@@ -10,7 +10,7 @@ species <- args[1]
 #species <- "Agambiae"
 
 depthhist.fn <- paste("/n/holylfs/LABS/informatics/tsackton/popgen/softsweep/stats/",species,".depth_hist",sep = "")
-depthhist <- read_delim(test.fn,delim="\t",col_names = c("depth","count"))
+depthhist <- read_delim(depthhist.fn,delim="\t",col_names = c("depth","count"))
 
 nsites <- depthhist %>%
   summarise(sites=sum(count)) %>% pull

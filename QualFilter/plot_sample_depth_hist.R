@@ -13,6 +13,16 @@ species <- args[1]
 depthhist.fn <- paste("/n/holylfs/LABS/informatics/tsackton/popgen/softsweep/stats/",species,".depth_hist",sep = "")
 depthhist <- read_delim(depthhist.fn,delim="\t",col_names = c("depth","count"))
 
+nsites <- depthhist %>%
+  summarise(sites=sum(count)) %>% pull
+
+perc_0 <- depthhist %>%
+  mutate(perc=count/nsites*100) %>%
+  mutate(perc=round(perc,1)) %>%
+  filter(depth==0) %>%
+  pull(perc)
+
+
 depthhist %>%
   mutate(ints=round(depth,0)) %>%
   group_by(ints) %>%

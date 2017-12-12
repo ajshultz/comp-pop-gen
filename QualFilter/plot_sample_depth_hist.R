@@ -33,7 +33,7 @@ depthhist %>%
   xlab("mean depth") +
   ylab("counts") +
   labs(title=paste(species,", ",nsites," sites, ",perc_0,"% missing data",sep=""))
-ggsave(filename=paste0("depth_plots/",species,"_mean_sample_depth_100.pdf"),device="pdf")
+ggsave(filename=paste0("sample_depth_plots/",species,"_mean_sample_depth_100.pdf"),device="pdf")
 
 
 

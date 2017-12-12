@@ -32,11 +32,11 @@ ggplot(depthhist,aes(depth,count)) +
   geom_col() +
   xlim(c(1,max_depth_plot)) +
   labs(title=paste(species,", ",nsites," sites, ",perc_0,"% missing data",sep=""))
-ggsave(filename=paste0("depth_plots/",species,"restricted_dist.pdf"),device="pdf")
+ggsave(filename=paste0("depth_plots/",species,"_restricted_dist.pdf"),device="pdf")
 
 ggplot(depthhist,aes(depth,count)) +
   geom_col() +
   labs(title=paste(species,", ",nsites," sites, ",perc_0,"% missing data",sep=""))
-ggsave(filename=paste0("depth_plots/",species,"entire_dist.pdf"),device="pdf")
+ggsave(filename=paste0("depth_plots/",species,"_entire_dist.pdf"),device="pdf")
 
 

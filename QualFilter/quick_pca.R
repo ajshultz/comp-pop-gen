@@ -22,8 +22,7 @@ tab <- data.frame(sample.id = pca$sample.id,
                   EV2 = pca$eigenvect[,2],    # the second eigenvector
                   stringsAsFactors = FALSE)
 pdf(file=paste("pca_plots/",species,"_pc1pc2.pdf",sep=""))
-pc.percent <- pca$varprop*100 %>%
-  round(.,2)
+pc.percent <- round(pca$varprop*100,2)
 plot(tab$EV2, tab$EV1, xlab=paste("PC2 ",pc.percent[2],"%",sep=""), ylab=paste("PC1 ",pc.percent[1],"%",sep=""), pch=16, col="salmon", bty="l", cex=1.5, cex.axis=1.5, las=1)
 dev.off()
 
@@ -34,6 +33,7 @@ loc <- cmdscale(1 - ibs$ibs, k = 2)
 x <- loc[, 1]; y <- loc[, 2]
 pdf(file=paste("pca_plots/",species,"_ibs.pdf",sep=""))
 plot(x, y, xlab = "", ylab = "",
-     main = "Multidimensional Scaling Analysis (IBS)")
+     main = "Multidimensional Scaling Analysis (IBS)",
+     pch=16, col="salmon")
 dev.off()
 

@@ -6,8 +6,8 @@ setwd("/n/holylfs/LABS/informatics/ashultz/CompPopGen")
 args <- commandArgs(TRUE)
 species <- args[1]
 
-test.fn <- "~/Dropbox/Informatics/CompPopGen/Agambiae.depth_hist"
-species <- "Agambiae"
+#test.fn <- "~/Dropbox/Informatics/CompPopGen/Agambiae.depth_hist"
+#species <- "Agambiae"
 
 depthhist.fn <- paste("/n/holylfs/LABS/informatics/tsackton/popgen/softsweep/stats/",species,".depth_hist",sep = "")
 depthhist <- read_delim(test.fn,delim="\t",col_names = c("depth","count"))

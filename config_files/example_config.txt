@@ -1,0 +1,17 @@
+#Example config file:
+
+#Species abbreviation for use in file headers (e.g. CCornix for hooded crow)
+--ABBV CCornix
+
+#Enter sample IDs and information: --SAMPLE <SAMPLE_ID> <SRA,SRA,SRA>
+--SAMPLE SRX542255 SRR1286117,SRR1286118,SRR1286119,SRR1286121,SRR1286122
+--SAMPLE SRX581052 SRR1368293
+
+#A genome must be supplied, either hosted on NCBI (use --GENOME_NCBI flag) or locally (use --GENOME_LOCAL flag). See examples below.
+
+#Enter name of genome assembly for mapping if genome hosted on NCBI. Must correspond to name of fasta file on NCBI if download is necessary (e.g. for Corvus cornix: GCF_000738735.2_ASM73873v2_genomic.fna.gz)
+--GENOME_NCBI GCF_000738735.2_ASM73873v2
+
+#If genome available locally, input fasta filename
+#For example:
+#--GENOME_LOCAL CCornix.fasta

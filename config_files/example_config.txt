@@ -1,11 +1,17 @@
 #Example config file:
 
+#Path to desired output directory (directory for each species will be created with in this directory). If not specified will be current working directory
+--OUT_DIR .
+
 #Species abbreviation for use in file headers (e.g. CCornix for hooded crow)
 --ABBV CCornix
 
-#Enter sample IDs and information: --SAMPLE <SAMPLE_ID> <SRA,SRA,SRA>
---SAMPLE SRX542255 SRR1286117,SRR1286118,SRR1286119,SRR1286121,SRR1286122
---SAMPLE SRX581052 SRR1368293
+#Enter sample IDs and information, must include SRA accession numbers for download from NCBI: --SAMPLE <SAMPLE_ID> <SRA,SRA,SRA>
+--SAMPLE_NCBI SRX542255 SRR1286117,SRR1286118,SRR1286119,SRR1286121,SRR1286122
+--SAMPLE_NCBI SRX581052 SRR1368293
+
+#At this time, using local fastq files is not supported. We will add this feature in the future.
+#--SAMPLE_LOCAL Ind_1
 
 #A genome must be supplied, either hosted on NCBI (use --GENOME_NCBI flag) or locally (use --GENOME_LOCAL flag). See examples below.
 

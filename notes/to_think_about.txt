@@ -1,0 +1,6 @@
+To think about:
+- update paths for required software to more general locations (aspc)
+- have to update prefetch config file to alter where SRA data are downloaded to. To do this, go to the bin directory of sra toolkit, and run "./vdb-config -i". Can then navigate down to set default download directory. Currently set to: /n/holylfs/LABS/informatics/ashultz/CompPopGen/raw_sra_files. See here for configuration guide (https://trace.ncbi.nlm.nih.gov/Traces/sra/sra.cgi?view=toolkit_doc&f=std#s-3).
+
+- how frequently should sacct or squeue check the cluster for job completion?  
+

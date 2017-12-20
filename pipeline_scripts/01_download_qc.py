@@ -79,7 +79,8 @@ def script_create():
 def sbatch_submit(filename):
     proc = Popen('sbatch %s'%filename,shell=True,stdout=PIPE,stderr=PIPE)
     stdout,stderr = proc.communicate()
-    return stdout.strip('Submitted batch job ')
+    stdout = stdout.decode("utf-8","ignore")
+    return(stdout.strip('Submitted batch job '))
 
 
 #Check job status of specific jobid: returns job status

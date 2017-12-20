@@ -82,7 +82,6 @@ def sbatch_submit(filename):
     stdout = stdout.decode("utf-8","ignore")
     stdout = stdout.strip()
     stdout = stdout.strip('Submitted batch job ')
-    print(stdout)
     return(stdout)
 
 
@@ -120,7 +119,7 @@ def all_jobs_status():
 
 def num_pend_run(job_id_list):
     count = 0
-    status_dict = all_jobs_status
+    status_dict = all_jobs_status()
     for job in job_id_list:
         if status_dict[job] == "PENDING" or status_dict[job] == "RUNNING":
             count += 1

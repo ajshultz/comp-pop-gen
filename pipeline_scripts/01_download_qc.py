@@ -162,7 +162,7 @@ def get_ncbi_genome(sp_dir,species_name,sp_abbr):
     #wget_ncbi_summary = 'wget -O %s/assembly_summary_genbank.txt ftp://ftp.ncbi.nlm.nih.gov/genomes/ASSEMBLY_REPORTS/assembly_summary_genbank.txt'%genome_dir
     wget_ncbi_summary = 'curl ftp://ftp.ncbi.nlm.nih.gov/genomes/ASSEMBLY_REPORTS/assembly_summary_genbank.txt > %s/assembly_summary_genbank.txt'%genome_dir
     proc = Popen(wget_ncbi_summary,shell=True,stdout=PIPE,stderr=PIPE)
-    proc.close()
+    proc.wait()
     
     #Use grep to pull in relevant lines for this genome
     grep_command = r'grep "%s" %s/assembly_summary_genbank.txt'%(species_name_spaces,genome_dir)

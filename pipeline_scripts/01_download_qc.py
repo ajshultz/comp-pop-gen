@@ -439,7 +439,7 @@ def main():
     sra_dl_sbatch_filenames = sra_download_sbatch(sp_dir,config_info["sample_ncbi_dict"])
         
     #Submit SRA read sbatch files, only allow 20 SRA jobs to run (or pend) at a time (set max_jobs)  
-    max_jobs = 2
+    max_jobs = 3
     sra_dl_jobids = []
     completed_jobids = {}
     job_count = 0
@@ -447,7 +447,6 @@ def main():
     for i in range(0,max_jobs):
         sra_dl_jobids.append(sbatch_submit(sra_dl_sbatch_filenames[job_count]))
         print("Submitted job")
-        print(sra_dl_jobids)
         job_count += 1
         sleep(1)
     #Add an extra sleep to give sacct a chance to catch up
@@ -459,12 +458,11 @@ def main():
             sra_dl_jobids.append(sbatch_submit(sra_dl_sbatch_filenames[job_count]))
             print("Submitted job")
             job_count += 1
+            sleep(20)
             num_running = num_pend_run(sra_dl_jobids)
-            sleep(1)
         job_statuses = all_jobs_status()
         for job in sra_dl_jobids:
             if job not in completed_jobids:
-                print(job_statuses[job])
                 if job_statuses[job] != "PENDING" and job_statuses[job] != "RUNNING":
                     completed_jobids[job] = job_statuses[job]
                     print("Job %s completed"%job)
@@ -472,24 +470,49 @@ def main():
     
     #After all jobs have finished, report which jobs failed
     for job in completed_jobids:
-        if job_statuses[job] != "COMPLETED":
-            print("SRA download and parse job %s failed with code: %s"%(job,job_statuses[job]))
-
-    #Once SRA dl and genome jobs are finished, check that all fastq files are there. If so, continue below. If not, 
+        if completed_jobids[job] != "COMPLETED":
+            print("SRA download and parse job %s failed with code: %s"%(job,completed_jobids[job]))
+    
+    #####Final processing and mapping
     
     #Trim fastq files with NGmerge
     #Set Read Group information
     #Map fastq files to genome with BWA
-    #Sort (convert to BAM), Index
-    #Calculate alignment stats
-    #Remove SAM file if stats file is there
+    #Sort (convert to BAM), Index with PicardTools
+    #Calculate alignment stats with PicardTools
+    #Remove SAM file if stats file exists
+    #Before submitting jobs, check to see that fastq files are there. If not, print info statement.
     mapping_jobids = []
+    mapping_completed_jobids = {}
     
     for sample in config_info["sample_ncbi_dict"]:
         for sra in config_info["sample_ncbi_dict"][sample]:
-            sra_map_sbatchfile = fastq_trim_align_stats(sp_dir,sra,config_info["abbv"],sample)
-            #sra_map_jobid = sbatch_submit(sra_map_sbatchfile)
-            #mapping_jobids.append(sra_map_jobid)
+            if os.path.isfile('%s/%s_1.fastq.gz'%(fastq_dir,sra)):
+                if os.path.isfile('%s/%s_2.fastq.gz'%(fastq_dir,sra)):
+                    sra_map_sbatchfile = fastq_trim_align_stats(sp_dir,sra,config_info["abbv"],sample)
+                    sra_map_jobid = sbatch_submit(sra_map_sbatchfile)
+                    mapping_jobids.append(sra_map_jobid)
+                    sleep(1)
+                else:
+                    print("No fastq_2 file for %s"%sra)
+            else:
+                print("No fastq files for %s"%sra)
+
+    sleep(60)
+       
+    while len(mapping_jobids) < len(mapping_completed_jobids):
+        job_statuses = all_jobs_status()
+        for job in mapping_jobids:
+            if job not in mapping_completed_jobids:
+                if job_statuses[job] != "PENDING" and job_statuses[job] != "RUNNING":
+                    mapping_completed_jobids[job] = job_statuses[job]
+                    print("Job %s completed"%job)
+        sleep(60)
+
+    #After all jobs have finished, report which jobs failed
+    for job in mapping_completed_jobids:
+        if mapping_completed_jobids[job] != "COMPLETED":
+            print("SRA trimming, mapping, sorting, and stats job %s failed with code: %s"%(job,mapping_completed_jobids[job]))
 
 if __name__ == "__main__":
     main()

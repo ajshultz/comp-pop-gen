@@ -5,3 +5,5 @@ To think about:
 - For now, using simple read group IDs (sample and sra accession as a proxy for lane). Could grab additional info on flowcell etc. from fastq headers, but some variation by technology, so not sure how useful this would be.
 
 - Aaron thought 50 jobs with NCBI downloads was too many, recommended 20, but probably should talk to the folks upstairs.
+
+- Which files to keep and discard (already have it delete mapped sam files). Probably should get rid of raw SRA files too.

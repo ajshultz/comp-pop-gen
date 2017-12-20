@@ -445,7 +445,7 @@ def main():
     for i in range(0,max_jobs):
         sra_dl_jobids.append(sbatch_submit(sra_dl_sbatch_filenames[job_count]))
         print("Submitted job")
-        print*sra_dle_jobids)
+        print(sra_dle_jobids)
         job_count += 1
         sleep(1)
     #Then, enter while loop that will continue until the number of completed jobs matches the. number of sbatch files

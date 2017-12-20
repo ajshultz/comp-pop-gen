@@ -80,6 +80,7 @@ def sbatch_submit(filename):
     proc = Popen('sbatch %s'%filename,shell=True,stdout=PIPE,stderr=PIPE)
     stdout,stderr = proc.communicate()
     stdout = stdout.decode("utf-8","ignore")
+    stdout = stdout.strip()
     return(stdout.strip('Submitted batch job '))
 
 

@@ -16,9 +16,9 @@
 #A genome must be supplied, either hosted on NCBI (use --GENOME_NCBI flag) or locally (use --GENOME_LOCAL flag). See examples below.
 
 #Enter name of species with genome assembly for mapping if genome hosted on Genbank. Must correspond to name of organism on NCBI if download is necessary (e.g. for Corvus cornix: Corvus_cornix_cornix)
---GENOME_NCBI Corvus_cornix_cornix
+#--GENOME_NCBI Corvus_cornix_cornix
 #--GENOME_NCBI Corvus_brachyrhynchos
 
 #If genome available locally, input path to fasta filename. If local fasta path is supplied, file will be copied into genome directory and renamed ABBV.fa for downstream use.
 #For example:
-#--GENOME_LOCAL ./PATH/TO/CCornix.fa
+--GENOME_LOCAL ./CCornix/CCornix.fa

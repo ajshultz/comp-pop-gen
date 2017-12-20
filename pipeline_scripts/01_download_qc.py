@@ -115,6 +115,15 @@ def all_jobs_status():
     return(status_dict)
     
 
+def num_pend_run(job_id_list):
+    count = 0
+    status_dict = all_jobs_status
+    for job in job_id_list:
+        if status_dict[job] == "PENDING" or status_dict[job] == "RUNNING":
+            count += 1
+    return(count)
+
+
 #Create an sbatch file for a given set of SRAs and split into fastq files. Returns a list of new sbatch filenames
 def sra_download_sbatch(sp_dir,sample_ncbi_dict):
     slurm_script = script_create()
@@ -140,7 +149,7 @@ def sra_download_sbatch(sp_dir,sample_ncbi_dict):
     
     #Format sbatch script
             sra_script = slurm_script.format(partition="shared",time="1-0:00",mem="4000",cores="1",nodes="1",jobid="SRA",sp_dir=sp_dir,cmd=final_cmd)
-            out_filename = "%s/scripts/01_sra_download_parse_%s.sbatch"%(sp_dir,sra)
+            out_filename = "%s/scripts/02_sra_download_parse_%s.sbatch"%(sp_dir,sra)
             out_file = open(out_filename,"w")
             out_file.write(sra_script)
             out_file.close
@@ -220,7 +229,7 @@ def get_ncbi_genome(sp_dir,species_name,sp_abbr):
     #Format sbatch script
     genome_script = slurm_script.format(partition="shared",time="0-8:00",mem="8000",cores="1",nodes="1",jobid="Genome_DL_Index",sp_dir=sp_dir,cmd=final_cmd)
 
-    out_filename = "%s/scripts/02_genome_download_index_%s.sbatch"%(sp_dir,sp_abbr)
+    out_filename = "%s/scripts/01_genome_download_index_%s.sbatch"%(sp_dir,sp_abbr)
     out_file = open(out_filename,"w")
     out_file.write(genome_script)
     out_file.close
@@ -393,39 +402,70 @@ def main():
             
             #Submit sbatch script
             genome_job_id = sbatch_submit(genome_sbatch_name)
-        
-    #Sleep 30 seconds to give job status time to get to sacct before starting to check    
-    sleep(30)
     
-    dones = ['COMPLETED','CANCELLED','FAILED','TIMEOUT','PREEMPTED','NODE_FAIL']
-    #Check job id status of genome job. If not in one of the 'done' job status categories, wait 30 seconds and check again.
-    while jobid_status(genome_job_id) not in dones:
-        print("Genome not done yet")
+    #Only check on genome job if actually submitted. 
+    if genome_job_id: 
+        #Sleep 30 seconds to give job status time to get to sacct before starting to check    
         sleep(30)
     
-    #Check to make sure job completed, and that all necessary files are present. If not, exit and give information.
-    genome_job_completion_status = jobid_status(genome_job_id)
-    if genome_job_completion_status != 'COMPLETED':
-        sys.exit("There was a problem downloading and indexing the genome. The job exited with status %s. Please diagnose and fix before moving on"%genome_job_completion_status)
+        dones = ['COMPLETED','CANCELLED','FAILED','TIMEOUT','PREEMPTED','NODE_FAIL']
+        #Check job id status of genome job. If not in one of the 'done' job status categories, wait 30 seconds and check again.
+        while jobid_status(genome_job_id) not in dones:
+            #print("Genome not done yet")
+            sleep(30)
+    
+        #Check to make sure job completed, and that all necessary files are present. If not, exit and give information.
+        genome_job_completion_status = jobid_status(genome_job_id)
+        if genome_job_completion_status != 'COMPLETED':
+            sys.exit("There was a problem downloading and indexing the genome. The job exited with status %s. Please diagnose and fix before moving on"%genome_job_completion_status)
         
-    genome_present = os.path.isfile(genome_path)
-    bwa_index_present = os.path.isfile(index_path_bwa)
-    faidx_index_present = os.path.isfile(index_path_faidx)
-    dict_index_present = os.path.isfile(index_path_dict)
-    if genome_present == False or bwa_index_present == False or faidx_index_present == False or dict_index_present == False:
-        sys.exit("The genome job finished but not all files and indexes are present. Please check, create missing indexes, and resubmit with local genome")
+        genome_present = os.path.isfile(genome_path)
+        bwa_index_present = os.path.isfile(index_path_bwa)
+        faidx_index_present = os.path.isfile(index_path_faidx)
+        dict_index_present = os.path.isfile(index_path_dict)
+        if genome_present == False or bwa_index_present == False or faidx_index_present == False or dict_index_present == False:
+            sys.exit("The genome job finished but not all files and indexes are present. Please check, create missing indexes, and resubmit with local genome")
 
-    print("\nGenome download and indexing successfully finished\n")
+        print("\nGenome download and indexing successfully completed\n")
+
 
     #####Create sbatch files to download SRA files and use fastq-dump to split
     
     #Create sbatch files
     sra_dl_sbatch_filenames = sra_download_sbatch(sp_dir,config_info["sample_ncbi_dict"])
         
-    #Submit SRA read sbatch files            
+    #Submit SRA read sbatch files, only allow 20 SRA jobs to run (or pend) at a time (set max_jobs)  
+    max_jobs = 2
     sra_dl_jobids = []
+    completed_jobids = {}
+    job_count = 0
+    #First submit up to the maximum number of jobs quickly
+    for i in range(0,max_jobs)):
+        sra_dl_jobids.append(sbatch_submit(sra_dl_sbatch_filenames[job_count]))
+        print("Submitted job")
+        job_count += 1
+        sleep(1)
+    #Then, enter while loop that will continue until the number of completed jobs matches the. number of sbatch files
+    while len(completed_jobids) < len(sra_dl_sbatch_filenames):
+        num_running = num_pend_run(sra_dl_jobids)
+        while num_running < max_jobs:
+            sra_dl_jobids.append(sbatch_submit(sra_dl_sbatch_filenames[job_count]))
+            print("Submitted job")
+            job_count += 1
+            num_running = num_pend_run(sra_dl_jobids)
+            sleep(1)
+        job_statuses = all_jobs_status()
+        for job in sra_dl_jobids:
+            if job not in completed_jobids:
+                if job_statuses[job] != "PENDING" and job_statuses[job] != "RUNNING":
+                    completed_jobids[job] = job_statuses[job]
+                    print("Job %s completed"%job)
+        sleep(30)
     
-
+    #After all jobs have finished, report which jobs failed
+    for job in completed_jobids:
+        if job_statuses[job] != "COMPLETED":
+            print("SRA download and parse job %s failed with code: %s"%(job,job_statuses[job]))
 
     #Once SRA dl and genome jobs are finished, check that all fastq files are there. If so, continue below. If not, 
     

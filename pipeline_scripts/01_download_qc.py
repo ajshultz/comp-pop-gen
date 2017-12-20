@@ -377,7 +377,7 @@ def main():
         genome_sbatch_name = get_ncbi_genome(sp_dir,config_info["genome_ncbi"],config_info["abbv"])
         
         #Submit sbatch script
-        #genome_jobid = sbatch_submit(genome_sbatch_name)
+        genome_jobid = sbatch_submit(genome_sbatch_name)
         
     elif "genome_local" in config_info:
         #Check if genome, BWA indexes, and faidx indexes already exist in genome directory. If not, create script to copy and index.
@@ -391,7 +391,7 @@ def main():
             genome_sbatch_name = process_local_genome(sp_dir,config_info["genome_local"],config_info["abbv"],genome_present,bwa_index_present,faidx_index_present,dict_index_present)
             
             #Submit sbatch script
-            #genome_job_id = sbatch_submit(genome_sbatch_name)
+            genome_job_id = sbatch_submit(genome_sbatch_name)
         
     #Sleep 30 seconds to give job status time to get to sacct before starting to check    
     sleep(30)

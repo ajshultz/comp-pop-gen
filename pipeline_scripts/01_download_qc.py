@@ -168,7 +168,6 @@ def get_ncbi_genome(sp_dir,species_name,sp_abbr):
     grep_command = r'grep "%s" %s/assembly_summary_genbank.txt'%(species_name_spaces,genome_dir)
     proc = Popen(grep_command,shell=True,stdout=PIPE,stderr=PIPE)
     stdout,stderr = proc.communicate()
-    print(stdout)
     genome_opts = stdout.decode("utf-8","ignore")
     genome_opts = genome_opts.strip()
     genome_opts = genome_opts.split("\n")

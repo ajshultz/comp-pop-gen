@@ -382,6 +382,8 @@ def main():
     index_path_dict = "%s/%s.dict"%(genome_dir,config_info["abbv"])
     genome_jobnum = []
     
+    genome_job_id = None
+    
     if "genome_ncbi" in config_info:
         #Create sbatch script
         genome_sbatch_name = get_ncbi_genome(sp_dir,config_info["genome_ncbi"],config_info["abbv"])
@@ -404,7 +406,7 @@ def main():
             genome_job_id = sbatch_submit(genome_sbatch_name)
     
     #Only check on genome job if actually submitted. 
-    if genome_job_id: 
+    if genome_job_id is not None: 
         #Sleep 30 seconds to give job status time to get to sacct before starting to check    
         sleep(30)
     

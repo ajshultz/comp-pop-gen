@@ -165,6 +165,7 @@ def get_ncbi_genome(sp_dir,species_name,sp_abbr):
     
     #Use grep to pull in relevant lines for this genome
     proc = Popen(r'grep "%s" %s/assembly_summary_genbank.txt'%(species_name_spaces,genome_dir),shell=True, stdout=PIPE, stderr=PIPE)
+    print(proc)
     stdoutstr,stderrstr = proc.communicate()
     genome_opts = stdoutstr.decode("utf-8","ignore")
     genome_opts = genome_opts.strip()

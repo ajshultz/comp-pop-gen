@@ -440,7 +440,7 @@ def main():
     completed_jobids = {}
     job_count = 0
     #First submit up to the maximum number of jobs quickly
-    for i in range(0,max_jobs)):
+    for i in range(0,max_jobs):
         sra_dl_jobids.append(sbatch_submit(sra_dl_sbatch_filenames[job_count]))
         print("Submitted job")
         job_count += 1

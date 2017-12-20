@@ -378,7 +378,7 @@ def main():
         genome_sbatch_name = get_ncbi_genome(sp_dir,config_info["genome_ncbi"],config_info["abbv"])
         
         #Submit sbatch script
-        genome_jobid = sbatch_submit(genome_sbatch_name)
+        genome_job_id = sbatch_submit(genome_sbatch_name)
         
     elif "genome_local" in config_info:
         #Check if genome, BWA indexes, and faidx indexes already exist in genome directory. If not, create script to copy and index.

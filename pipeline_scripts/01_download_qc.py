@@ -81,7 +81,9 @@ def sbatch_submit(filename):
     stdout,stderr = proc.communicate()
     stdout = stdout.decode("utf-8","ignore")
     stdout = stdout.strip()
-    return(stdout.strip('Submitted batch job '))
+    stdout = stdout.strip('Submitted batch job ')
+    print(stdout)
+    return(stdout)
 
 
 #Check job status of specific jobid: returns job status

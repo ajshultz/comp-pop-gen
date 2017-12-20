@@ -450,6 +450,8 @@ def main():
         print(sra_dl_jobids)
         job_count += 1
         sleep(1)
+    #Add an extra sleep to give sacct a chance to catch up
+    sleep(20)
     #Then, enter while loop that will continue until the number of completed jobs matches the. number of sbatch files
     while len(completed_jobids) < len(sra_dl_sbatch_filenames):
         num_running = num_pend_run(sra_dl_jobids)

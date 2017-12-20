@@ -161,18 +161,17 @@ def get_ncbi_genome(sp_dir,species_name,sp_abbr):
     #Download current genbank assembly summary report
     #wget_ncbi_summary = 'wget -O %s/assembly_summary_genbank.txt ftp://ftp.ncbi.nlm.nih.gov/genomes/ASSEMBLY_REPORTS/assembly_summary_genbank.txt'%genome_dir
     wget_ncbi_summary = 'curl ftp://ftp.ncbi.nlm.nih.gov/genomes/ASSEMBLY_REPORTS/assembly_summary_genbank.txt > %s/assembly_summary_genbank.txt'%genome_dir
-    Popen(wget_ncbi_summary,shell=True,stdout=PIPE,stderr=PIPE)
+    proc = Popen(wget_ncbi_summary,shell=True,stdout=PIPE,stderr=PIPE)
+    proc.close()
     
     #Use grep to pull in relevant lines for this genome
     grep_command = r'grep "%s" %s/assembly_summary_genbank.txt'%(species_name_spaces,genome_dir)
-    proc = Popen(grep_command,shell=True, stdout=PIPE, stderr=PIPE)
+    proc = Popen(grep_command,shell=True,stdout=PIPE,stderr=PIPE)
     stdout,stderr = proc.communicate()
     print(stdout)
     genome_opts = stdout.decode("utf-8","ignore")
     genome_opts = genome_opts.strip()
     genome_opts = genome_opts.split("\n")
-    print(species_name_spaces)
-    print(genome_opts)
     
     #If there are no entries print an error message.
     if len(genome_opts[0]) == 0:

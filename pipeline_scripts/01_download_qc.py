@@ -169,6 +169,7 @@ def get_ncbi_genome(sp_dir,species_name,sp_abbr):
     genome_opts = stdoutstr.decode("utf-8","ignore")
     genome_opts = genome_opts.strip()
     genome_opts = genome_opts.split("\n")
+    print(species_name_spaces)
     print(genome_opts)
     
     #If there are no entries print an error message.

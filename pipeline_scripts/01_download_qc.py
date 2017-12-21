@@ -441,10 +441,16 @@ def main():
     completed_jobids = {}
     job_count = 0
     #First submit up to the maximum number of jobs quickly
-    for i in range(0,max_jobs):
-        sra_dl_jobids.append(sbatch_submit(sra_dl_sbatch_filenames[job_count]))
-        job_count += 1
-        sleep(1)
+    if len(sra_dl_sbatch_filenames) > max_jobs:
+        for i in range(0,max_jobs):
+            sra_dl_jobids.append(sbatch_submit(sra_dl_sbatch_filenames[job_count]))
+            job_count += 1
+            sleep(1)
+    else:
+        for i in range(0,len(sra_dl_sbatch_filenames)):
+            sra_dl_jobids.append(sbatch_submit(sra_dl_sbatch_filenames[job_count]))
+            job_count += 1
+            sleep(1)
     #Add an extra sleep to give sacct a chance to catch up
     sleep(20)
     #Then, enter while loop that will continue until the number of completed jobs matches the. number of sbatch files

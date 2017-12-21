@@ -211,7 +211,6 @@ def get_ncbi_genome(sp_dir,species_name,sp_abbr):
             print("\nDownloading %s genome accession %s from: %s\n\nCopying fasta file to %s.fa and indexing with samtools faidx and bwa index, and creating a sequence dictionary with samtools dict\n"%(species_name,possible_genome_opts[0][0],full_genome_path,sp_abbr))
 
         elif len(possible_genome_opts) > 1:
-            print(possible_genome_opts)
             sys.exit("There seems to be more than one representative genome for the species you provided, which is problematic. See the genbank assebmly summary table in the genome directory to refine genome name before proceeding, or supply a local fasta.")
         else:
             sys.exit("There does not seem to be a 'representative genome' for your species. See the genbank assebmly summary table in the genome directory to refine genome name before proceeding, or supply a local fasta.") 

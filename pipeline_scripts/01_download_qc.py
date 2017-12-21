@@ -439,25 +439,22 @@ def main():
     sra_dl_sbatch_filenames = sra_download_sbatch(sp_dir,config_info["sample_ncbi_dict"])
         
     #Submit SRA read sbatch files, only allow 20 SRA jobs to run (or pend) at a time (set max_jobs)  
-    max_jobs = 3
+    max_jobs = 20
     sra_dl_jobids = []
     completed_jobids = {}
     job_count = 0
     #First submit up to the maximum number of jobs quickly
     for i in range(0,max_jobs):
         sra_dl_jobids.append(sbatch_submit(sra_dl_sbatch_filenames[job_count]))
-        print("Submitted job")
         job_count += 1
         sleep(1)
     #Add an extra sleep to give sacct a chance to catch up
     sleep(20)
     #Then, enter while loop that will continue until the number of completed jobs matches the. number of sbatch files
     while len(completed_jobids) < len(sra_dl_sbatch_filenames):
-        print(len(completed_jobids))
         num_running = num_pend_run(sra_dl_jobids)
         while num_running < max_jobs and job_count < (len(sra_dl_sbatch_filenames)):
             sra_dl_jobids.append(sbatch_submit(sra_dl_sbatch_filenames[job_count]))
-            print("Submitted job")
             job_count += 1
             sleep(20)
             num_running = num_pend_run(sra_dl_jobids)

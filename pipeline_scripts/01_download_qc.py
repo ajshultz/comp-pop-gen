@@ -501,7 +501,7 @@ def main():
 
     sleep(60)
        
-    while len(mapping_jobids) < len(mapping_completed_jobids):
+    while len(mapping_completed_jobids) < len(mapping_jobids):
         job_statuses = all_jobs_status()
         for job in mapping_jobids:
             if job not in mapping_completed_jobids:

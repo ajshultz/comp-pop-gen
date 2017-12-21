@@ -131,10 +131,14 @@ def sra_download_sbatch(sp_dir,sample_ncbi_dict):
     slurm_script = script_create()
     sra_dl_sbatch_filenames = []
     
+    path_to_sratools = "/n/home13/ashultz/sw/progs/sratoolkit.2.8.2-1-centos_linux64/bin/"
+    
+    '''
+    #For now ditching prefetch and using wget to donwload due to some weird ascp errors
     #Paths to various required software
     path_to_ascp="/n/home13/ashultz/.aspera/connect/bin/ascp"
     path_to_ascp_openssh="/n/home13/ashultz/.aspera/connect/etc/asperaweb_id_dsa.openssh"
-    path_to_sratools = "/n/home13/ashultz/sw/progs/sratoolkit.2.8.2-1-centos_linux64/bin/"
+
     path_to_sra_dls = "/n/holylfs/LABS/informatics/ashultz/CompPopGen/raw_sra_files"
     
     for sample in sample_ncbi_dict.keys():
@@ -158,75 +162,66 @@ def sra_download_sbatch(sp_dir,sample_ncbi_dict):
             sra_dl_sbatch_filenames.append(out_filename)
     
     return(sra_dl_sbatch_filenames)
+    '''       
+    
+    for sample in sample_ncbi_dict.keys():
+        for sra in sample_ncbi_dict[sample]:
+            print('Will download %s for sample %s, split, and run through fastqc'%(sra,sample))
+    
+            #Load modules and get versions for all programs used
+            cmd_1 = 'module load fastqc/0.11.5-fasrc01'
+            cmd_2 = 'wget -P %s/sra/ ftp://ftp-trace.ncbi.nih.gov/sra/sra-instant/reads/ByRun/sra/%s/%s/%s/%s.sra'%(sp_dir,sra[0:3],sra[0:6],sra,sra)
+            cmd_3 = r'%sfastq-dump --outdir %s/fastq --gzip --split-files %s/sra/%s.sra'%(path_to_sratools,sp_dir,sp_dir,sra)
+            cmd_4 = 'fastqc -o %s/fastqc %s/fastq/%s_1.fastq.gz %s/fastq/%s_2.fastq.gz'%(sp_dir,sp_dir,sra,sp_dir,sra) 
             
+            final_cmd = "%s\n\n%s\n\n%s\n\n%s"%(cmd_1,cmd_2,cmd_3,cmd_4)
+    
+    #Format sbatch script
+            sra_script = slurm_script.format(partition="shared",time="1-0:00",mem="4000",cores="1",nodes="1",jobid="SRA",sp_dir=sp_dir,cmd=final_cmd)
+            out_filename = "%s/scripts/02_sra_download_parse_%s.sbatch"%(sp_dir,sra)
+            out_file = open(out_filename,"w")
+            out_file.write(sra_script)
+            out_file.close
+            sra_dl_sbatch_filenames.append(out_filename)
+    
+    return(sra_dl_sbatch_filenames)
+
+
 
 
 #Use FTP to download species genome fasta file. Will obtain FTP location by first downloading the current genbank assembly summary report. Returns name of sbatch script created.
-def get_ncbi_genome(sp_dir,species_name,sp_abbr):
+def get_ncbi_genome(sp_dir,fasta_ftp,sp_abbr):
 
     #Recreate genome directory
     genome_dir = "%s/genome"%(sp_dir)
     
-    #Species are named with spaces instead of "_" in NCBI records, so convert underscores to spaces first.
-    species_name_spaces = re.sub("_"," ",species_name)
+    print("Downloading genome from %s and building relevant indexes"%fasta_ftp)
     
-    #Download current genbank assembly summary report
-    #wget_ncbi_summary = 'wget -O %s/assembly_summary_genbank.txt ftp://ftp.ncbi.nlm.nih.gov/genomes/ASSEMBLY_REPORTS/assembly_summary_genbank.txt'%genome_dir
-    wget_ncbi_summary = 'curl ftp://ftp.ncbi.nlm.nih.gov/genomes/ASSEMBLY_REPORTS/assembly_summary_genbank.txt > %s/assembly_summary_genbank.txt'%genome_dir
-    proc = Popen(wget_ncbi_summary,shell=True,stdout=PIPE,stderr=PIPE)
-    proc.wait()
-    
-    #Use grep to pull in relevant lines for this genome
-    grep_command = r'grep "%s" %s/assembly_summary_genbank.txt'%(species_name_spaces,genome_dir)
-    proc = Popen(grep_command,shell=True,stdout=PIPE,stderr=PIPE)
-    stdout,stderr = proc.communicate()
-    genome_opts = stdout.decode("utf-8","ignore")
-    genome_opts = genome_opts.strip()
-    genome_opts = genome_opts.split("\n")
-    
-    #If there are no entries print an error message.
-    if len(genome_opts[0]) == 0:
-        sys.exit("Are you sure the NCBI genome name is correct? It is not in the genbank assembly summary table (see file in genome directory).")
-    
-    #If there is one entry, take FTP from that. If there are more than 1, take "representative genome" for FTP. If more than one "representative genome", break and give an error
-    if len(genome_opts) == 1:
-        genome_opts = genome_opts[0].split("\t")
-        genome_ftp_path = genome_opts[19] 
-        genome_filename = '%s_genomic.fna.gz'%genome_ftp_path.split("/")[-1]
-        full_genome_path = '%s/%s'%(genome_ftp_path,genome_filename)
-        print("Downloading %s genome accession %s from: %s"%(species_name,genome_opts[0],full_genome_path))
+    #Get relevant directories and create filenames for other desired files
+    fasta_ftp_split = fasta_ftp.split("/")
 
-    elif len(genome_opts) > 1:
-        possible_genome_opts = []
-        for i in range(0,len(genome_opts)):
-            possible = genome_opts[i].split("\t")
-            if possible[4] == "representative genome" or possible[4] == "reference genome":
-                possible_genome_opts.append(possible)
-        
-        #Double check single entry
-        if len(possible_genome_opts) == 1:
-            genome_ftp_path = possible_genome_opts[0][19]                
-            genome_filename = '%s_genomic.fna.gz'%genome_ftp_path.split("/")[-1]
-            full_genome_path = '%s/%s'%(genome_ftp_path,genome_filename)
-            print("\nDownloading %s genome accession %s from: %s\n\nCopying fasta file to %s.fa and indexing with samtools faidx and bwa index, and creating a sequence dictionary with samtools dict\n"%(species_name,possible_genome_opts[0][0],full_genome_path,sp_abbr))
-
-        elif len(possible_genome_opts) > 1:
-            sys.exit("There seems to be more than one representative genome for the species you provided, which is problematic. See the genbank assebmly summary table in the genome directory to refine genome name before proceeding, or supply a local fasta.")
-        else:
-            sys.exit("There does not seem to be a 'representative genome' for your species. See the genbank assebmly summary table in the genome directory to refine genome name before proceeding, or supply a local fasta.") 
+    ftp_dir = "/".join(fasta_ftp_split[:-1])
+    genome_filename = fasta_ftp_split[-1]
+    file_base = fasta_ftp_split[-2]
     
     slurm_script = script_create()
     
     #Load modules, also print samtools and bwa versions
     cmd_1 = 'module load samtools/1.5-fasrc01\nmodule load bwa/0.7.15-fasrc01'
-    cmd_2 = 'wget -P %s %s'%(genome_dir,full_genome_path)
+    cmd_2 = 'wget -P %s %s'%(genome_dir,fasta_ftp)
     cmd_3 = 'gunzip %s/%s'%(genome_dir,genome_filename)
     cmd_4 = 'mv %s/%s %s/%s.fa'%(genome_dir,genome_filename[:-3],genome_dir,sp_abbr)
     cmd_5 = 'samtools faidx %s/%s.fa'%(genome_dir,sp_abbr)
     cmd_6 = 'bwa index %s/%s.fa'%(genome_dir,sp_abbr)
     cmd_7 = 'samtools dict -o %s/%s.dict %s/%s.fa'%(genome_dir,sp_abbr,genome_dir,sp_abbr)
+    cmd_8 = 'wget -P %s %s/%s_assembly_stats.txt'%(genome_dir,ftp_dir,file_base)
+    cmd_9 = 'wget -P %s %s/%s_assembly_report.txt'%(genome_dir,ftp_dir,file_base)
+    cmd_10 = 'wget -P %s %s/%s_genomic.gff.gz'%(genome_dir,ftp_dir,file_base)
+    cmd_11 = 'wget -P %s %s/md5checksums.txt'%(genome_dir,ftp_dir)
     
-    final_cmd = "%s\n\n%s\n\n%s\n\n%s\n\n%s\n\n%s\n\n%s"%(cmd_1,cmd_2,cmd_3,cmd_4,cmd_5,cmd_6,cmd_7)    
+    cmd_list = [cmd_1,cmd_2,cmd_3,cmd_4,cmd_5,cmd_6,cmd_7,cmd_8,cmd_9,cmd_10,cmd_11]
+    
+    final_cmd = "\n\n".join(cmd_list)   
     
     #Format sbatch script
     genome_script = slurm_script.format(partition="shared",time="0-8:00",mem="8000",cores="1",nodes="1",jobid="Genome_DL_Index",sp_dir=sp_dir,cmd=final_cmd)
@@ -359,6 +354,7 @@ def main():
     
     logs_dir = "%s/logs"%(sp_dir)
     scripts_dir = "%s/scripts"%(sp_dir)
+    sra_dir = "%s/sra"%(sp_dir)
     fastq_dir = "%s/fastq"%(sp_dir)
     fastqc_dir = "%s/fastqc"%(sp_dir)
     genome_dir = "%s/genome"%(sp_dir)
@@ -368,6 +364,7 @@ def main():
     directory_create(sp_dir)
     directory_create(logs_dir)
     directory_create(scripts_dir)
+    directory_create(sra_dir)
     directory_create(fastq_dir)
     directory_create(fastqc_dir)
     directory_create(genome_dir)
@@ -389,7 +386,7 @@ def main():
     if "genome_ncbi" in config_info:
         #Create sbatch script
         genome_sbatch_name = get_ncbi_genome(sp_dir,config_info["genome_ncbi"],config_info["abbv"])
-        
+  
         #Submit sbatch script
         genome_job_id = sbatch_submit(genome_sbatch_name)
         
@@ -437,7 +434,7 @@ def main():
     
     #Create sbatch files
     sra_dl_sbatch_filenames = sra_download_sbatch(sp_dir,config_info["sample_ncbi_dict"])
-        
+   
     #Submit SRA read sbatch files, only allow 20 SRA jobs to run (or pend) at a time (set max_jobs)  
     max_jobs = 20
     sra_dl_jobids = []

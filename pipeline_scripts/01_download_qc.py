@@ -503,7 +503,7 @@ def main():
                 else:
                     print("No fastq_2 file for %s"%sra)
             else:
-
+                print("No fastq files for %s"%sra)
     sleep(60)
        
     while len(mapping_completed_jobids) < len(mapping_jobids):

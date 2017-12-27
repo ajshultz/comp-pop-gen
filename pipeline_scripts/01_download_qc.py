@@ -27,8 +27,10 @@ def extract_config(config_filename):
             if line[0] == "--ABBV":
                 config_info["abbv"] = line[1]
             elif line[0] == "--SAMPLE_NCBI":
-                sra_list = line[2].split(",")
-                sample_ncbi_dict[line[1]] = sra_list
+                if line[1] not in sample_ncbi_dict:
+                    sample_ncbi_dict[line[1]] = [line[2]]
+                elif line[1] in sample_ncbi_dict:
+                    sample_ncbi_dict[line[1]].append(line[2])
                 config_info["sample_ncbi_dict"] = sample_ncbi_dict
             elif line[0] == "--GENOME_NCBI":
                 config_info["genome_ncbi"] = line[1]
@@ -166,23 +168,28 @@ def sra_download_sbatch(sp_dir,sample_ncbi_dict):
     
     for sample in sample_ncbi_dict.keys():
         for sra in sample_ncbi_dict[sample]:
-            print('Will download %s for sample %s, split, and run through fastqc'%(sra,sample))
+            #First check if fastq file is already present (already downloaded. If it has, print statment and continue with next sample. 
+            fastq_1_filename = '%s/fastq/%s_1.fastq.gz'%(sp_dir,sra)
+            if os.path.isfile(fastq_1_filename):
+                print('%s_1.fastq.gz already present, skipping'%(sra))
+            else:
+                print('Will download %s for sample %s, split, and run through fastqc'%(sra,sample))
     
-            #Load modules and get versions for all programs used
-            cmd_1 = 'module load fastqc/0.11.5-fasrc01'
-            cmd_2 = 'wget -P %s/sra/ ftp://ftp-trace.ncbi.nih.gov/sra/sra-instant/reads/ByRun/sra/%s/%s/%s/%s.sra'%(sp_dir,sra[0:3],sra[0:6],sra,sra)
-            cmd_3 = r'%sfastq-dump --outdir %s/fastq --gzip --split-files %s/sra/%s.sra'%(path_to_sratools,sp_dir,sp_dir,sra)
-            cmd_4 = 'fastqc -o %s/fastqc %s/fastq/%s_1.fastq.gz %s/fastq/%s_2.fastq.gz'%(sp_dir,sp_dir,sra,sp_dir,sra) 
+                #Load modules and get versions for all programs used
+                cmd_1 = 'module load fastqc/0.11.5-fasrc01'
+                cmd_2 = 'wget -P %s/sra/ ftp://ftp-trace.ncbi.nih.gov/sra/sra-instant/reads/ByRun/sra/%s/%s/%s/%s.sra'%(sp_dir,sra[0:3],sra[0:6],sra,sra)
+                cmd_3 = r'%sfastq-dump --outdir %s/fastq --gzip --split-files %s/sra/%s.sra'%(path_to_sratools,sp_dir,sp_dir,sra)
+                cmd_4 = 'fastqc -o %s/fastqc %s/fastq/%s_1.fastq.gz %s/fastq/%s_2.fastq.gz'%(sp_dir,sp_dir,sra,sp_dir,sra) 
             
-            final_cmd = "%s\n\n%s\n\n%s\n\n%s"%(cmd_1,cmd_2,cmd_3,cmd_4)
+                final_cmd = "%s\n\n%s\n\n%s\n\n%s"%(cmd_1,cmd_2,cmd_3,cmd_4)
     
-    #Format sbatch script
-            sra_script = slurm_script.format(partition="shared",time="1-0:00",mem="4000",cores="1",nodes="1",jobid="SRA",sp_dir=sp_dir,cmd=final_cmd)
-            out_filename = "%s/scripts/02_sra_download_parse_%s.sbatch"%(sp_dir,sra)
-            out_file = open(out_filename,"w")
-            out_file.write(sra_script)
-            out_file.close
-            sra_dl_sbatch_filenames.append(out_filename)
+        #Format sbatch script
+                sra_script = slurm_script.format(partition="shared",time="1-0:00",mem="4000",cores="1",nodes="1",jobid="SRA",sp_dir=sp_dir,cmd=final_cmd)
+                out_filename = "%s/scripts/02_sra_download_parse_%s.sbatch"%(sp_dir,sra)
+                out_file = open(out_filename,"w")
+                out_file.write(sra_script)
+                out_file.close
+                sra_dl_sbatch_filenames.append(out_filename)
     
     return(sra_dl_sbatch_filenames)
 
@@ -284,43 +291,43 @@ def process_local_genome(sp_dir,genome_local,sp_abbr,genome_present,bwa_index_pr
 
 #Create sbatch files for trimming, mapping, sorting, indexing and alignment stat creation for each set of paired SRA fastq files.
 def fastq_trim_align_stats(sp_dir,sra,sp_abbr,sample):
-    print('Will trim, map, sort, index, and collect alignment stats for %s from sample %s'%(sra,sample))
+	print('Will trim, map, sort, index, and collect alignment stats for %s from sample %s'%(sra,sample))
 
-    #Set read group info: ID = SRA number, SM = sample id, PU: SRA.sample, LB: sample id 
-    read_group_info = '@RG\\tID:%s\\tSM:%s\\tPU:%s.%s\\tLB:%s'%(sra,sample,sra,sample,sample)
-    path_to_picard = '~/sw/bin/picard.jar'
+	#Set read group info: ID = SRA number, SM = sample id, PU: SRA.sample, LB: sample id 
+	read_group_info = '@RG\\tID:%s\\tSM:%s\\tPU:%s.%s\\tLB:%s'%(sra,sample,sra,sample,sample)
+	path_to_picard = '~/sw/bin/picard.jar'
 
-    #Load necessary modules
-    cmd_1 = 'module load NGmerge/0.2-fasrc01\nmodule load bwa/0.7.15-fasrc01\nmodule load java/1.8.0_45-fasrc01'
-    
-    #If paired end data:
-    #Trim adapters with NGmerge
-    cmd_2 = 'NGmerge -1 %s/fastq/%s_1.fastq.gz -2 %s/fastq/%s_2.fastq.gz -a -v -o %s/fastq/%s_trimmed -n 8 -z -u 60'%(sp_dir,sra,sp_dir,sra,sp_dir,sra)
-    
-    #Map to genome with BWA mem
-    cmd_3 = r"bwa mem -M -t 8 -R '%s' %s/genome/%s.fa %s/fastq/%s_trimmed_1.fastq.gz %s/fastq/%s_trimmed_2.fastq.gz > %s/alignment/%s_bwa.sam"%(read_group_info,sp_dir,sp_abbr,sp_dir,sra,sp_dir,sra,sp_dir,sra)
-    
-    cmd_4 = 'java -Xmx7g -XX:ParallelGCThreads=6 -jar %s SortSam I=%s/alignment/%s_bwa.sam O=%s/alignment/%s.sorted.bam SORT_ORDER=coordinate CREATE_INDEX=true'%(path_to_picard,sp_dir,sra,sp_dir,sra)
-    
-    #Calculate alignment summary stats
-    cmd_5 = 'java -Xmx7g -XX:ParallelGCThreads=6 -jar %s CollectAlignmentSummaryMetrics I=%s/alignment/%s.sorted.bam R=%s/genome/%s.fa METRIC_ACCUMULATION_LEVEL=SAMPLE O=%s/stats/%s.%s.alignment_metrics.txt'%(path_to_picard,sp_dir,sra,sp_dir,sp_abbr,sp_dir,sample,sra)
+	#Load necessary modules
+	cmd_1 = 'module load NGmerge/0.2-fasrc01\nmodule load bwa/0.7.15-fasrc01\nmodule load java/1.8.0_45-fasrc01'
 
-    cmd_6 = 'if [ -f %s/stats/%s.%s.alignment_metrics.txt ]\nthen\n rm %s/alignment/%s_bwa.sam \nfi'%(sp_dir,sample,sra,sp_dir,sra)
-    
-    cmd_list = [cmd_1,cmd_2,cmd_3,cmd_4,cmd_5,cmd_6]
-    
-    final_cmd = "\n\n".join(cmd_list)
-    
-    #Format sbatch script and write file
-    slurm_script = script_create()
-    genome_script = slurm_script.format(partition="shared",time="1-0:00",mem="16000",cores="8",nodes="1",jobid="Trim_Map",sp_dir=sp_dir,cmd=final_cmd)
+	#If paired end data:
+	#Trim adapters with NGmerge
+	cmd_2 = 'NGmerge -1 %s/fastq/%s_1.fastq.gz -2 %s/fastq/%s_2.fastq.gz -a -v -o %s/fastq/%s_trimmed -n 8 -z -u 60'%(sp_dir,sra,sp_dir,sra,sp_dir,sra)
 
-    out_filename = "%s/scripts/03_trim_map_stats_%s.sbatch"%(sp_dir,sra)
-    out_file = open(out_filename,"w")
-    out_file.write(genome_script)
-    out_file.close
+	#Map to genome with BWA mem
+	cmd_3 = r"bwa mem -M -t 8 -R '%s' %s/genome/%s.fa %s/fastq/%s_trimmed_1.fastq.gz %s/fastq/%s_trimmed_2.fastq.gz > %s/alignment/%s_bwa.sam"%(read_group_info,sp_dir,sp_abbr,sp_dir,sra,sp_dir,sra,sp_dir,sra)
 
-    return(out_filename)
+	cmd_4 = 'java -Xmx7g -XX:ParallelGCThreads=6 -jar %s SortSam I=%s/alignment/%s_bwa.sam O=%s/alignment/%s.sorted.bam SORT_ORDER=coordinate CREATE_INDEX=true'%(path_to_picard,sp_dir,sra,sp_dir,sra)
+
+	#Calculate alignment summary stats
+	cmd_5 = 'java -Xmx7g -XX:ParallelGCThreads=6 -jar %s CollectAlignmentSummaryMetrics I=%s/alignment/%s.sorted.bam R=%s/genome/%s.fa METRIC_ACCUMULATION_LEVEL=SAMPLE O=%s/stats/%s.%s.alignment_metrics.txt'%(path_to_picard,sp_dir,sra,sp_dir,sp_abbr,sp_dir,sample,sra)
+
+	cmd_6 = 'if [ -f %s/stats/%s.%s.alignment_metrics.txt ]\nthen\n rm %s/alignment/%s_bwa.sam \nfi'%(sp_dir,sample,sra,sp_dir,sra)
+
+	cmd_list = [cmd_1,cmd_2,cmd_3,cmd_4,cmd_5,cmd_6]
+
+	final_cmd = "\n\n".join(cmd_list)
+
+	#Format sbatch script and write file
+	slurm_script = script_create()
+	genome_script = slurm_script.format(partition="shared",time="1-0:00",mem="16000",cores="8",nodes="1",jobid="Trim_Map",sp_dir=sp_dir,cmd=final_cmd)
+
+	out_filename = "%s/scripts/03_trim_map_stats_%s.sbatch"%(sp_dir,sra)
+	out_file = open(out_filename,"w")
+	out_file.write(genome_script)
+	out_file.close
+
+	return(out_filename)
 
 
 
@@ -386,7 +393,6 @@ def main():
     if "genome_ncbi" in config_info:
         #Create sbatch script
         genome_sbatch_name = get_ncbi_genome(sp_dir,config_info["genome_ncbi"],config_info["abbv"])
-  
         #Submit sbatch script
         genome_job_id = sbatch_submit(genome_sbatch_name)
         
@@ -429,12 +435,10 @@ def main():
 
         print("\nGenome download and indexing successfully completed\n")
 
-
     #####Create sbatch files to download SRA files and use fastq-dump to split
     
     #Create sbatch files
     sra_dl_sbatch_filenames = sra_download_sbatch(sp_dir,config_info["sample_ncbi_dict"])
-   
     #Submit SRA read sbatch files, only allow 20 SRA jobs to run (or pend) at a time (set max_jobs)  
     max_jobs = 20
     sra_dl_jobids = []
@@ -474,8 +478,7 @@ def main():
         if completed_jobids[job] != "COMPLETED":
             print("SRA download and parse job %s failed with code: %s"%(job,completed_jobids[job]))
     
-    #####Final processing and mapping
-    
+    #####Final processing and mapping   
     #Trim fastq files with NGmerge
     #Set Read Group information
     #Map fastq files to genome with BWA
@@ -490,14 +493,16 @@ def main():
         for sra in config_info["sample_ncbi_dict"][sample]:
             if os.path.isfile('%s/%s_1.fastq.gz'%(fastq_dir,sra)):
                 if os.path.isfile('%s/%s_2.fastq.gz'%(fastq_dir,sra)):
-                    sra_map_sbatchfile = fastq_trim_align_stats(sp_dir,sra,config_info["abbv"],sample)
-                    sra_map_jobid = sbatch_submit(sra_map_sbatchfile)
-                    mapping_jobids.append(sra_map_jobid)
-                    sleep(1)
+                    if  os.path.isfile('%s/stats/%s.%s.alignment_metrics.txt'%(sp_dir,sample,sra)) is False:
+                        sra_map_sbatchfile = fastq_trim_align_stats(sp_dir,sra,config_info["abbv"],sample)
+                        #sra_map_jobid = sbatch_submit(sra_map_sbatchfile)
+                        #mapping_jobids.append(sra_map_jobid)
+                        #sleep(1)
+                    else:
+                        print('%s.%s.alignment_metrics.txt already present, skipping'%(sample,sra))
                 else:
                     print("No fastq_2 file for %s"%sra)
             else:
-                print("No fastq files for %s"%sra)
 
     sleep(60)
        

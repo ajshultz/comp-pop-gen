@@ -24,4 +24,4 @@
 
 #If genome available locally, input path to fasta filename. If local fasta path is supplied, file will be copied into genome directory and renamed ABBV.fa for downstream use.
 #For example:
-#--GENOME_LOCAL ./CCornix/CCornix.fa
+#--GENOME_LOCAL ./CCornix/genome/CCornix.fa

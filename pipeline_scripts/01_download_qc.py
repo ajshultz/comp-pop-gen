@@ -495,9 +495,9 @@ def main():
                 if os.path.isfile('%s/%s_2.fastq.gz'%(fastq_dir,sra)):
                     if  os.path.isfile('%s/stats/%s.%s.alignment_metrics.txt'%(sp_dir,sample,sra)) is False:
                         sra_map_sbatchfile = fastq_trim_align_stats(sp_dir,sra,config_info["abbv"],sample)
-                        #sra_map_jobid = sbatch_submit(sra_map_sbatchfile)
-                        #mapping_jobids.append(sra_map_jobid)
-                        #sleep(1)
+                        sra_map_jobid = sbatch_submit(sra_map_sbatchfile)
+                        mapping_jobids.append(sra_map_jobid)
+                        sleep(1)
                     else:
                         print('%s.%s.alignment_metrics.txt already present, skipping'%(sample,sra))
                 else:

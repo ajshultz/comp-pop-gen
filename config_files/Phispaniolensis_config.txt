@@ -1,0 +1,33 @@
+#Example config file:
+
+#Path to desired output directory (directory for each species will be created within this directory). If not specified will be current working directory
+--OUT_DIR .
+
+#Species abbreviation for use in file headers (e.g. CCornix for hooded crow)
+--ABBV Phispaniolensis
+
+#Enter sample IDs and information, must include SRA accession numbers for download from NCBI: --SAMPLE <SAMPLE_ID> <SRA,SRA,SRA>
+#From Bioproject:PRJNA255814
+--SAMPLE_NCBI SAMN06619711 SRR5369947
+--SAMPLE_NCBI SAMN06619710 SRR5369948
+--SAMPLE_NCBI SAMN06619709 SRR5369949
+--SAMPLE_NCBI SAMN06619708 SRR5369950
+--SAMPLE_NCBI SAMN06619707 SRR5369951
+--SAMPLE_NCBI SAMN06619706 SRR5369952
+--SAMPLE_NCBI SAMN06619705 SRR5369953
+--SAMPLE_NCBI SAMN06619704 SRR5369954
+--SAMPLE_NCBI SAMN06619703 SRR5369955
+--SAMPLE_NCBI SAMN06619702 SRR5369956
+
+
+#At this time, using local fastq files is not supported. We will add this feature in the future.
+#--SAMPLE_LOCAL Ind_1
+
+#A genome must be supplied, either hosted on NCBI (use --GENOME_NCBI flag) or locally (use --GENOME_LOCAL flag). See examples below.
+
+#Enter name of species with genome assembly for mapping if genome hosted on Genbank. Must correspond to name of organism on NCBI if download is necessary (e.g. for Corvus cornix: Corvus_cornix_cornix)
+--GENOME_NCBI ftp://ftp.ncbi.nlm.nih.gov/genomes/all/GCA/001/700/915/GCA_001700915.1_Passer_domesticus-1.0/GCA_001700915.1_Passer_domesticus-1.0_genomic.fna.gz
+
+#If genome available locally, input path to fasta filename. If local fasta path is supplied, file will be copied into genome directory and renamed ABBV.fa for downstream use.
+#For example:
+#--GENOME_LOCAL 

@@ -1,0 +1,2 @@
+AvgSpotLen	BioSample	Experiment	Library_Name	LoadDate	MBases	MBytes	Organism	ReleaseDate	Run	SRA_Sample	Sample_Name	dev_stage	isolate	sex	tissue	Assay_Type	BioProject	BioSampleModel	Consent	InsertSize	Instrument	LibraryLayout	LibrarySelection	LibrarySource	Platform	SRA_Study
+200	SAMN06619722	SRX2665263	HI.1147.004.Index_5.Pmontanus_1_Naxos_2	2017-03-24	13984	10100	Passer montanus	2017-03-24	SRR5369936	SRS2066956	2008-Pm_Naxos_2	adult	2008-Pm_Naxos_2	male	blood	WGS	PRJNA255814	Model organism or animal	public	0	Illumina HiSeq 2000	PAIRED	RANDOM	GENOMIC	ILLUMINA	SRP045123

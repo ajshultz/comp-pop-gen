@@ -525,7 +525,7 @@ def main():
         for sra in config_info["sample_ncbi_dict"][sample]:
             if os.path.isfile('%s/%s.sorted.bam'%(alignment_dir,sra)) and os.path.isfile('%s/%s.sorted.bai'%(alignment_dir,sra)):
                     proc = Popen('rm %s/%s*'%(fastq_dir,sra),shell=True)
-                    proc = Popen('rm %s/%s.sra'%(fastq_dir,sra),shell=True)
+                    proc = Popen('rm %s/%s.sra'%(sra_dir,sra),shell=True)
             else:
                 print("Something happened with SRA: %s for sample: %s"%(sra,sample))        
 

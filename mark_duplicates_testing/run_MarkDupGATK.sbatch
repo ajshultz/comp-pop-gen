@@ -13,7 +13,7 @@ SAMPLE=$1
 
 module load java/1.8.0_45-fasrc01
 
-gatk --java-options "-Xmx8g -XX:ParallelGCThreads=1" MarkDuplicatesGATK TMP_DIR=tmp \
+gatk --java-options "-Xmx8g -XX:ParallelGCThreads=1" MarkDuplicatesGATK \
 -I ${SAMPLE}.sorted.bam \
 -O ${SAMPLE}.dedup.gatk.bam \
 --METRICS_FILE ${SAMPLE}.dedup.gatk.metrics.txt \

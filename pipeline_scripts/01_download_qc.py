@@ -343,7 +343,7 @@ def main():
     config_filename = args.config
     
     now = datetime.datetime.now()
-    print('Staring work: '%now)
+    print('Staring work: %s'%now)
     start_date = now.strftime("%Y-%m-%d")
     
     #Open config file and get Sample, SRA and Genome attributes

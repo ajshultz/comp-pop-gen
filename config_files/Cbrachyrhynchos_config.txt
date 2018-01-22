@@ -1,0 +1,55 @@
+#Example config file:
+
+#Path to desired output directory (directory for each species will be created within this directory). If not specified will be current working directory
+--OUT_DIR .
+
+#Species abbreviation for use in file headers (e.g. CCornix for hooded crow)
+--ABBV Cbrachyrhynchos
+
+#Enter sample IDs and information, must include SRA accession numbers for download from NCBI: --SAMPLE <SAMPLE_ID> <SRA,SRA,SRA>
+#From Bioproject:PRJNA192205
+--SAMPLE_NCBI SAMN02743852 SRR1289962
+--SAMPLE_NCBI SAMN02743852 SRR1289965
+--SAMPLE_NCBI SAMN02743852 SRR1289975
+--SAMPLE_NCBI SAMN02743852 SRR1289976
+--SAMPLE_NCBI SAMN02743852 SRR1284298
+--SAMPLE_NCBI SAMN02743848 SRR1286110
+--SAMPLE_NCBI SAMN02743848 SRR1286111
+--SAMPLE_NCBI SAMN02743848 SRR1286112
+--SAMPLE_NCBI SAMN02743848 SRR1286113
+--SAMPLE_NCBI SAMN02743848 SRR1286115
+--SAMPLE_NCBI SAMN02743850 SRR1286117
+--SAMPLE_NCBI SAMN02743850 SRR1286118
+--SAMPLE_NCBI SAMN02743850 SRR1286119
+--SAMPLE_NCBI SAMN02743850 SRR1286121
+--SAMPLE_NCBI SAMN02743850 SRR1286122
+--SAMPLE_NCBI SAMN02743849 SRR1286123
+--SAMPLE_NCBI SAMN02743849 SRR1286124
+--SAMPLE_NCBI SAMN02743849 SRR1286125
+--SAMPLE_NCBI SAMN02743849 SRR1286126
+--SAMPLE_NCBI SAMN02743849 SRR1286127
+--SAMPLE_NCBI SAMN02743849 SRR1286128
+--SAMPLE_NCBI SAMN02743851 SRR1286130
+--SAMPLE_NCBI SAMN02743851 SRR1286131
+--SAMPLE_NCBI SAMN02743851 SRR1286132
+--SAMPLE_NCBI SAMN02743851 SRR1286134
+--SAMPLE_NCBI SAMN02743851 SRR1286135
+
+#From Bioproject PRJEB9057
+--SAMPLE_NCBI SAMEA3334436 ERR849888
+--SAMPLE_NCBI SAMEA3334437 ERR849890
+--SAMPLE_NCBI SAMEA3334438 ERR849893
+--SAMPLE_NCBI SAMEA3334439 ERR849894
+--SAMPLE_NCBI SAMEA3334440 ERR849896
+
+#At this time, using local fastq files is not supported. We will add this feature in the future.
+#--SAMPLE_LOCAL Ind_1
+
+#A genome must be supplied, either hosted on NCBI (use --GENOME_NCBI flag) or locally (use --GENOME_LOCAL flag). See examples below.
+
+#Enter name of species with genome assembly for mapping if genome hosted on Genbank. Must correspond to name of organism on NCBI if download is necessary (e.g. for Corvus cornix: Corvus_cornix_cornix)
+--GENOME_NCBI ftp://ftp.ncbi.nlm.nih.gov/genomes/all/GCF/000/738/735/GCF_000738735.2_ASM73873v2/GCF_000738735.2_ASM73873v2_genomic.fna.gz
+
+#If genome available locally, input path to fasta filename. If local fasta path is supplied, file will be copied into genome directory and renamed ABBV.fa for downstream use.
+#For example:
+#--GENOME_LOCAL 

@@ -8,6 +8,7 @@ import os
 import argparse
 from subprocess import Popen,PIPE
 from time import sleep
+import datetime
 
 #Extract Sample, SRA and genome info from config file. Sample data will be stored as a dictionary with sample ID as keys and a list of SRA accessions as values. Returns a dictionary of this info.
 def extract_config(config_filename):
@@ -88,8 +89,8 @@ def sbatch_submit(filename):
 
 
 #Check job status of specific jobid: returns job status
-def jobid_status(jobid):
-    proc = Popen('sacct --format state --noheader -j %d'%int(jobid),shell=True,stdout=PIPE,stderr=PIPE)
+def jobid_status(jobid,date):
+    proc = Popen('sacct --format state --noheader -j %d -S %s'%(int(jobid),date),shell=True,stdout=PIPE,stderr=PIPE)
     stdout,stderr=proc.communicate()
     if proc.returncode != 0:
         raise Exception('Error running sacct: %s'%stderr)
@@ -100,8 +101,8 @@ def jobid_status(jobid):
     
     
 #Check the status of all jobs, returns dictionary of jobid:status. Ignores jobs with ".ba+" and ".ex+" file extensions.
-def all_jobs_status():
-    proc = Popen('sacct --format jobid,state --noheader',shell=True,stdout=PIPE,stderr=PIPE)
+def all_jobs_status(date):
+    proc = Popen('sacct --format jobid,state --noheader -S %s'%(date),shell=True,stdout=PIPE,stderr=PIPE)
     stdout,stderr=proc.communicate()
     stdout=stdout.decode("utf-8","ignore")
     stderr=stderr.decode("utf-8","ignore")
@@ -119,9 +120,9 @@ def all_jobs_status():
     return(status_dict)
     
 
-def num_pend_run(job_id_list):
+def num_pend_run(job_id_list,date):
     count = 0
-    status_dict = all_jobs_status()
+    status_dict = all_jobs_status(date)
     for job in job_id_list:
         if status_dict[job] == "PENDING" or status_dict[job] == "RUNNING":
             count += 1
@@ -168,10 +169,11 @@ def sra_download_sbatch(sp_dir,sample_ncbi_dict):
     
     for sample in sample_ncbi_dict.keys():
         for sra in sample_ncbi_dict[sample]:
-            #First check if fastq file is already present (already downloaded. If it has, print statment and continue with next sample. 
+            #First check if fastq file is already present (already downloaded), or final BAM file already present. If it has, print statment and continue with next sample. 
             fastq_1_filename = '%s/fastq/%s_1.fastq.gz'%(sp_dir,sra)
-            if os.path.isfile(fastq_1_filename):
-                print('%s_1.fastq.gz already present, skipping'%(sra))
+            bam_filename = '%s/alignment/%s.sorted.bam'%(sp_dir,sra)
+            if os.path.isfile(fastq_1_filename) or os.path.isfile(bam_filename):
+                print('%s_1.fastq.gz or %s.sorted.bam already present, skipping'%(sra,sra))
             else:
                 print('Will download %s for sample %s, split, and run through fastqc'%(sra,sample))
     
@@ -320,7 +322,7 @@ def fastq_trim_align_stats(sp_dir,sra,sp_abbr,sample):
 
 	#Format sbatch script and write file
 	slurm_script = script_create()
-	genome_script = slurm_script.format(partition="shared",time="1-0:00",mem="16000",cores="8",nodes="1",jobid="Trim_Map",sp_dir=sp_dir,cmd=final_cmd)
+	genome_script = slurm_script.format(partition="shared",time="1-0:00",mem="24000",cores="8",nodes="1",jobid="Trim_Map",sp_dir=sp_dir,cmd=final_cmd)
 
 	out_filename = "%s/scripts/03_trim_map_stats_%s.sbatch"%(sp_dir,sra)
 	out_file = open(out_filename,"w")
@@ -339,6 +341,10 @@ def main():
     parser.add_argument("--config", help="config file specifying samples and genome for mapping")
     args = parser.parse_args()
     config_filename = args.config
+    
+    now = datetime.datetime.now()
+    print('Staring work: '%now)
+    start_date = now.strftime("%Y-%m-%d")
     
     #Open config file and get Sample, SRA and Genome attributes
 #     '''
@@ -417,12 +423,12 @@ def main():
     
         dones = ['COMPLETED','CANCELLED','FAILED','TIMEOUT','PREEMPTED','NODE_FAIL']
         #Check job id status of genome job. If not in one of the 'done' job status categories, wait 30 seconds and check again.
-        while jobid_status(genome_job_id) not in dones:
+        while jobid_status(genome_job_id,start_date) not in dones:
             #print("Genome not done yet")
             sleep(30)
     
         #Check to make sure job completed, and that all necessary files are present. If not, exit and give information.
-        genome_job_completion_status = jobid_status(genome_job_id)
+        genome_job_completion_status = jobid_status(genome_job_id,start_date)
         if genome_job_completion_status != 'COMPLETED':
             sys.exit("There was a problem downloading and indexing the genome. The job exited with status %s. Please diagnose and fix before moving on"%genome_job_completion_status)
         
@@ -459,13 +465,13 @@ def main():
     sleep(20)
     #Then, enter while loop that will continue until the number of completed jobs matches the. number of sbatch files
     while len(completed_jobids) < len(sra_dl_sbatch_filenames):
-        num_running = num_pend_run(sra_dl_jobids)
+        num_running = num_pend_run(sra_dl_jobids,start_date)
         while num_running < max_jobs and job_count < (len(sra_dl_sbatch_filenames)):
             sra_dl_jobids.append(sbatch_submit(sra_dl_sbatch_filenames[job_count]))
             job_count += 1
             sleep(20)
-            num_running = num_pend_run(sra_dl_jobids)
-        job_statuses = all_jobs_status()
+            num_running = num_pend_run(sra_dl_jobids,start_date)
+        job_statuses = all_jobs_status(start_date)
         for job in sra_dl_jobids:
             if job not in completed_jobids:
                 if job_statuses[job] != "PENDING" and job_statuses[job] != "RUNNING":
@@ -507,7 +513,7 @@ def main():
     sleep(60)
        
     while len(mapping_completed_jobids) < len(mapping_jobids):
-        job_statuses = all_jobs_status()
+        job_statuses = all_jobs_status(start_date)
         for job in mapping_jobids:
             if job not in mapping_completed_jobids:
                 if job_statuses[job] != "PENDING" and job_statuses[job] != "RUNNING":

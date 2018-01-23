@@ -17,4 +17,5 @@ gatk --java-options "-Xmx8g -XX:ParallelGCThreads=1" MarkDuplicatesGATK \
 -I ${SAMPLE}.sorted.bam \
 -O ${SAMPLE}.dedup.gatk.bam \
 --METRICS_FILE ${SAMPLE}.dedup.gatk.metrics.txt \
---REMOVE_DUPLICATES false
+--REMOVE_DUPLICATES false \
+--COMPRESSION_LEVEL 5

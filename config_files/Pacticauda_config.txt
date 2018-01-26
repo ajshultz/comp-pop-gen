@@ -1,0 +1,42 @@
+#Example config file:
+
+#Path to desired output directory (directory for each species will be created within this directory). If not specified will be current working directory
+--OUT_DIR .
+
+#Species abbreviation for use in file headers (e.g. CCornix for hooded crow)
+--ABBV Pacticauda
+
+#Enter sample IDs and information, must include SRA accession numbers for download from NCBI: --SAMPLE <SAMPLE_ID> <SRA,SRA,SRA>
+#From Bioproject:PRJEB10586
+--SAMPLE_NCBI SAMEA3532832 ERR1013135
+--SAMPLE_NCBI SAMEA3532833 ERR1013136
+--SAMPLE_NCBI SAMEA3532834 ERR1013137
+--SAMPLE_NCBI SAMEA3532835 ERR1013138
+--SAMPLE_NCBI SAMEA3532836 ERR1013139
+--SAMPLE_NCBI SAMEA3532837 ERR1013140
+--SAMPLE_NCBI SAMEA3532838 ERR1013141
+--SAMPLE_NCBI SAMEA3532839 ERR1013142
+--SAMPLE_NCBI SAMEA3532840 ERR1013143
+--SAMPLE_NCBI SAMEA3532841 ERR1013144
+--SAMPLE_NCBI SAMEA3532842 ERR1013145
+--SAMPLE_NCBI SAMEA3532843 ERR1013146
+--SAMPLE_NCBI SAMEA3532844 ERR1013147
+--SAMPLE_NCBI SAMEA3532845 ERR1013148
+--SAMPLE_NCBI SAMEA3532846 ERR1013149
+--SAMPLE_NCBI SAMEA3532847 ERR1013150
+--SAMPLE_NCBI SAMEA3532848 ERR1013151
+--SAMPLE_NCBI SAMEA3532849 ERR1013152
+--SAMPLE_NCBI SAMEA3532850 ERR1013153
+--SAMPLE_NCBI SAMEA3532851 ERR1013154
+
+#At this time, using local fastq files is not supported. We will add this feature in the future.
+#--SAMPLE_LOCAL Ind_1
+
+#A genome must be supplied, either hosted on NCBI (use --GENOME_NCBI flag) or locally (use --GENOME_LOCAL flag). See examples below.
+
+#Enter name of species with genome assembly for mapping if genome hosted on Genbank. Must correspond to name of organism on NCBI if download is necessary (e.g. for Corvus cornix: Corvus_cornix_cornix)
+--GENOME_NCBI ftp://ftp.ncbi.nlm.nih.gov/genomes/all/GCF/000/151/805/GCF_000151805.1_Taeniopygia_guttata-3.2.4/GCF_000151805.1_Taeniopygia_guttata-3.2.4_genomic.fna.gz
+
+#If genome available locally, input path to fasta filename. If local fasta path is supplied, file will be copied into genome directory and renamed ABBV.fa for downstream use.
+#For example:
+#--GENOME_LOCAL ./Pmajor/genome/Pmajor.fa

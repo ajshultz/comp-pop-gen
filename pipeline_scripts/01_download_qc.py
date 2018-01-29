@@ -186,7 +186,7 @@ def sra_download_sbatch(sp_dir,sample_ncbi_dict):
                 final_cmd = "%s\n\n%s\n\n%s\n\n%s"%(cmd_1,cmd_2,cmd_3,cmd_4)
     
         #Format sbatch script
-                sra_script = slurm_script.format(partition="shared",time="1-0:00",mem="4000",cores="1",nodes="1",jobid="SRA",sp_dir=sp_dir,cmd=final_cmd)
+                sra_script = slurm_script.format(partition="shared",time="2-0:00",mem="4000",cores="1",nodes="1",jobid="SRA",sp_dir=sp_dir,cmd=final_cmd)
                 out_filename = "%s/scripts/02_sra_download_parse_%s.sbatch"%(sp_dir,sra)
                 out_file = open(out_filename,"w")
                 out_file.write(sra_script)
@@ -322,7 +322,7 @@ def fastq_trim_align_stats(sp_dir,sra,sp_abbr,sample):
 
 	#Format sbatch script and write file
 	slurm_script = script_create()
-	genome_script = slurm_script.format(partition="shared",time="1-0:00",mem="24000",cores="8",nodes="1",jobid="Trim_Map",sp_dir=sp_dir,cmd=final_cmd)
+	genome_script = slurm_script.format(partition="shared",time="2-0:00",mem="24000",cores="8",nodes="1",jobid="Trim_Map",sp_dir=sp_dir,cmd=final_cmd)
 
 	out_filename = "%s/scripts/03_trim_map_stats_%s.sbatch"%(sp_dir,sra)
 	out_file = open(out_filename,"w")

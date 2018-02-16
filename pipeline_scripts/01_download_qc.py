@@ -297,7 +297,6 @@ def fastq_trim_align_stats(sp_dir,sra,sp_abbr,sample):
 
 	#Set read group info: ID = SRA number, SM = sample id, PU: SRA.sample, LB: sample id 
 	read_group_info = '@RG\\tID:%s\\tSM:%s\\tPU:%s.%s\\tLB:%s'%(sra,sample,sra,sample,sample)
-	path_to_picard = '~/sw/bin/picard.jar'
 
 	#Load necessary modules
 	cmd_1 = 'module load NGmerge/0.2-fasrc01\nmodule load bwa/0.7.15-fasrc01\nmodule load java/1.8.0_45-fasrc01'
@@ -309,10 +308,10 @@ def fastq_trim_align_stats(sp_dir,sra,sp_abbr,sample):
 	#Map to genome with BWA mem
 	cmd_3 = r"bwa mem -M -t 8 -R '%s' %s/genome/%s.fa %s/fastq/%s_trimmed_1.fastq.gz %s/fastq/%s_trimmed_2.fastq.gz > %s/alignment/%s_bwa.sam"%(read_group_info,sp_dir,sp_abbr,sp_dir,sra,sp_dir,sra,sp_dir,sra)
 
-	cmd_4 = 'java -Xmx7g -XX:ParallelGCThreads=6 -jar %s SortSam I=%s/alignment/%s_bwa.sam O=%s/alignment/%s.sorted.bam SORT_ORDER=coordinate CREATE_INDEX=true'%(path_to_picard,sp_dir,sra,sp_dir,sra)
+	cmd_4 ='gatk --java-options "-Xmx8g -XX:ParallelGCThreads=6" SortSam -I %s/alignment/%s_bwa.sam -O %s/alignment/%s.sorted.bam --SORT_ORDER=coordinate --CREATE_INDEX=true'%(sp_dir,sra,sp_dir,sra)
 
 	#Calculate alignment summary stats
-	cmd_5 = 'java -Xmx7g -XX:ParallelGCThreads=6 -jar %s CollectAlignmentSummaryMetrics I=%s/alignment/%s.sorted.bam R=%s/genome/%s.fa METRIC_ACCUMULATION_LEVEL=SAMPLE O=%s/stats/%s.%s.alignment_metrics.txt'%(path_to_picard,sp_dir,sra,sp_dir,sp_abbr,sp_dir,sample,sra)
+	cmd_5 = 'gatk --java-options "-Xmx8g -XX:ParallelGCThreads=6" CollectAlignmentSummaryMetrics -I %s/alignment/%s.sorted.bam -R %s/genome/%s.fa --METRIC_ACCUMULATION_LEVEL=SAMPLE -O %s/stats/%s.%s.alignment_metrics.txt'%(sp_dir,sra,sp_dir,sp_abbr,sp_dir,sample,sra)
 
 	cmd_6 = 'if [ -f %s/stats/%s.%s.alignment_metrics.txt ]\nthen\n rm %s/alignment/%s_bwa.sam \nfi'%(sp_dir,sample,sra,sp_dir,sra)
 
@@ -488,8 +487,8 @@ def main():
     #Trim fastq files with NGmerge
     #Set Read Group information
     #Map fastq files to genome with BWA
-    #Sort (convert to BAM), Index with PicardTools
-    #Calculate alignment stats with PicardTools
+    #Sort (convert to BAM), Index with GATK4 (installed in path)
+    #Calculate alignment stats with GATK4 (installed in path)
     #Remove SAM file if stats file exists
     #Before submitting jobs, check to see that fastq files are there. If not, print info statement.
     mapping_jobids = []

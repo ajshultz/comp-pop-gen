@@ -163,15 +163,18 @@ def dedup_sbatch(sp_dir,sp_abbr,sample_ncbi_dict):
             cmd_2 = "".join([gatk_cmd_1,gatk_cmd_2,gatk_cmd_3,gatk_cmd_4,gatk_cmd_5])
             
             #Sort and index dedup bam file
-            cmd_3 = 'gatk --java-options "-Xmx8g -XX:ParallelGCThreads=1" SortSam -I %s/dedup/%s.dedup.bam -O %s/dedup/%s.dedup.sorted.bam --SORT_ORDER coordinate --CREATE_INDEX true'%(sp_dir,sample,sp_dir,sample)
+            cmd_3 = 'gatk --java-options "-Xmx8g -XX:ParallelGCThreads=1" SortSam -I %s/dedup/%s.dedup.bam -O %s/dedup/%s.dedup.sorted.bam --SORT_ORDER coordinate --CREATE_INDEX true --COMPRESSION_LEVEL 5'%(sp_dir,sample,sp_dir,sample)
             
             #Validate sorted bam
             cmd_4 = 'gatk --java-options "-Xmx8g -XX:ParallelGCThreads=1" ValidateSamFile -I %s/dedup/%s.dedup.sorted.bam -O %s/stats/%s.validate.txt'%(sp_dir,sample,sp_dir,sample)
             
             #Compute coverage histogram of sorted bam
-            cmd_5 = 'bedtools genomecov -ibam %s/dedup/%s.dedup.sorted.bam -g %s/genome/%s.fa'%(sp_dir,sample,sp_dir,sp_abbr)
+            cmd_5 = 'bedtools genomecov -ibam %s/dedup/%s.dedup.sorted.bam -g %s/genome/%s.fa > %s/stats/%s.coverage'%(sp_dir,sample,sp_dir,sp_abbr,sp_abbr,sample)
+            
+            #Grab only genome output
+            cmd_6 = r"""awk '$1 == "genome" {print $0}' %s/stats/%s.coverage > %s/stats/%s.genome.coverage"""%(sp_dir,sample,sp_dir,sample)
         
-            cmd_list = [cmd_1,cmd_2,cmd_3,cmd_4,cmd_5]
+            cmd_list = [cmd_1,cmd_2,cmd_3,cmd_4,cmd_5,cmd_6]
 
             final_cmd = "\n\n".join(cmd_list)
 

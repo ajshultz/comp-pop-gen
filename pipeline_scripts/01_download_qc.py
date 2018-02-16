@@ -295,8 +295,8 @@ def process_local_genome(sp_dir,genome_local,sp_abbr,genome_present,bwa_index_pr
 def fastq_trim_align_stats(sp_dir,sra,sp_abbr,sample):
 	print('Will trim, map, sort, index, and collect alignment stats for %s from sample %s'%(sra,sample))
 
-	#Set read group info: ID = SRA number, SM = sample id, PU: SRA.sample, LB: sample id 
-	read_group_info = '@RG\\tID:%s\\tSM:%s\\tPU:%s.%s\\tLB:%s'%(sra,sample,sra,sample,sample)
+	#Set read group info: ID = SRA number, SM = sample id, PU: SRA.sample, LB: sample id, PL: illumina (assumes all illumina data.) 
+	read_group_info = '@RG\\tID:%s\\tSM:%s\\tPU:%s.%s\\tLB:%s\\tPL:illumina'%(sra,sample,sra,sample,sample)
 
 	#Load necessary modules
 	cmd_1 = 'module load NGmerge/0.2-fasrc01\nmodule load bwa/0.7.15-fasrc01\nmodule load java/1.8.0_45-fasrc01'

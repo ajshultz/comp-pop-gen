@@ -16,6 +16,8 @@ def extract_config(config_filename):
     config_file = open(config_filename,"r")
     config_info = {}
     sample_ncbi_dict = {}
+    sample_ena_dict = {}
+    sample_dict = {}
     
     for line in config_file:
         if line[0] == "#":
@@ -32,7 +34,24 @@ def extract_config(config_filename):
                     sample_ncbi_dict[line[1]] = [line[2]]
                 elif line[1] in sample_ncbi_dict:
                     sample_ncbi_dict[line[1]].append(line[2])
+                if line[1] not in sample_dict:
+                    sample_dict[line[1]] = [line[2]]
+                elif line[1] in sample_dict:
+                    sample_dict[line[1]].append(line[2])
                 config_info["sample_ncbi_dict"] = sample_ncbi_dict
+                config_info["sample_dict"] = sample_dict
+            elif line[0] == "--SAMPLE_ENA":
+                if line[1] not in sample_ena_dict:
+                    sample_ena_dict[line[1]] = [line[2]]
+                elif line[1] in sample_ena_dict:
+                    sample_ena_dict[line[1]].append(line[2])
+                if line[1] not in sample_dict:
+                    sample_dict[line[1]] = [line[2]]
+                elif line[1] in sample_dict:
+                    sample_dict[line[1]].append(line[2])
+                config_info["sample_ena_dict"] = sample_ena_dict
+                config_info["sample_dict"] = sample_dict
+
             elif line[0] == "--GENOME_NCBI":
                 config_info["genome_ncbi"] = line[1]
             elif line[0] == "--GENOME_LOCAL":
@@ -57,7 +76,7 @@ def extract_config(config_filename):
     if "genome_ncbi" not in config_info and "genome_local" not in config_info:
         sys.exit("Oops, you forgot to specify a reference genome!")
         
-    if len(config_info["sample_ncbi_dict"]) == 0:
+    if len(config_info["sample_dict"]) == 0:
         sys.exit("Oops, you forgot to specify samples!")
     
     #Return objects    
@@ -222,18 +241,9 @@ def main():
     print('Staring work on script 02: %s'%now)
     start_date = now.strftime("%Y-%m-%d")
     
-    #Open config file and get Sample, SRA and Genome attributes - use same config as for pipeline script 01
-#     '''
-#     Example config file format (separate by spaces), only include one genome option: 
-#     --ABBV <Species_Abbr>
-#     --OUT_DIR <output directory>
-#     --SAMPLE_NCBI <SAMPLE_1> <SRA_ID,SRA_ID,SRA_ID>
-#     --SAMPLE_NCBI <SAMPLE_2> <SRA_ID,SRA_ID>
-#     --GENOME_NCBI <NCBI Genome Accession>
-#     --GENOME_LOCAL <Local genome fasta file>
-#     '''
-    
+    #Open config file and get Sample, SRA and Genome attributes - use same config as for pipeline script 01    
     config_info = extract_config(config_filename)
+
 
     #####Check if dedup directory exists, if not creates it
     
@@ -271,10 +281,19 @@ def main():
     for job in completed_jobids:
         if completed_jobids[job] != "COMPLETED":
             print("Dedup, sort and validate job %s failed with code: %s"%(job,completed_jobids[job]))
+    '''    
+    
     
     #####Collate summary statistics   
-    #Collect alignment metrics and dedup metrics into single files for all samples
     
+    #Get stats directory filenames
+    stat_files = os.listdir("%s/stats"%(sp_dir))
+    
+    #Collect alignment metrics into a single file for all samples
+    
+    
+    
+    #Collect dedup metrics into a single file for all samples
     
     
     #Collect coverage histograms, plot in pdf (species_date.pdf), mean and median coverage
@@ -284,7 +303,7 @@ def main():
     #Copy this file and pdf of coverage to centralized location        
     
     #Check that the final sorted bam and index is available, if so, remove intermediate files (dedup)
-    '''
+
     '''
     for sample in config_info["sample_ncbi_dict"]:
         for sra in config_info["sample_ncbi_dict"][sample]:

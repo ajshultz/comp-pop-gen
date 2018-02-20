@@ -16,6 +16,7 @@ def extract_config(config_filename):
     config_file = open(config_filename,"r")
     config_info = {}
     sample_ncbi_dict = {}
+    sample_dict = {}
     
     for line in config_file:
         if line[0] == "#":
@@ -32,7 +33,12 @@ def extract_config(config_filename):
                     sample_ncbi_dict[line[1]] = [line[2]]
                 elif line[1] in sample_ncbi_dict:
                     sample_ncbi_dict[line[1]].append(line[2])
+                if line[1] not in sample_dict:
+                    sample_dict[line[1]] = [line[2]]
+                elif line[1] in sample_dict:
+                    sample_dict[line[1]].append(line[2])
                 config_info["sample_ncbi_dict"] = sample_ncbi_dict
+                config_info["sample_dict"] = sample_dict
             elif line[0] == "--GENOME_NCBI":
                 config_info["genome_ncbi"] = line[1]
             elif line[0] == "--GENOME_LOCAL":
@@ -57,7 +63,7 @@ def extract_config(config_filename):
     if "genome_ncbi" not in config_info and "genome_local" not in config_info:
         sys.exit("Oops, you forgot to specify a reference genome!")
         
-    if len(config_info["sample_ncbi_dict"]) == 0:
+    if len(config_info["sample_dict"]) == 0:
         sys.exit("Oops, you forgot to specify samples!")
     
     #Return objects    
@@ -494,8 +500,8 @@ def main():
     mapping_jobids = []
     mapping_completed_jobids = {}
     
-    for sample in config_info["sample_ncbi_dict"]:
-        for sra in config_info["sample_ncbi_dict"][sample]:
+    for sample in config_info["sample_dict"]:
+        for sra in config_info["sample_dict"][sample]:
             if os.path.isfile('%s/%s_1.fastq.gz'%(fastq_dir,sra)):
                 if os.path.isfile('%s/%s_2.fastq.gz'%(fastq_dir,sra)):
                     if  os.path.isfile('%s/stats/%s.%s.alignment_metrics.txt'%(sp_dir,sample,sra)) is False:
@@ -526,8 +532,8 @@ def main():
             print("SRA trimming, mapping, sorting, and stats job %s failed with code: %s"%(job,mapping_completed_jobids[job]))
             
     #Check that the final sorted bam and index is available, if so, remove intermediate files (SRA, fastq,unsorted BAM)
-    for sample in config_info["sample_ncbi_dict"]:
-        for sra in config_info["sample_ncbi_dict"][sample]:
+    for sample in config_info["sample_dict"]:
+        for sra in config_info["sample_dict"][sample]:
             if os.path.isfile('%s/%s.sorted.bam'%(alignment_dir,sra)) and os.path.isfile('%s/%s.sorted.bai'%(alignment_dir,sra)):
                     proc = Popen('rm %s/%s*'%(fastq_dir,sra),shell=True)
                     proc = Popen('rm %s/%s.sra'%(sra_dir,sra),shell=True)

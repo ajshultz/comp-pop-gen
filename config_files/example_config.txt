@@ -4,7 +4,7 @@
 --OUT_DIR .
 
 #Species abbreviation for use in file headers (e.g. CCornix for hooded crow)
---ABBV CCornix
+--ABBV Ccornix
 
 #Enter sample IDs and information, must include SRA accession numbers for download from NCBI: --SAMPLE <SAMPLE_ID> <SRA>. Note that sample IDs may be repeated if multiple SRAs
 --SAMPLE_NCBI SAMN02439805 SRR1265092
@@ -28,4 +28,4 @@
 
 #If genome available locally, input path to fasta filename. If local fasta path is supplied, file will be copied into genome directory and renamed ABBV.fa for downstream use.
 #For example:
---GENOME_LOCAL ./CCornix/genome/CCornix.fa
+--GENOME_LOCAL ./Ccornix/genome/CCornix.fa

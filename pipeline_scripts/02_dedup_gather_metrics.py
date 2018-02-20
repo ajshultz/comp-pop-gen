@@ -174,18 +174,20 @@ def dedup_sbatch(sp_dir,sp_abbr,sample_ncbi_dict):
             cmd_2 = "".join([gatk_cmd_1,gatk_cmd_2,gatk_cmd_3,gatk_cmd_4,gatk_cmd_5])
             
             #Sort and index dedup bam file
-            cmd_3 = 'gatk --java-options "-Xmx8g -XX:ParallelGCThreads=1" SortSam -I %s/dedup/%s.dedup.rg.bam -O %s/dedup/%s.dedup.sorted.bam --SORT_ORDER coordinate --CREATE_INDEX true --COMPRESSION_LEVEL 5'%(sp_dir,sample,sp_dir,sample)
+            cmd_3 = 'gatk --java-options "-Xmx8g -XX:ParallelGCThreads=1" SortSam -I %s/dedup/%s.dedup.bam -O %s/dedup/%s.dedup.sorted.bam --SORT_ORDER coordinate --CREATE_INDEX true --COMPRESSION_LEVEL 5'%(sp_dir,sample,sp_dir,sample)
+            
+            cmd_4 = 'gatk --java-options "-Xmx8g -XX:ParallelGCThreads=1" CollectAlignmentSummaryMetrics -I %s/dedup/%s.dedup.sorted.bam -R %s/genome/%s.fa --METRIC_ACCUMULATION_LEVEL=SAMPLE -O %s/stats/%s.alignment_metrics.txt'%(sp_dir,sample,sp_dir,sp_abbr,sp_dir,sample)
             
             #Validate sorted bam
-            cmd_4 = 'gatk --java-options "-Xmx8g -XX:ParallelGCThreads=1" ValidateSamFile -I %s/dedup/%s.dedup.sorted.bam -O %s/stats/%s.validate.txt'%(sp_dir,sample,sp_dir,sample)
+            cmd_5 = 'gatk --java-options "-Xmx8g -XX:ParallelGCThreads=1" ValidateSamFile -I %s/dedup/%s.dedup.sorted.bam -O %s/stats/%s.validate.txt'%(sp_dir,sample,sp_dir,sample)
             
             #Compute coverage histogram of sorted bam
-            cmd_5 = 'bedtools genomecov -ibam %s/dedup/%s.dedup.sorted.bam -g %s/genome/%s.fa > %s/stats/%s.coverage'%(sp_dir,sample,sp_dir,sp_abbr,sp_abbr,sample)
+            cmd_6 = 'bedtools genomecov -ibam %s/dedup/%s.dedup.sorted.bam -g %s/genome/%s.fa > %s/stats/%s.coverage'%(sp_dir,sample,sp_dir,sp_abbr,sp_abbr,sample)
             
             #Grab only genome output
-            cmd_6 = r"""awk '$1 == "genome" {print $0}' %s/stats/%s.coverage > %s/stats/%s.genome.coverage"""%(sp_dir,sample,sp_dir,sample)
+            cmd_7 = r"""awk '$1 == "genome" {print $0}' %s/stats/%s.coverage > %s/stats/%s.genome.coverage"""%(sp_dir,sample,sp_dir,sample)
         
-            cmd_list = [cmd_1,rg_cmd,cmd_2,cmd_3,cmd_4,cmd_5,cmd_6]
+            cmd_list = [cmd_1,rg_cmd,cmd_2,cmd_3,cmd_4,cmd_5,cmd_6,cmd_7]
 
             final_cmd = "\n\n".join(cmd_list)
 
@@ -200,6 +202,12 @@ def dedup_sbatch(sp_dir,sp_abbr,sample_ncbi_dict):
     
     return(dedup_sbatch_filenames)
 
+#Collect all deduplication metrics for a list of sample IDs, writes all metrics to a file and returns a dictionary of % duplication for each sample
+def collect_dedup_metrics(stats_dir,sample_list):
+    
+
+#Collect all alignment summary metrics for a list of sample IDs, writes all metrics to a file and returns a dictionary of important metrics for each sample
+def collect_alignment_metrics(stats_dir,sample_list):
 
 
 
@@ -265,11 +273,16 @@ def main():
             print("Dedup, sort and validate job %s failed with code: %s"%(job,completed_jobids[job]))
     
     #####Collate summary statistics   
-    #Collect alignment metrics, dedup metrics
+    #Collect alignment metrics and dedup metrics into single files for all samples
     
-    #Collect coverage histograms, plot in pdf (species_date.pdf), table of mean coverage
     
-            
+    
+    #Collect coverage histograms, plot in pdf (species_date.pdf), mean and median coverage
+    
+    #Produce file of all most important summary stats. 
+    
+    #Copy this file and pdf of coverage to centralized location        
+    
     #Check that the final sorted bam and index is available, if so, remove intermediate files (dedup)
     '''
     '''

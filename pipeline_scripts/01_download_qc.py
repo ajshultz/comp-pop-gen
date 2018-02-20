@@ -16,6 +16,7 @@ def extract_config(config_filename):
     config_file = open(config_filename,"r")
     config_info = {}
     sample_ncbi_dict = {}
+    sample_ena_dict = {}
     sample_dict = {}
     
     for line in config_file:
@@ -39,6 +40,18 @@ def extract_config(config_filename):
                     sample_dict[line[1]].append(line[2])
                 config_info["sample_ncbi_dict"] = sample_ncbi_dict
                 config_info["sample_dict"] = sample_dict
+            elif line[0] == "--SAMPLE_ENA":
+                if line[1] not in sample_ena_dict:
+                    sample_ena_dict[line[1]] = [line[2]]
+                elif line[1] in sample_ena_dict:
+                    sample_ena_dict[line[1]].append(line[2])
+                if line[1] not in sample_dict:
+                    sample_dict[line[1]] = [line[2]]
+                elif line[1] in sample_dict:
+                    sample_dict[line[1]].append(line[2])
+                config_info["sample_ena_dict"] = sample_ena_dict
+                config_info["sample_dict"] = sample_dict
+
             elif line[0] == "--GENOME_NCBI":
                 config_info["genome_ncbi"] = line[1]
             elif line[0] == "--GENOME_LOCAL":
@@ -136,7 +149,7 @@ def num_pend_run(job_id_list,date):
 
 
 #Create an sbatch file for a given set of SRAs and split into fastq files. Returns a list of new sbatch filenames
-def sra_download_sbatch(sp_dir,sample_ncbi_dict):
+def ncbi_sra_download_sbatch(sp_dir,sample_ncbi_dict):
     slurm_script = script_create()
     sra_dl_sbatch_filenames = []
     
@@ -201,6 +214,40 @@ def sra_download_sbatch(sp_dir,sample_ncbi_dict):
     
     return(sra_dl_sbatch_filenames)
 
+def ena_sra_download_sbatch(sp_dir,sample_ena_dict):
+    slurm_script = script_create()
+    sra_dl_sbatch_filenames = []
+    
+    path_to_sratools = "/n/home13/ashultz/sw/progs/sratoolkit.2.8.2-1-centos_linux64/bin/"
+    
+        
+    for sample in sample_ena_dict.keys():
+        for sra in sample_ena_dict[sample]:
+            #First check if fastq file is already present (already downloaded), or final BAM file already present. If it has, print statment and continue with next sample. 
+            fastq_1_filename = '%s/fastq/%s_1.fastq.gz'%(sp_dir,sra)
+            bam_filename = '%s/alignment/%s.sorted.bam'%(sp_dir,sra)
+            if os.path.isfile(fastq_1_filename) or os.path.isfile(bam_filename):
+                print('%s_1.fastq.gz or %s.sorted.bam already present, skipping'%(sra,sra))
+            else:
+                print('Will download %s for sample %s, split, and run through fastqc'%(sra,sample))
+    
+                #Load modules and get versions for all programs used
+                cmd_1 = 'module load fastqc/0.11.5-fasrc01'
+                cmd_2 = 'wget -P %s/sra/ ftp://ftp-trace.ncbi.nih.gov/sra/sra-instant/reads/ByRun/sra/%s/%s/%s/%s.sra'%(sp_dir,sra[0:3],sra[0:6],sra,sra)
+                cmd_3 = r'%sfastq-dump --outdir %s/fastq --gzip --split-files %s/sra/%s.sra'%(path_to_sratools,sp_dir,sp_dir,sra)
+                cmd_4 = 'fastqc -o %s/fastqc %s/fastq/%s_1.fastq.gz %s/fastq/%s_2.fastq.gz'%(sp_dir,sp_dir,sra,sp_dir,sra) 
+            
+                final_cmd = "%s\n\n%s\n\n%s\n\n%s"%(cmd_1,cmd_2,cmd_3,cmd_4)
+    
+        #Format sbatch script
+                sra_script = slurm_script.format(partition="shared",time="2-0:00",mem="4000",cores="1",nodes="1",jobid="SRA",sp_dir=sp_dir,cmd=final_cmd)
+                out_filename = "%s/scripts/02_sra_download_parse_%s.sbatch"%(sp_dir,sra)
+                out_file = open(out_filename,"w")
+                out_file.write(sra_script)
+                out_file.close
+                sra_dl_sbatch_filenames.append(out_filename)
+    
+    return(sra_dl_sbatch_filenames)
 
 
 
@@ -449,7 +496,19 @@ def main():
     #####Create sbatch files to download SRA files and use fastq-dump to split
     
     #Create sbatch files
-    sra_dl_sbatch_filenames = sra_download_sbatch(sp_dir,config_info["sample_ncbi_dict"])
+    ncbi_sra_dl_sbatch_filenames = ()
+    ena_sra_dl_sbatch_filenames = ()
+    
+    #Create sbatch files for ncbi
+    if len(config_info["sample_ncbi_dict"]) > 0:
+        ncbi_sra_dl_sbatch_filenames = ncbi_sra_download_sbatch(sp_dir,config_info["sample_ncbi_dict"])
+    #Create sbatch files for ena
+    if len(config_info["sample_ena_dict"]) > 0:
+        ena_sra_dl_sbatch_filenames = ena_sra_download_sbatch(sp_dir,config_info["sample_ena_dict"])
+    
+    #Combine sbatch filenames into single object:
+    sra_dl_sbatch_filenames = ncbi_sra_dl_sbatch_filenames + ena_sra_dl_sbatch_filenames
+       
     #Submit SRA read sbatch files, only allow 20 SRA jobs to run (or pend) at a time (set max_jobs)  
     max_jobs = 20
     sra_dl_jobids = []

@@ -233,11 +233,17 @@ def ena_sra_download_sbatch(sp_dir,sample_ena_dict):
     
                 #Load modules and get versions for all programs used
                 cmd_1 = 'module load fastqc/0.11.5-fasrc01'
-                cmd_2 = 'wget -P %s/sra/ ftp://ftp-trace.ncbi.nih.gov/sra/sra-instant/reads/ByRun/sra/%s/%s/%s/%s.sra'%(sp_dir,sra[0:3],sra[0:6],sra,sra)
-                cmd_3 = r'%sfastq-dump --outdir %s/fastq --gzip --split-files %s/sra/%s.sra'%(path_to_sratools,sp_dir,sp_dir,sra)
+                
+                #ENA uses different directory tree if SRA #s >=0 integers or < 7 integers, so have to take both of those into account.
+                if len(sra) < 10:
+                    cmd_2 = 'wget -P %s/sra/ ftp://ftp.sra.ebi.ac.uk/vol1/%s/%s/%s'%(sp_dir,sra[0:3].lower(),sra[0:6],sra)
+                else:
+                    cmd_2 = 'wget -P %s/sra/ ftp://ftp.sra.ebi.ac.uk/vol1/%s/%s/00%s/%s'%(sp_dir,sra[0:3].lower(),sra[0:6],sra[-1],sra)
+                cmd_3 = r'%sfastq-dump --outdir %s/fastq --gzip --split-files %s/sra/%s'%(path_to_sratools,sp_dir,sp_dir,sra)
                 cmd_4 = 'fastqc -o %s/fastqc %s/fastq/%s_1.fastq.gz %s/fastq/%s_2.fastq.gz'%(sp_dir,sp_dir,sra,sp_dir,sra) 
             
                 final_cmd = "%s\n\n%s\n\n%s\n\n%s"%(cmd_1,cmd_2,cmd_3,cmd_4)
+    
     
         #Format sbatch script
                 sra_script = slurm_script.format(partition="shared",time="2-0:00",mem="4000",cores="1",nodes="1",jobid="SRA",sp_dir=sp_dir,cmd=final_cmd)

@@ -331,7 +331,7 @@ def main():
     
     #Create sbatch files
     dedup_filenames = dedup_sbatch(sp_dir,config_info["abbv"],config_info["sample_dict"])
-    '''
+
     #Submit dedup read sbatch files
     dedup_jobids = []
     completed_jobids = {}
@@ -355,7 +355,7 @@ def main():
     for job in completed_jobids:
         if completed_jobids[job] != "COMPLETED":
             print("Dedup, sort and validate job %s failed with code: %s"%(job,completed_jobids[job]))
-    '''    
+
     
     
     #####Collate summary statistics   
@@ -494,16 +494,16 @@ def main():
         print("There was an error copying summary stat files")
     
     
-    #Check that the final sorted bam and index is available, if so, remove intermediate files (dedup)
+    #Check that the final sorted bam and index is available, if so, remove intermediate files (unsorted dedup)
+    ###Do we want to delete alignment file as well? Probably at least file with old RGs
 
     '''
     for sample in config_info["sample_dict"]:
-        for sra in config_info["sample_dict"][sample]:
-            if os.path.isfile('%s/%s.sorted.bam'%(alignment_dir,sra)) and os.path.isfile('%s/%s.sorted.bai'%(alignment_dir,sra)):
-                    proc = Popen('rm %s/%s*'%(fastq_dir,sra),shell=True)
-                    proc = Popen('rm %s/%s.sra'%(sra_dir,sra),shell=True)
-            else:
-                print("Something happened with SRA: %s for sample: %s"%(sra,sample))        
+        if os.path.isfile('%s/dedup/%s.dedup.sorted.bam'%(sp_dir,sample)) and os.path.isfile('%s/dedup/%s.dedup.sorted.bai'%(sp_dir,sample)):
+                proc = Popen('rm %s/dedup/%s.dedup.bam'%(sp_dir,sample),shell=True)
+                proc = Popen('rm %s/%s.sra'%(sra_dir,sra),shell=True)
+        else:
+            print("Something happened with sample deduping: %s"%(sample))        
     '''
 if __name__ == "__main__":
     main()

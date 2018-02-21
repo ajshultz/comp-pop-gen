@@ -9,6 +9,9 @@ import argparse
 from subprocess import Popen,PIPE
 from time import sleep
 import datetime
+import numpy as np
+import matplotlib.pyplot as plt
+from matplotlib.backends.backend_pdf import PdfPages
 
 #Extract Sample, SRA and genome info from config file. Sample data will be stored as a dictionary with sample ID as keys and a list of SRA accessions as values. Returns a dictionary of this info.
 def extract_config(config_filename):
@@ -221,13 +224,84 @@ def dedup_sbatch(sp_dir,sp_abbr,sample_ncbi_dict):
     
     return(dedup_sbatch_filenames)
 
-#Collect all deduplication metrics for a list of sample IDs, writes all metrics to a file and returns a dictionary of % duplication for each sample
-def collect_dedup_metrics(stats_dir,sample_list):
+
+#Collect relevant line of alignment stats (from pair) for each sample. Returns a dictionary of header column names as keys with values for that sample as values.
+def collect_alignment_metrics(sp_dir,sample):
+    align_stats_file = '%s/stats/%s.alignment_metrics.txt'%(sp_dir,sample)
+    align_stats = {}
+    try:
+        full_align_stats = open(align_stats_file,"r")
+        for line in full_align_stats:
+            split_line = line.strip().split("\t")
+            if split_line[0] == "CATEGORY":
+                header = split_line
+            #Look for lines with the paired data at the sample level (no read group but sample in sample list, return relevant line)
+            else:
+                try:
+                    if split_line[24] == sample and split_line[0] == "PAIR":
+                        align_stats = dict(zip(header,split_line))
+                except:
+                    pass
+    except:
+        print('No alignment stats file for sample: %s'%(sample))
+
+    return(align_stats)
     
+#Collect all deduplication metrics for a list of sample IDs, writes all metrics to a file and returns a dictionary of % duplication for each sample
+def collect_dedup_metrics(sp_dir,sample):
+    dedup_stats_file = '%s/stats/%s.dedup.metrics.txt'%(sp_dir,sample)
+    dedup_stats = {}
+    try:
+        full_dedup_stats = open(dedup_stats_file,"r")
+        for line in full_dedup_stats:
+            split_line = line.strip().split("\t")
+            if split_line[0] == "LIBRARY":
+                header = split_line
+            #Look for lines with the paired data at the sample level (no read group but sample in sample list, return relevant line)
+            elif split_line[0] == sample:
+                dedup_stats = dict(zip(header,split_line))
+    except:
+        print('No dedup stats file for sample: %s'%(sample))
 
-#Collect all alignment summary metrics for a list of sample IDs, writes all metrics to a file and returns a dictionary of important metrics for each sample
-def collect_alignment_metrics(stats_dir,sample_list):
-
+    return(dedup_stats)
+    
+#Given a sample name, reads in histogram of genome coverage, calculates mean and median, and returns dictionary with coverage histogram, mean and median for that sample
+def collect_coverage_metrics(sp_dir,sample):
+    coverage_file = '%s/stats/%s.genome.coverage'%(sp_dir,sample)
+    coverage_stats = {}
+    hist_bins = []
+    hist_vals = []
+    site_total = 0
+    cov_total = 0
+    try:
+        full_coverage_stats = open(coverage_file,"r")
+        for line in full_coverage_stats:
+            split_line = line.strip().split("\t")
+            med_cutoff = (int(split_line[3])+1)/2
+            site_total += int(split_line[2])
+            cov_total += (int(split_line[1])*int(split_line[2]))
+            
+            hist_bins.append(int(split_line[1]))
+            hist_vals.append(float(split_line[4]))
+            
+            #Test whether site total is greater than midpoint if median not yet discovered - if yes, add to median in dictionary.
+            if "median" not in coverage_stats and site_total > med_cutoff:
+                coverage_stats["median"] = int(split_line[1])
+            else:
+                pass
+        
+        #Calculate mean from cov_total and site_total
+        coverage_stats["mean"] = round(cov_total/site_total,2)
+        
+        #Add histogram to dictionary
+        coverage_stats["hist_vals"] = hist_vals
+        coverage_stats["hist_bins"] = hist_bins
+    except:
+        print("No genome coverage file for sample: %s"%(sample))
+        
+    return(coverage_stats)
+    
+    
 
 
 def main():
@@ -256,7 +330,7 @@ def main():
     #####Create sbatch files to dedup SRA files and combine if multiple SRAs for each sample, sort and index resulting file, validate, and compute coverage histogram
     
     #Create sbatch files
-    dedup_filenames = dedup_sbatch(sp_dir,config_info["abbv"],config_info["sample_ncbi_dict"])
+    dedup_filenames = dedup_sbatch(sp_dir,config_info["abbv"],config_info["sample_dict"])
     '''
     #Submit dedup read sbatch files
     dedup_jobids = []
@@ -289,24 +363,142 @@ def main():
     #Get stats directory filenames
     stat_files = os.listdir("%s/stats"%(sp_dir))
     
-    #Collect alignment metrics into a single file for all samples
-    
-    
+    #Collect alignment metrics into a single file for all samples - if none exists will print statement and add empty list to dictionary
+    all_align_stats = {}
+    for sample in config_info["sample_dict"]:
+        all_align_stats[sample] = collect_alignment_metrics(sp_dir,sample)
+        
+    #Write all sample alignment metrics to a file
+    align_file = open('%s/stats/_%s_all_sample_alignment_stats.txt'%(sp_dir,config_info["abbv"]),"w")
+    align_file.write("SAMPLE\tCATEGORY\tTOTAL_READS\tPF_READS\tPCT_PF_READS\tPF_NOISE_READS\tPF_READS_ALIGNED\tPCT_PF_READS_ALIGNED\tPF_ALIGNED_BASES\tPF_HQ_ALIGNED_READS\tPF_HQ_ALIGNED_BASES\tPF_HQ_ALIGNED_Q20_BASES\tPF_HQ_MEDIAN_MISMATCHES\tPF_MISMATCH_RATE\tPF_HQ_ERROR_RATE\tPF_INDEL_RATE\tMEAN_READ_LENGTH\tREADS_ALIGNED_IN_PAIRS\tPCT_READS_ALIGNED_IN_PAIRS\tBAD_CYCLES\tSTRAND_BALANCE\tPCT_CHIMERAS\tPCT_ADAPTER\n")
+    for sample in sorted(config_info["sample_dict"].keys()):
+        if all_align_stats[sample]:
+            sample_line = '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n'%(sample,all_align_stats[sample]["CATEGORY"],all_align_stats[sample]["TOTAL_READS"],all_align_stats[sample]["PF_READS"],all_align_stats[sample]["PCT_PF_READS"],all_align_stats[sample]["PF_NOISE_READS"],all_align_stats[sample]["PF_READS_ALIGNED"],all_align_stats[sample]["PCT_PF_READS_ALIGNED"],all_align_stats[sample]["PF_ALIGNED_BASES"],all_align_stats[sample]["PF_HQ_ALIGNED_READS"],all_align_stats[sample]["PF_HQ_ALIGNED_BASES"],all_align_stats[sample]["PF_HQ_ALIGNED_Q20_BASES"],all_align_stats[sample]["PF_HQ_MEDIAN_MISMATCHES"],all_align_stats[sample]["PF_MISMATCH_RATE"],all_align_stats[sample]["PF_HQ_ERROR_RATE"],all_align_stats[sample]["PF_INDEL_RATE"],all_align_stats[sample]["MEAN_READ_LENGTH"],all_align_stats[sample]["READS_ALIGNED_IN_PAIRS"],all_align_stats[sample]["PCT_READS_ALIGNED_IN_PAIRS"],all_align_stats[sample]["BAD_CYCLES"],all_align_stats[sample]["STRAND_BALANCE"],all_align_stats[sample]["PCT_CHIMERAS"],all_align_stats[sample]["PCT_ADAPTER"])
+            align_file.write(sample_line)
+        else:
+            align_file.write('%s\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\n'%(sample))
+    align_file.close()
+
     
     #Collect dedup metrics into a single file for all samples
+    all_dedup_stats = {}
+    for sample in config_info["sample_dict"]:
+        all_dedup_stats[sample] = collect_dedup_metrics(sp_dir,sample)
+        
+    #Write all sample dedup metrics to a file
+    dedup_file = open('%s/stats/_%s_all_sample_dedup_stats.txt'%(sp_dir,config_info["abbv"]),"w")
+    dedup_file.write("SAMPLE\tUNPAIRED_READS_EXAMINED\tREAD_PAIRS_EXAMINED\tUNMAPPED_READS\tUNPAIRED_READ_DUPLICATES\tREAD_PAIR_DUPLICATES\tREAD_PAIR_OPTICAL_DUPLICATES\tPERCENT_DUPLICATION\tESTIMATED_LIBRARY_SIZE\n")
+    for sample in sorted(config_info["sample_dict"].keys()):
+        if all_dedup_stats[sample]:
+            sample_line = '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n'%(sample,all_dedup_stats[sample]["UNPAIRED_READS_EXAMINED"],all_dedup_stats[sample]["READ_PAIRS_EXAMINED"],all_dedup_stats[sample]["UNMAPPED_READS"],all_dedup_stats[sample]["UNPAIRED_READ_DUPLICATES"],all_dedup_stats[sample]["READ_PAIR_DUPLICATES"],all_dedup_stats[sample]["READ_PAIR_OPTICAL_DUPLICATES"],all_dedup_stats[sample]["PERCENT_DUPLICATION"],all_dedup_stats[sample]["ESTIMATED_LIBRARY_SIZE"])
+            dedup_file.write(sample_line)
+        else:
+            dedup_file.write('%s\t\t\t\t\t\t\t\t\n'%(sample))
+    dedup_file.close()
+
     
+    #Collect coverage histograms, plot in pdf (species_date.pdf), calculate mean and median coverage
+    all_coverage_stats = {}
+    for sample in config_info["sample_dict"]:
+        all_coverage_stats[sample] = collect_coverage_metrics(sp_dir,sample)
+        
+    #Plot all coverage histograms in pdf, initialize file
+    pdf_file = PdfPages('%s/stats/_%s_all_coverage_plots.pdf'%(sp_dir,config_info["abbv"]))
     
-    #Collect coverage histograms, plot in pdf (species_date.pdf), mean and median coverage
+    #Iterate through samples and add plots to pdf file
+    for sample in config_info["sample_dict"]:
+        if "hist_vals" in all_coverage_stats[sample]:
+            #Only plot up to 3x the mean
+            bars = []
+            height = []
+            for i in range(0,len(all_coverage_stats[sample]["hist_bins"])):
+                if all_coverage_stats[sample]["hist_bins"][i] < (all_coverage_stats[sample]["mean"]*3):
+                    bars.append(all_coverage_stats[sample]["hist_bins"][i])
+                    height.append(all_coverage_stats[sample]["hist_vals"][i])
+                    
+            y_pos = np.arange(len(bars))
+            
+            #Create bars
+            plt.bar(y_pos,height,color="c")
+            
+            #Add title, axis names
+            plt.title("%s"%sample)
+            plt.xlabel("coverage")
+            plt.ylabel("proportion reads")
+            
+            #Change ticks to coverage labels, rotate
+            plt.xticks(y_pos,bars, rotation=90)
+            
+            #Save plot to pdf
+            #plt.show()
+            pdf_file.savefig()
     
-    #Produce file of all most important summary stats. 
+    pdf_file.close()
     
+    #Produce file of all most important summary stats (including validation status). 
+    summary_stat_file = '%s/stats/_%s_all_summary_stats.txt'%(sp_dir,config_info["abbv"])
+    sum_stat = open(summary_stat_file,"w")
+    
+    #Write header
+    sum_stat.write("SAMPLE\tMEAN_COVERAGE\tMEDIAN_COVERAGE\tTOTAL_READS\tMEAN_READ_LENGTH\tPCT_PF_READS_ALIGNED\tPCT_PF_HQ_ALIGNED_READS\tPF_HQ_MEDIAN_MISMATCHES\tPF_INDEL_RATE\tPCT_READS_ALIGNED_IN_PAIRS\tSTRAND_BALANCE\tPERCENT_DUPLICATION\n")
+    
+    #Iterate through samples and add results from all three dictionaries if present
+    for sample in config_info["sample_dict"]:
+        samp_sum = []
+        samp_sum.append(sample)
+        #coverage
+        if "mean" in all_coverage_stats[sample]:
+            samp_sum.append(str(all_coverage_stats[sample]["mean"]))
+            samp_sum.append(str(all_coverage_stats[sample]["median"]))
+        else:
+            samp_sum.append("")
+            samp_sum.append("")
+        #alignment
+        if "TOTAL_READS" in all_align_stats[sample]:
+            samp_sum.append(all_align_stats[sample]["TOTAL_READS"])
+            samp_sum.append(all_align_stats[sample]["MEAN_READ_LENGTH"])
+            samp_sum.append(all_align_stats[sample]["PCT_PF_READS_ALIGNED"])
+            samp_sum.append(str(round(int(all_align_stats[sample]["PF_HQ_ALIGNED_READS"])/int(all_align_stats[sample]["PF_READS"]),6)))
+            samp_sum.append(all_align_stats[sample]["PF_HQ_MEDIAN_MISMATCHES"])
+            samp_sum.append(all_align_stats[sample]["PF_INDEL_RATE"])
+            samp_sum.append(all_align_stats[sample]["PCT_READS_ALIGNED_IN_PAIRS"])
+            samp_sum.append(all_align_stats[sample]["STRAND_BALANCE"])
+        else:
+            samp_sum.append("")
+            samp_sum.append("")
+            samp_sum.append("")
+            samp_sum.append("")
+            samp_sum.append("")
+            samp_sum.append("")
+            samp_sum.append("")
+            samp_sum.append("")           
+        #dedup
+        if "PERCENT_DUPLICATION" in all_dedup_stats[sample]:
+            samp_sum.append(all_dedup_stats[sample]["PERCENT_DUPLICATION"])
+        else:
+            samp_sum.append("")
+            
+        samp_sum = "\t".join(samp_sum)
+        sum_stat.write('%s\n'%samp_sum)
+    
+    sum_stat.close()
+   
     #Copy this file and pdf of coverage to centralized location        
+    general_dir = "_ALL_SPECIES_SUMMARIES"
+    directory_create(general_dir)
+    
+    try:
+        proc = Popen('cp %s %s/%s_all_summary_stats.txt'%(summary_stat_file,general_dir,config_info["abbv"]),shell=True)
+        proc = Popen('cp %s/stats/_%s_all_coverage_plots.pdf %s/%s_all_coverage_plots.pdf'%(sp_dir,config_info["abbv"],general_dir,config_info["abbv"]),shell=True)
+    except:
+        print("There was an error copying summary stat files")
+    
     
     #Check that the final sorted bam and index is available, if so, remove intermediate files (dedup)
 
     '''
-    for sample in config_info["sample_ncbi_dict"]:
-        for sra in config_info["sample_ncbi_dict"][sample]:
+    for sample in config_info["sample_dict"]:
+        for sra in config_info["sample_dict"][sample]:
             if os.path.isfile('%s/%s.sorted.bam'%(alignment_dir,sra)) and os.path.isfile('%s/%s.sorted.bai'%(alignment_dir,sra)):
                     proc = Popen('rm %s/%s*'%(fastq_dir,sra),shell=True)
                     proc = Popen('rm %s/%s.sra'%(sra_dir,sra),shell=True)

@@ -62,6 +62,13 @@ def extract_config(config_filename):
                 config_info["out_dir"] = line[1]
     config_file.close()
     
+    #Add the sample_ncbi_dict and sample_ena_dict if they don't exist
+    if "sample_ncbi_dict" not in config_info:
+        config_info["sample_ncbi_dict"] = {}
+    
+    if "sample_ena_dict" not in config_info:
+        config_info["sample_ena_dict"] = {}
+    
     #Make sure all necessary inputs are present
     try:
         config_info["abbv"]

@@ -509,8 +509,8 @@ def main():
     #####Create sbatch files to download SRA files and use fastq-dump to split
     
     #Create sbatch files
-    ncbi_sra_dl_sbatch_filenames = ()
-    ena_sra_dl_sbatch_filenames = ()
+    ncbi_sra_dl_sbatch_filenames = []
+    ena_sra_dl_sbatch_filenames = []
     
     #Create sbatch files for ncbi
     if len(config_info["sample_ncbi_dict"]) > 0:

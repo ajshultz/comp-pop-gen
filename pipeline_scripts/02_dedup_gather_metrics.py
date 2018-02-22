@@ -11,6 +11,7 @@ from time import sleep
 import datetime
 import numpy as np
 import matplotlib.pyplot as plt
+plt.switch_backend('agg') #Added to get working on the cluster
 from matplotlib.backends.backend_pdf import PdfPages
 
 #Extract Sample, SRA and genome info from config file. Sample data will be stored as a dictionary with sample ID as keys and a list of SRA accessions as values. Returns a dictionary of this info.
@@ -496,6 +497,7 @@ def main():
     
     #Check that the final sorted bam and index is available, if so, remove intermediate files (unsorted dedup)
     ###Do we want to delete alignment file as well? Probably at least file with old RGs
+    ###Only delete if validate says no errors found.
 
     '''
     for sample in config_info["sample_dict"]:

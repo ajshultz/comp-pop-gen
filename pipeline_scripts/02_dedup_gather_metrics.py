@@ -428,7 +428,7 @@ def main():
             plt.ylabel("proportion reads")
             
             #Change ticks to coverage labels, rotate
-            plt.xticks(y_pos,bars, rotation=90)
+            plt.xticks(y_pos,bars, rotation=90, labelsize=8)
             
             #Save plot to pdf
             #plt.show()

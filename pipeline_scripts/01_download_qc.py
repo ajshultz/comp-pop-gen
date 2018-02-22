@@ -246,7 +246,10 @@ def ena_sra_download_sbatch(sp_dir,sample_ena_dict):
                     cmd_2 = 'wget -P %s/sra/ ftp://ftp.sra.ebi.ac.uk/vol1/fastq/%s/%s/%s_1.fastq.gz'%(sp_dir,sra[0:6],sra,sra)
                 else:
                     cmd_2 = 'wget -P %s/fastq/ ftp://ftp.sra.ebi.ac.uk/vol1/fastq/%s/00%s/%s/%s_1.fastq.gz'%(sp_dir,sra[0:6],sra[-1],sra,sra)
-                cmd_3 = r'%sfastq-dump --outdir %s/fastq --gzip --split-files %s/sra/%s'%(path_to_sratools,sp_dir,sp_dir,sra)
+                if len(sra) < 10:
+                    cmd_3 = 'wget -P %s/sra/ ftp://ftp.sra.ebi.ac.uk/vol1/fastq/%s/%s/%s_2.fastq.gz'%(sp_dir,sra[0:6],sra,sra)
+                else:
+                    cmd_3 = 'wget -P %s/fastq/ ftp://ftp.sra.ebi.ac.uk/vol1/fastq/%s/00%s/%s/%s_2.fastq.gz'%(sp_dir,sra[0:6],sra[-1],sra,sra)
                 cmd_4 = 'fastqc -o %s/fastqc %s/fastq/%s_1.fastq.gz %s/fastq/%s_2.fastq.gz'%(sp_dir,sp_dir,sra,sp_dir,sra) 
             
                 final_cmd = "%s\n\n%s\n\n%s\n\n%s"%(cmd_1,cmd_2,cmd_3,cmd_4)
@@ -376,12 +379,9 @@ def fastq_trim_align_stats(sp_dir,sra,sp_abbr,sample):
 
 	cmd_4 ='gatk --java-options "-Xmx8g -XX:ParallelGCThreads=6" SortSam -I %s/alignment/%s_bwa.sam -O %s/alignment/%s.sorted.bam --SORT_ORDER=coordinate --CREATE_INDEX=true --COMPRESSION_LEVEL 5'%(sp_dir,sra,sp_dir,sra)
 
-	#Calculate alignment summary stats
-	cmd_5 = 'gatk --java-options "-Xmx8g -XX:ParallelGCThreads=6" CollectAlignmentSummaryMetrics -I %s/alignment/%s.sorted.bam -R %s/genome/%s.fa --METRIC_ACCUMULATION_LEVEL=SAMPLE -O %s/stats/%s.%s.alignment_metrics.txt'%(sp_dir,sra,sp_dir,sp_abbr,sp_dir,sample,sra)
+	cmd_5 = 'if [ -f %s/alignment/%s.sorted.bai ]\nthen\n rm %s/alignment/%s_bwa.sam \nfi'%(sp_dir,sra,sp_dir,sra)
 
-	cmd_6 = 'if [ -f %s/stats/%s.%s.alignment_metrics.txt ]\nthen\n rm %s/alignment/%s_bwa.sam \nfi'%(sp_dir,sample,sra,sp_dir,sra)
-
-	cmd_list = [cmd_1,cmd_2,cmd_3,cmd_4,cmd_5,cmd_6]
+	cmd_list = [cmd_1,cmd_2,cmd_3,cmd_4,cmd_5]
 
 	final_cmd = "\n\n".join(cmd_list)
 
@@ -576,13 +576,13 @@ def main():
         for sra in config_info["sample_dict"][sample]:
             if os.path.isfile('%s/%s_1.fastq.gz'%(fastq_dir,sra)):
                 if os.path.isfile('%s/%s_2.fastq.gz'%(fastq_dir,sra)):
-                    if  os.path.isfile('%s/stats/%s.%s.alignment_metrics.txt'%(sp_dir,sample,sra)) is False:
+                    if  os.path.isfile('%s/alignment/%s.sorted.bai'%(sp_dir,sra)) is False:
                         sra_map_sbatchfile = fastq_trim_align_stats(sp_dir,sra,config_info["abbv"],sample)
                         sra_map_jobid = sbatch_submit(sra_map_sbatchfile)
                         mapping_jobids.append(sra_map_jobid)
                         sleep(1)
                     else:
-                        print('%s.%s.alignment_metrics.txt already present, skipping'%(sample,sra))
+                        print('%s.sorted.bai already present, skipping'%(sra))
                 else:
                     print("No fastq_2 file for %s"%sra)
             else:

@@ -331,7 +331,6 @@ def main():
     #####Create sbatch files to dedup SRA files and combine if multiple SRAs for each sample, sort and index resulting file, validate, and compute coverage histogram
     
     #Create sbatch files
-    dedup_filenames = dedup_sbatch(sp_dir,config_info["abbv"],config_info["sample_dict"])
 
     #Submit dedup read sbatch files
     dedup_jobids = []
@@ -356,8 +355,7 @@ def main():
     for job in completed_jobids:
         if completed_jobids[job] != "COMPLETED":
             print("Dedup, sort and validate job %s failed with code: %s"%(job,completed_jobids[job]))
-
-    
+ 
     
     #####Collate summary statistics   
     
@@ -432,7 +430,7 @@ def main():
             plt.ylabel("proportion reads")
             
             #Change ticks to coverage labels, rotate
-            plt.xticks(y_pos,bars, rotation=90, size=8)
+            plt.xticks(y_pos,bars, rotation=90, size=6)
             
             #Save plot to pdf
             #plt.show()
@@ -440,12 +438,30 @@ def main():
     
     pdf_file.close()
     
+    #Check the output of validation file. Add to dictionary of samples, with "ok" if everything looks okay, and "check" if there are any issues.
+    all_validation_stats = {}
+    for sample in config_info["sample_dict"]:
+        try:
+            valid_file = open('%s/stats/%s.validate.txt'%(sp_dir,sample),"r")
+            valid_contents = []
+            for line in valid_file:
+                line = line.strip()
+                valid_contents.append(line)
+            if valid_contents[0] == "No errors found":
+                all_validation_stats[sample] = "ok"
+            else:
+                all_validation_stats[sample] = "check"
+                print("Sample %s has an error in the validation file"%sample)
+        except:
+            all_validation_stats[sample] = "check"
+            print("Sample %s has an error, or is missing the validation file"%sample)
+    
     #Produce file of all most important summary stats (including validation status). 
     summary_stat_file = '%s/stats/_%s_all_summary_stats.txt'%(sp_dir,config_info["abbv"])
     sum_stat = open(summary_stat_file,"w")
     
     #Write header
-    sum_stat.write("SAMPLE\tMEAN_COVERAGE\tMEDIAN_COVERAGE\tTOTAL_READS\tMEAN_READ_LENGTH\tPCT_PF_READS_ALIGNED\tPCT_PF_HQ_ALIGNED_READS\tPF_HQ_MEDIAN_MISMATCHES\tPF_INDEL_RATE\tPCT_READS_ALIGNED_IN_PAIRS\tSTRAND_BALANCE\tPERCENT_DUPLICATION\n")
+    sum_stat.write("SAMPLE\tMEAN_COVERAGE\tMEDIAN_COVERAGE\tTOTAL_READS\tMEAN_READ_LENGTH\tPCT_PF_READS_ALIGNED\tPCT_PF_HQ_ALIGNED_READS\tPF_HQ_MEDIAN_MISMATCHES\tPF_INDEL_RATE\tPCT_READS_ALIGNED_IN_PAIRS\tSTRAND_BALANCE\tPERCENT_DUPLICATION\tVALIDATION_STATUS\n")
     
     #Iterate through samples and add results from all three dictionaries if present
     for sample in config_info["sample_dict"]:
@@ -482,6 +498,8 @@ def main():
             samp_sum.append(all_dedup_stats[sample]["PERCENT_DUPLICATION"])
         else:
             samp_sum.append("")
+        
+        samp_sum.append(all_validation_stats[sample])
             
         samp_sum = "\t".join(samp_sum)
         sum_stat.write('%s\n'%samp_sum)
@@ -499,17 +517,16 @@ def main():
         print("There was an error copying summary stat files")
     
     
-    #Check that the final sorted bam and index is available, if so, remove intermediate files (unsorted dedup)
-    ###Do we want to delete alignment file as well? Probably at least file with old RGs
+    #Check that the final sorted bam and index is available, if so, remove intermediate files (unsorted dedup, all aligned bams)
     ###Only delete if validate says no errors found.
-
-    '''
     for sample in config_info["sample_dict"]:
-        if os.path.isfile('%s/dedup/%s.dedup.sorted.bam'%(sp_dir,sample)) and os.path.isfile('%s/dedup/%s.dedup.sorted.bai'%(sp_dir,sample)):
+        if os.path.isfile('%s/dedup/%s.dedup.sorted.bam'%(sp_dir,sample)) and os.path.isfile('%s/dedup/%s.dedup.sorted.bai'%(sp_dir,sample)) and all_validation_stats[sample] == "ok":
+            if os.path.isfile('%s/dedup/%s.dedup.bam'%(sp_dir,sample)):
                 proc = Popen('rm %s/dedup/%s.dedup.bam'%(sp_dir,sample),shell=True)
-                proc = Popen('rm %s/%s.sra'%(sra_dir,sra),shell=True)
+            if os.path.isfile('%s/alignment/%s.sorted.rg.bam'%(sp_dir,sample)):
+                proc = Popen('rm %s/alignment/%s.sorted*'%(sp_dir,sample),shell=True)
         else:
             print("Something happened with sample deduping: %s"%(sample))        
-    '''
+
 if __name__ == "__main__":
     main()

@@ -409,6 +409,10 @@ def main():
     #Iterate through samples and add plots to pdf file
     for sample in config_info["sample_dict"]:
         if "hist_vals" in all_coverage_stats[sample]:
+    
+            #Change size of figure 
+            plt.figure(figsize=(8,4))
+            
             #Only plot up to 3x the mean
             bars = []
             height = []
@@ -429,9 +433,6 @@ def main():
             
             #Change ticks to coverage labels, rotate
             plt.xticks(y_pos,bars, rotation=90, size=8)
-            
-            #Change size of figure 
-            plt.figure(figsize=(8,4))
             
             #Save plot to pdf
             #plt.show()

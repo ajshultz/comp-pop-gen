@@ -430,6 +430,9 @@ def main():
             #Change ticks to coverage labels, rotate
             plt.xticks(y_pos,bars, rotation=90, size=8)
             
+            #Change size of figure 
+            plt.figure(figsize=c(8,4))
+            
             #Save plot to pdf
             #plt.show()
             pdf_file.savefig()

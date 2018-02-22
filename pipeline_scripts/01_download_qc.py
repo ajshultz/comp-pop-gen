@@ -243,9 +243,9 @@ def ena_sra_download_sbatch(sp_dir,sample_ena_dict):
                 
                 #ENA uses different directory tree if SRA #s >=0 integers or < 7 integers, so have to take both of those into account.
                 if len(sra) < 10:
-                    cmd_2 = 'wget -P %s/sra/ ftp://ftp.sra.ebi.ac.uk/vol1/%s/%s/%s'%(sp_dir,sra[0:3].lower(),sra[0:6],sra)
+                    cmd_2 = 'wget -P %s/sra/ ftp://ftp.sra.ebi.ac.uk/vol1/fastq/%s/%s/%s_1.fastq.gz'%(sp_dir,sra[0:6],sra,sra)
                 else:
-                    cmd_2 = 'wget -P %s/sra/ ftp://ftp.sra.ebi.ac.uk/vol1/%s/%s/00%s/%s'%(sp_dir,sra[0:3].lower(),sra[0:6],sra[-1],sra)
+                    cmd_2 = 'wget -P %s/fastq/ ftp://ftp.sra.ebi.ac.uk/vol1/fastq/%s/00%s/%s/%s_1.fastq.gz'%(sp_dir,sra[0:6],sra[-1],sra,sra)
                 cmd_3 = r'%sfastq-dump --outdir %s/fastq --gzip --split-files %s/sra/%s'%(path_to_sratools,sp_dir,sp_dir,sra)
                 cmd_4 = 'fastqc -o %s/fastqc %s/fastq/%s_1.fastq.gz %s/fastq/%s_2.fastq.gz'%(sp_dir,sp_dir,sra,sp_dir,sra) 
             

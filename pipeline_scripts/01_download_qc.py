@@ -243,11 +243,11 @@ def ena_sra_download_sbatch(sp_dir,sample_ena_dict):
                 
                 #ENA uses different directory tree if SRA #s >=0 integers or < 7 integers, so have to take both of those into account.
                 if len(sra) < 10:
-                    cmd_2 = 'wget -P %s/sra/ ftp://ftp.sra.ebi.ac.uk/vol1/fastq/%s/%s/%s_1.fastq.gz'%(sp_dir,sra[0:6],sra,sra)
+                    cmd_2 = 'wget -P %s/fastq/ ftp://ftp.sra.ebi.ac.uk/vol1/fastq/%s/%s/%s_1.fastq.gz'%(sp_dir,sra[0:6],sra,sra)
                 else:
                     cmd_2 = 'wget -P %s/fastq/ ftp://ftp.sra.ebi.ac.uk/vol1/fastq/%s/00%s/%s/%s_1.fastq.gz'%(sp_dir,sra[0:6],sra[-1],sra,sra)
                 if len(sra) < 10:
-                    cmd_3 = 'wget -P %s/sra/ ftp://ftp.sra.ebi.ac.uk/vol1/fastq/%s/%s/%s_2.fastq.gz'%(sp_dir,sra[0:6],sra,sra)
+                    cmd_3 = 'wget -P %s/fastq/ ftp://ftp.sra.ebi.ac.uk/vol1/fastq/%s/%s/%s_2.fastq.gz'%(sp_dir,sra[0:6],sra,sra)
                 else:
                     cmd_3 = 'wget -P %s/fastq/ ftp://ftp.sra.ebi.ac.uk/vol1/fastq/%s/00%s/%s/%s_2.fastq.gz'%(sp_dir,sra[0:6],sra[-1],sra,sra)
                 cmd_4 = 'fastqc -o %s/fastqc %s/fastq/%s_1.fastq.gz %s/fastq/%s_2.fastq.gz'%(sp_dir,sp_dir,sra,sp_dir,sra) 
@@ -362,7 +362,7 @@ def process_local_genome(sp_dir,genome_local,sp_abbr,genome_present,bwa_index_pr
 
 #Create sbatch files for trimming, mapping, sorting, indexing and alignment stat creation for each set of paired SRA fastq files.
 def fastq_trim_align_stats(sp_dir,sra,sp_abbr,sample):
-	print('Will trim, map, sort, index, and collect alignment stats for %s from sample %s'%(sra,sample))
+	print('Will trim, map, sort, and index for %s from sample %s'%(sra,sample))
 
 	#Set read group info: ID = SRA number, SM = sample id, PU: SRA.sample, LB: sample id, PL: illumina (assumes all illumina data.) 
 	read_group_info = '@RG\\tID:%s\\tSM:%s\\tPU:%s.%s\\tLB:%s\\tPL:illumina'%(sra,sample,sra,sample,sample)
@@ -607,12 +607,15 @@ def main():
     for sample in config_info["sample_dict"]:
         for sra in config_info["sample_dict"][sample]:
             if os.path.isfile('%s/%s.sorted.bam'%(alignment_dir,sra)) and os.path.isfile('%s/%s.sorted.bai'%(alignment_dir,sra)):
-                if os.path.isfile('%s/%s*'%(fastq_dir,sra)):
+                if os.path.isfile('%s/%s_1.fastq.gz'%(fastq_dir,sra)):
                     proc = Popen('rm %s/%s*'%(fastq_dir,sra),shell=True)
                 if os.path.isfile('%s/%s.sra'%(sra_dir,sra)):
                     proc = Popen('rm %s/%s.sra'%(sra_dir,sra),shell=True)
             else:
-                print("Something happened with SRA: %s for sample: %s"%(sra,sample))        
+                print("Something happened with SRA: %s for sample: %s"%(sra,sample))   
+    
+    now = datetime.datetime.now()
+    print('Scripted finished: %s'%now)     
 
 if __name__ == "__main__":
     main()

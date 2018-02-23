@@ -163,7 +163,8 @@ def dedup_sbatch(sp_dir,sp_abbr,sample_ncbi_dict):
     for sample in sample_ncbi_dict.keys():
         #First check if dedup file is already present (already downloaded), or final BAM file already present. If it has, print statment and continue with next sample. 
         dedup_filename = '%s/dedup/%s.dedup.bam'%(sp_dir,sample)
-        if os.path.isfile(dedup_filename):
+        dedup_sorted_filename = '%s/dedup/%s.dedup.sorted.bam'%(sp_dir,sample)
+        if os.path.isfile(dedup_filename) or os.path.isfile(dedup_sorted_filename):
             print('%s.dedup.bam already present, skipping'%(sample))
         else:
             print('Will dedup sras for sample %s'%(sample))

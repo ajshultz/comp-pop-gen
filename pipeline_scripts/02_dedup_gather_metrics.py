@@ -331,7 +331,8 @@ def main():
     #####Create sbatch files to dedup SRA files and combine if multiple SRAs for each sample, sort and index resulting file, validate, and compute coverage histogram
     
     #Create sbatch files
-
+    dedup_filenames = dedup_sbatch(sp_dir,config_info["abbv"],config_info["sample_dict"])
+    
     #Submit dedup read sbatch files
     dedup_jobids = []
     completed_jobids = {}

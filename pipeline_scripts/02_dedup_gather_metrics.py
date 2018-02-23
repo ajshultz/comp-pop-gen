@@ -524,10 +524,14 @@ def main():
         if os.path.isfile('%s/dedup/%s.dedup.sorted.bam'%(sp_dir,sample)) and os.path.isfile('%s/dedup/%s.dedup.sorted.bai'%(sp_dir,sample)) and all_validation_stats[sample] == "ok":
             if os.path.isfile('%s/dedup/%s.dedup.bam'%(sp_dir,sample)):
                 proc = Popen('rm %s/dedup/%s.dedup.bam'%(sp_dir,sample),shell=True)
-            if os.path.isfile('%s/alignment/%s.sorted.rg.bam'%(sp_dir,sample)):
-                proc = Popen('rm %s/alignment/%s.sorted*'%(sp_dir,sample),shell=True)
+            for sra in config_info["sample_dict"][sample]:
+                if os.path.isfile('%s/alignment/%s.sorted.rg.bam'%(sp_dir,sra)):
+                    proc = Popen('rm %s/alignment/%s.sorted*'%(sp_dir,sra),shell=True)
         else:
-            print("Something happened with sample deduping: %s"%(sample))        
+            print("Something happened with sample deduping: %s"%(sample))     
+               
+    now = datetime.datetime.now()
+    print('Finished script 02: %s'%now)
 
 if __name__ == "__main__":
     main()

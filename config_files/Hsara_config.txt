@@ -1,0 +1,27 @@
+#Example config file:
+
+#Path to desired output directory (directory for each species will be created within this directory). If not specified will be current working directory
+--OUT_DIR .
+
+#Species abbreviation for use in file headers (e.g. CCornix for hooded crow)
+--ABBV Hsara
+
+#Enter sample IDs and information, must include SRA accession numbers for download from NCBI: --SAMPLE <SAMPLE_ID> <SRA,SRA,SRA>
+#From Bioproject:PRJNA324415
+--SAMPLE_NCBI SAMN05224102 SRR4032064
+--SAMPLE_NCBI SAMN05224186 SRR4032098
+--SAMPLE_NCBI SAMN05224187 SRR4032099
+
+
+#At this time, using local fastq files is not supported. We will add this feature in the future.
+#--SAMPLE_LOCAL Ind_1
+
+#A genome must be supplied, either hosted on NCBI (use --GENOME_NCBI flag) or locally (use --GENOME_LOCAL flag). See examples below.
+
+#Enter name of species with genome assembly for mapping if genome hosted on Genbank. Must correspond to name of organism on NCBI if download is necessary (e.g. for Corvus cornix: Corvus_cornix_cornix)
+#--GENOME_NCBI ftp://ftp.ncbi.nlm.nih.gov/genomes/all/GCF/000/247/815/GCF_000247815.1_FicAlb1.5/GCF_000247815.1_FicAlb1.5_genomic.fna.gz
+
+#If genome available locally, input path to fasta filename. If local fasta path is supplied, file will be copied into genome directory and renamed ABBV.fa for downstream use.
+#For example:
+#Herato downloaded from LepBase: 
+--GENOME_LOCAL ./Herato/genome/Herato.fa

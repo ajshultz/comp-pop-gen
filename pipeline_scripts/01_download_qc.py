@@ -317,7 +317,7 @@ def process_local_genome(sp_dir,genome_local,sp_abbr,genome_present,bwa_index_pr
     genome_dir = "%s/genome"%(sp_dir)
     
     #Load modules, also print samtools and bwa versions
-    cmd_1 = 'module load samtools/1.5-fasrc01\module load gcc/4.8.2-fasrc01 bwa/0.7.15-fasrc01'
+    cmd_1 = 'module load samtools/1.5-fasrc01\nmodule load gcc/4.8.2-fasrc01 bwa/0.7.15-fasrc01'
     
     #Copy genome if necessary
     if genome_present == False:

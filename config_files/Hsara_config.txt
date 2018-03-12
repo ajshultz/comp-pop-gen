@@ -20,8 +20,14 @@
 
 #Enter name of species with genome assembly for mapping if genome hosted on Genbank. Must correspond to name of organism on NCBI if download is necessary (e.g. for Corvus cornix: Corvus_cornix_cornix)
 #--GENOME_NCBI ftp://ftp.ncbi.nlm.nih.gov/genomes/all/GCF/000/247/815/GCF_000247815.1_FicAlb1.5/GCF_000247815.1_FicAlb1.5_genomic.fna.gz
+#Used lepbase genome from here:
+#wget http://download.lepbase.org/v4/sequence/Heliconius_erato_demophoon_v1_-_scaffolds.fa.gz
+#gff file: http://download.lepbase.org/v4/gff/heliconius_erato_demophoon_v1_core_32_85_1.gff
+#Other "features" gff
+#http://download.lepbase.org/v4/features/Heliconius_erato_demophoon_v1.gff3.gz
+#Further info: http://ensembl.lepbase.org/Heliconius_erato_demophoon_v1/Info/Index?db=core
 
 #If genome available locally, input path to fasta filename. If local fasta path is supplied, file will be copied into genome directory and renamed ABBV.fa for downstream use.
 #For example:
 #Herato downloaded from LepBase: 
---GENOME_LOCAL ./Herato/genome/Herato.fa
+--GENOME_LOCAL ./Herato_genome/Heliconius_erato_demophoon_v1_-_scaffolds.fa

@@ -462,10 +462,18 @@ def main():
     genome_job_id = None
     
     if "genome_ncbi" in config_info:
-        #Create sbatch script
-        genome_sbatch_name = get_ncbi_genome(sp_dir,config_info["genome_ncbi"],config_info["abbv"])
-        #Submit sbatch script
-        genome_job_id = sbatch_submit(genome_sbatch_name)
+        #Check if genome, BWA indexes, and faidx indexes already exist in genome directory. If not, create script to copy and index.
+        genome_present = os.path.isfile(genome_path)
+        bwa_index_present = os.path.isfile(index_path_bwa)
+        faidx_index_present = os.path.isfile(index_path_faidx)
+        dict_index_present = os.path.isfile(index_path_dict)
+
+        #Create sbatch script if any missing elements (genome, faidx or bwa index)
+        if genome_present == False or bwa_index_present == False or faidx_index_present == False or dict_index_present == False:  
+            #Create sbatch script
+            genome_sbatch_name = get_ncbi_genome(sp_dir,config_info["genome_ncbi"],config_info["abbv"])
+            #Submit sbatch script
+            genome_job_id = sbatch_submit(genome_sbatch_name)
         
     elif "genome_local" in config_info:
         #Check if genome, BWA indexes, and faidx indexes already exist in genome directory. If not, create script to copy and index.

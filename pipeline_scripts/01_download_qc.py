@@ -387,7 +387,7 @@ def fastq_trim_align_stats(sp_dir,sra,sp_abbr,sample):
 
 	#Format sbatch script and write file
 	slurm_script = script_create()
-	genome_script = slurm_script.format(partition="shared",time="2-0:00",mem="24000",cores="8",nodes="1",jobid="Trim_Map",sp_dir=sp_dir,cmd=final_cmd)
+	genome_script = slurm_script.format(partition="shared",time="3-0:00",mem="24000",cores="8",nodes="1",jobid="Trim_Map",sp_dir=sp_dir,cmd=final_cmd)
 
 	out_filename = "%s/scripts/03_trim_map_stats_%s.sbatch"%(sp_dir,sra)
 	out_file = open(out_filename,"w")

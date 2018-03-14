@@ -256,7 +256,7 @@ def ena_sra_download_sbatch(sp_dir,sample_ena_dict):
     
     
         #Format sbatch script
-                sra_script = slurm_script.format(partition="shared",time="2-0:00",mem="4000",cores="1",nodes="1",jobid="SRA",sp_dir=sp_dir,cmd=final_cmd)
+                sra_script = slurm_script.format(partition="shared",time="3-0:00",mem="4000",cores="1",nodes="1",jobid="SRA",sp_dir=sp_dir,cmd=final_cmd)
                 out_filename = "%s/scripts/02_sra_download_parse_%s.sbatch"%(sp_dir,sra)
                 out_file = open(out_filename,"w")
                 out_file.write(sra_script)

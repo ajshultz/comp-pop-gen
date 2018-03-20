@@ -217,7 +217,7 @@ def dedup_sbatch(sp_dir,sp_abbr,sample_ncbi_dict):
 
 
     #Format sbatch script
-            sra_script = slurm_script.format(partition="shared",time="1-0:00",mem="10000",cores="2",nodes="1",jobid="dedup",sp_dir=sp_dir,cmd=final_cmd)
+            sra_script = slurm_script.format(partition="shared",time="1-12:00",mem="10000",cores="2",nodes="1",jobid="dedup",sp_dir=sp_dir,cmd=final_cmd)
             out_filename = "%s/scripts/04_dedup_sort_validate_%s.sbatch"%(sp_dir,sample)
             out_file = open(out_filename,"w")
             out_file.write(sra_script)
@@ -391,8 +391,11 @@ def main():
     dedup_file.write("SAMPLE\tUNPAIRED_READS_EXAMINED\tREAD_PAIRS_EXAMINED\tUNMAPPED_READS\tUNPAIRED_READ_DUPLICATES\tREAD_PAIR_DUPLICATES\tREAD_PAIR_OPTICAL_DUPLICATES\tPERCENT_DUPLICATION\tESTIMATED_LIBRARY_SIZE\n")
     for sample in sorted(config_info["sample_dict"].keys()):
         if all_dedup_stats[sample]:
-            sample_line = '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n'%(sample,all_dedup_stats[sample]["UNPAIRED_READS_EXAMINED"],all_dedup_stats[sample]["READ_PAIRS_EXAMINED"],all_dedup_stats[sample]["UNMAPPED_READS"],all_dedup_stats[sample]["UNPAIRED_READ_DUPLICATES"],all_dedup_stats[sample]["READ_PAIR_DUPLICATES"],all_dedup_stats[sample]["READ_PAIR_OPTICAL_DUPLICATES"],all_dedup_stats[sample]["PERCENT_DUPLICATION"],all_dedup_stats[sample]["ESTIMATED_LIBRARY_SIZE"])
-            dedup_file.write(sample_line)
+            try:
+                sample_line = '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n'%(sample,all_dedup_stats[sample]["UNPAIRED_READS_EXAMINED"],all_dedup_stats[sample]["READ_PAIRS_EXAMINED"],all_dedup_stats[sample]["UNMAPPED_READS"],all_dedup_stats[sample]["UNPAIRED_READ_DUPLICATES"],all_dedup_stats[sample]["READ_PAIR_DUPLICATES"],all_dedup_stats[sample]["READ_PAIR_OPTICAL_DUPLICATES"],all_dedup_stats[sample]["PERCENT_DUPLICATION"],all_dedup_stats[sample]["ESTIMATED_LIBRARY_SIZE"])
+                dedup_file.write(sample_line)
+            except:
+                dedup_file.write('%s\t\t\t\t\t\t\t\t\n'%(sample))
         else:
             dedup_file.write('%s\t\t\t\t\t\t\t\t\n'%(sample))
     dedup_file.close()

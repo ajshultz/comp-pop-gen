@@ -1,0 +1,42 @@
+#Example config file:
+
+#Path to desired output directory (directory for each species will be created within this directory). If not specified will be current working directory
+--OUT_DIR .
+
+#Species abbreviation for use in file headers (e.g. CCornix for hooded crow)
+--ABBV Tguttata
+
+#Enter sample IDs and information, must include SRA accession numbers for download from NCBI: --SAMPLE <SAMPLE_ID> <SRA,SRA,SRA>
+#From Bioproject:PRJEB10586
+--SAMPLE_ENA SAMEA3532857 ERR1013161
+--SAMPLE_ENA SAMEA3532858 ERR1013162
+--SAMPLE_ENA SAMEA3532859 ERR1013163
+--SAMPLE_ENA SAMEA3532860 ERR1013164
+--SAMPLE_ENA SAMEA3532861 ERR1013165
+--SAMPLE_ENA SAMEA3532862 ERR1013166
+--SAMPLE_ENA SAMEA3532863 ERR1013167
+--SAMPLE_ENA SAMEA3532864 ERR1013168
+--SAMPLE_ENA SAMEA3532865 ERR1013169
+--SAMPLE_ENA SAMEA3532866 ERR1013170
+--SAMPLE_ENA SAMEA3532867 ERR1013171
+--SAMPLE_ENA SAMEA3532868 ERR1013172
+--SAMPLE_ENA SAMEA3532869 ERR1013173
+--SAMPLE_ENA SAMEA3532870 ERR1013174
+--SAMPLE_ENA SAMEA3532871 ERR1013175
+--SAMPLE_ENA SAMEA3532872 ERR1013176
+--SAMPLE_ENA SAMEA3532873 ERR1013177
+--SAMPLE_ENA SAMEA3532874 ERR1013178
+--SAMPLE_ENA SAMEA3532875 ERR1013179
+
+
+#At this time, using local fastq files is not supported. We will add this feature in the future.
+#--SAMPLE_LOCAL Ind_1
+
+#A genome must be supplied, either hosted on NCBI (use --GENOME_NCBI flag) or locally (use --GENOME_LOCAL flag). See examples below.
+
+#Enter name of species with genome assembly for mapping if genome hosted on Genbank. Must correspond to name of organism on NCBI if download is necessary (e.g. for Corvus cornix: Corvus_cornix_cornix)
+#--GENOME_NCBI ftp://ftp.ncbi.nlm.nih.gov/genomes/all/GCF/000/151/805/GCF_000151805.1_Taeniopygia_guttata-3.2.4/GCF_000151805.1_Taeniopygia_guttata-3.2.4_genomic.fna.gz
+
+#If genome available locally, input path to fasta filename. If local fasta path is supplied, file will be copied into genome directory and renamed ABBV.fa for downstream use.
+#For example:
+--GENOME_LOCAL ./Tguttata/genome/Tguttata.fa

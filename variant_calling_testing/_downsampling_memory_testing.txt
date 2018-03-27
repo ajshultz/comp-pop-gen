@@ -1,0 +1,66 @@
+
+
+module load java/1.8.0_45-fasrc01
+
+gatk --java-options "-Xmx20g -XX:ParallelGCThreads=1" DownsampleSam -I ../SPECIES_DATASETS/Herato/dedup/SAMN05224099.dedup.sorted.bam -O SAMN05224099.0.5_downsampled_20GB.bam -S Chained -P 0.5 -A 0.0001
+
+bedtools genomecov -ibam SAMN05224099.0.5_downsampled_20GB.bam -g ./Herato/genome/Herato.fa > Herato_0.5_GATK_test.coverage
+
+
+INFO    2018-03-26 13:08:17     DownsampleSam   Finished downsampling.
+INFO    2018-03-26 13:08:17     DownsampleSam   Kept 79251863 out of 158504953 reads (50.00%).
+[Mon Mar 26 13:08:17 GMT-05:00 2018] picard.sam.DownsampleSam done. Elapsed time: 66.93 minutes.
+Runtime.totalMemory()=12468092928
+Tool returned:
+0
+
+
+gatk --java-options "-Xmx150g -XX:ParallelGCThreads=1" DownsampleSam -I ../SPECIES_DATASETS/Mmulatta/dedup/SAMN03083651.dedup.sorted.bam -O SAMN03083651.0.5_downsampled_test3.bam -S Chained -P 0.06 -A 0.0001  --COMPRESSION_LEVEL 5
+
+INFO    2018-03-27 09:28:55     DownsampleSam   Wrote    40,000,000 records.  Elapsed time: 00:54:29s.  Time for last 10,000,000:  789s.  Last read position: NC_027903.1:41,584,106
+INFO    2018-03-27 09:41:44     DownsampleSam   Wrote    50,000,000 records.  Elapsed time: 01:07:18s.  Time for last 10,000,000:  769s.  Last read position: NC_027906.1:104,652,501
+INFO    2018-03-27 09:55:04     DownsampleSam   Wrote    60,000,000 records.  Elapsed time: 01:20:39s.  Time for last 10,000,000:  800s.  Last read position: NC_027911.1:35,494,388
+INFO    2018-03-27 10:08:13     DownsampleSam   Wrote    70,000,000 records.  Elapsed time: 01:33:47s.  Time for last 10,000,000:  788s.  Last read position: NW_014948357.1:1,965
+INFO    2018-03-27 10:14:15     DownsampleSam   Finished downsampling.
+INFO    2018-03-27 10:14:15     DownsampleSam   Kept 74028652 out of 1233805237 reads (6.00%).
+[Tue Mar 27 10:14:15 GMT-05:00 2018] picard.sam.DownsampleSam done. Elapsed time: 100.02 minutes.
+Runtime.totalMemory()=61246799872
+
+bedtools genomecov -ibam SAMN03083651.0.5_downsampled_test3.bam -g ../SPECIES_DATASETS/Mmulatta/genome/Mmulatta.fa > Herato_0.06_Chained_GATK_test.coverage
+
+grep "genome" Herato_0.06_Chained_GATK_test.coverage > Herato_0.06_Chained_GATK_test_genome.coverage
+
+genome  0       799686139       3236224332      0.247105
+genome  1       676508413       3236224332      0.209043
+genome  2       578780032       3236224332      0.178844
+genome  3       434290843       3236224332      0.134197
+genome  4       297228680       3236224332      0.0918443
+
+
+gatk --java-options "-Xmx24g -XX:ParallelGCThreads=1" DownsampleSam -I ../SPECIES_DATASETS/Mmulatta/dedup/SAMN03083651.dedup.sorted.bam -O SAMN03083651.0.5_downsampled_test_constantmem.bam -S ConstantMemory -P 0.06 -A 0.0001  --COMPRESSION_LEVEL 5
+
+[Tue Mar 27 08:49:54 GMT-05:00 2018] DownsampleSam  --INPUT ../SPECIES_DATASETS/Mmulatta/dedup/SAMN03083651.dedup.sorted.bam --OUTPUT SAMN03083651.0.5_downsampled_test_constantmem.bam --STRATEGY ConstantMemory --PROBABILITY 0.06 --ACCURACY 1.0E-4 --COMPRESSION_LEVEL 5  --RANDOM_SEED 1 --VERBOSITY INFO --QUIET false --VALIDATION_STRINGENCY STRICT --MAX_RECORDS_IN_RAM 500000 --CREATE_INDEX false --CREATE_MD5_FILE false --GA4GH_CLIENT_SECRETS client_secrets.json --help false --version false --showHidden false --USE_JDK_DEFLATER false --USE_JDK_INFLATER false
+[Tue Mar 27 08:49:54 GMT-05:00 2018] Executing as ashultz@bioinf01.rc.fas.harvard.edu on Linux 2.6.32-642.6.2.el6.centos.plus.x86_64 amd64; Java HotSpot(TM) 64-Bit Server VM 1.8.0_45-b14; Deflater: Intel; Inflater: Intel; Picard version: Version:4.0.0.0
+INFO    2018-03-27 09:02:13     DownsampleSam   Wrote    10,000,000 records.  Elapsed time: 00:12:15s.  Time for last 10,000,000:  735s.  Last read position: NC_027894.1:202,446,256
+INFO    2018-03-27 09:14:04     DownsampleSam   Wrote    20,000,000 records.  Elapsed time: 00:24:06s.  Time for last 10,000,000:  710s.  Last read position: NC_027897.1:88,915,021
+INFO    2018-03-27 09:25:23     DownsampleSam   Wrote    30,000,000 records.  Elapsed time: 00:35:25s.  Time for last 10,000,000:  679s.  Last read position: NC_027900.1:881,007
+INFO    2018-03-27 09:36:41     DownsampleSam   Wrote    40,000,000 records.  Elapsed time: 00:46:43s.  Time for last 10,000,000:  677s.  Last read position: NC_027903.1:42,317,424
+INFO    2018-03-27 09:48:03     DownsampleSam   Wrote    50,000,000 records.  Elapsed time: 00:58:05s.  Time for last 10,000,000:  682s.  Last read position: NC_027906.1:105,331,587
+INFO    2018-03-27 09:59:14     DownsampleSam   Wrote    60,000,000 records.  Elapsed time: 01:09:16s.  Time for last 10,000,000:  671s.  Last read position: NC_027911.1:36,271,632
+INFO    2018-03-27 10:10:33     DownsampleSam   Wrote    70,000,000 records.  Elapsed time: 01:20:35s.  Time for last 10,000,000:  678s.  Last read position: NW_014949114.1:602
+INFO    2018-03-27 10:15:08     DownsampleSam   Finished downsampling.
+INFO    2018-03-27 10:15:08     DownsampleSam   Kept 74014636 out of 1233805237 reads (6.00%).
+[Tue Mar 27 10:15:08 GMT-05:00 2018] picard.sam.DownsampleSam done. Elapsed time: 85.23 minutes.
+Runtime.totalMemory()=1681391616
+Tool returned:
+0
+
+bedtools genomecov -ibam SAMN03083651.0.5_downsampled_test_constantmem.bam -g ../SPECIES_DATASETS/Mmulatta/genome/Mmulatta.fa > Herato_0.06_CosntantMem_GATK_test.coverage
+
+grep "genome" Herato_0.06_CosntantMem_GATK_test.coverage > Herato_0.06_CosntantMem_GATK_test_genome.coverage
+
+genome  0       799881949       3236224332      0.247165
+genome  1       676671912       3236224332      0.209093
+genome  2       578668841       3236224332      0.17881
+genome  3       434236775       3236224332      0.13418
+genome  4       297197740       3236224332      0.0918347

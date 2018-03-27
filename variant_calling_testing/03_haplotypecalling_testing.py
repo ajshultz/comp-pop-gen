@@ -424,8 +424,8 @@ def main():
     
     #Read in file with coverage info, create a dictionary with sample name as the key, and the proportion to downsample, calculated as the desired coverage/median coverage
     
-    #test_sample_info_file = open("../comp-pop-gen/variant_calling_testing/test_sample_info.csv","r")
-    test_sample_info_file = open("test_sample_info.csv","r")
+    test_sample_info_file = open("../comp-pop-gen/variant_calling_testing/test_sample_info.csv","r")
+    #test_sample_info_file = open("test_sample_info.csv","r")
     
     test_sample_info_dict={}
     

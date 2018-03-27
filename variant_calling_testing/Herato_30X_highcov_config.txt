@@ -36,7 +36,7 @@
 --COVERAGE 30
 
 #Number of intervals to run at a time?
---NINTERVALS 5
+--NINTERVALS 10
 
 #Memory for downsampling (GB)
 --MEMORY_DS 8

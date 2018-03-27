@@ -448,10 +448,10 @@ def main():
     #Add an extra sleep to give sacct a chance to catch up
     sleep(20)
     #Then, enter while loop that will continue until the number of completed jobs matches the number of sbatch files
-    while len(completed_jobids) < len(dedup_filenames):
-        num_running = num_pend_run(dedup_jobids,start_date)
+    while len(completed_jobids) < len(downsample_jobids):
+        num_running = num_pend_run(downsample_jobids,start_date)
         job_statuses = all_jobs_status(start_date)
-        for job in dedup_jobids:
+        for job in downsample_jobids:
             if job not in completed_jobids:
                 if job_statuses[job] != "PENDING" and job_statuses[job] != "RUNNING":
                     completed_jobids[job] = job_statuses[job]

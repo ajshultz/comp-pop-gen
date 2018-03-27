@@ -471,7 +471,7 @@ def main():
     #Collect coverage histograms, calculate mean and median coverage
     all_coverage_stats = {}
     for sample in config_info["sample_dict"]:
-        all_coverage_stats[sample] = collect_coverage_metrics(sp_dir,sample)   
+        all_coverage_stats[sample] = collect_coverage_metrics(sp_dir,sample,coverage=config_info["coverage"])   
 
     summary_stat_file = '%s/stats/_%s_downsampled_%sX_coverage_stats.txt'%(sp_dir,config_info["abbv"],config_info["coverage"])
     sum_stat = open(summary_stat_file,"w")

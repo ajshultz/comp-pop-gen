@@ -274,7 +274,7 @@ def downsample_sbatch(sp_dir,sp_abbr,sample_dict,coverage,coverage_dict,memory_d
             
             #Command to donwsample if proportion <0.95, if >0.95, just copy
             if coverage_dict[sample] < 0.95:
-                cmd_2 = 'gatk --java-options "-Xmx%dg -XX:ParallelGCThreads=1" DownsampleSam -I %s/%s.dedup.sorted.bam -O %s/dedup/%s.%sX.dedup.sorted.bam -S ConstantMemory -P %f -A 0.0001 --COMPRESSION_LEVEL 5'%((int(memory_ds)-2),orig_dir,sample,sp_dir,sample,coverage,coverage_dict[sample])
+                cmd_2 = 'gatk --java-options "-Xmx%dg -XX:ParallelGCThreads=1" DownsampleSam -I %s/%s.dedup.sorted.bam -O %s/dedup/%s.%sX.dedup.bam -S ConstantMemory -P %f -A 0.0001 --COMPRESSION_LEVEL 5'%((int(memory_ds)-2),orig_dir,sample,sp_dir,sample,coverage,coverage_dict[sample])
                 
                 #Sort and index dedup bam file
                 cmd_3 = 'gatk --java-options "-Xmx%dg -XX:ParallelGCThreads=1" SortSam -I %s/dedup/%s.%sX.dedup.bam -O %s/dedup/%s.%sX.dedup.sorted.bam --SORT_ORDER coordinate --CREATE_INDEX true --COMPRESSION_LEVEL 5'%((int(memory_ds)-2),sp_dir,sample,coverage,sp_dir,sample,coverage)
@@ -283,7 +283,7 @@ def downsample_sbatch(sp_dir,sp_abbr,sample_dict,coverage,coverage_dict,memory_d
                 cmd_2 = "cp %s/%s.dedup.sorted.bam %s/dedup/%s.%sX.dedup.sorted.bam"%(orig_dir,sample,sp_dir,sample,coverage)
                 
                 #Re-create index
-                cmd_3 = 'gatk --java-options "-Xmx%dg -XX:ParallelGCThreads=1" BuildBamIndex -I %s/dedup/%s.%sX.dedup.sorted.bam --SORT_ORDER coordinate'%((int(memory_ds)-2),sp_dir,sample,coverage)
+                cmd_3 = 'gatk --java-options "-Xmx%dg -XX:ParallelGCThreads=1" BuildBamIndex -I %s/dedup/%s.%sX.dedup.sorted.bam'%((int(memory_ds)-2),sp_dir,sample,coverage)
              
             #Compute coverage histogram of sorted bam
             cmd_4 = 'bedtools genomecov -ibam %s/dedup/%s.%sX.dedup.sorted.bam -g %s/genome/%s.fa > %s/stats/%s.%sX.coverage'%(sp_dir,sample,coverage,sp_dir,sp_abbr,sp_dir,sample,coverage)

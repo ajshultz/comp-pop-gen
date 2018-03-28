@@ -1,0 +1,46 @@
+#Example config file:
+
+#Path to desired output directory (directory for each species will be created within this directory). If not specified will be current working directory
+--OUT_DIR .
+
+#Species abbreviation for use in file headers (e.g. CCornix for hooded crow)
+--ABBV Tguttata
+
+#Enter sample IDs and information, must include SRA accession numbers for download from NCBI: --SAMPLE <SAMPLE_ID> <SRA,SRA,SRA>
+#From Bioproject:PRJEB10586
+--SAMPLE_ENA SAMEA3532857 ERR1013161
+--SAMPLE_ENA SAMEA3532858 ERR1013162
+--SAMPLE_ENA SAMEA3532859 ERR1013163
+--SAMPLE_ENA SAMEA3532861 ERR1013165
+--SAMPLE_ENA SAMEA3532863 ERR1013167
+--SAMPLE_ENA SAMEA3532866 ERR1013170
+--SAMPLE_ENA SAMEA3532868 ERR1013172
+--SAMPLE_ENA SAMEA3532871 ERR1013175
+--SAMPLE_ENA SAMEA3532874 ERR1013178
+--SAMPLE_ENA SAMEA3532875 ERR1013179
+
+
+#A genome must be supplied, either hosted on NCBI (use --GENOME_NCBI flag) or locally (use --GENOME_LOCAL flag). See examples below.
+
+--GENOME_LOCAL ./Tguttata/genome/Tguttata.fa
+
+#Heterozygosity for running haplotypecaller and genotypegvcf
+--HETEROZYGOSITY 0.013
+
+#Which version of pipeline to run (lowcoverage or highcoverage)
+--PIPELINE highcoverage
+
+#What is desired coverage to test?
+--COVERAGE 30
+
+#Number of intervals to run at a time?
+--NINTERVALS 30
+
+#Memory for downsampling (GB)
+--MEMORY_DS 8
+
+#Starting memory (GB) for running HaplotypeCaller
+--MEMORY_HC 16
+
+#Starting time (hours) for running HaplotypeCaller
+--TIME_HC 72

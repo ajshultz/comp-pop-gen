@@ -450,7 +450,7 @@ def main():
     
     #Create sbatch script to grab deduped BAM files, downsample to desired proportion (just copy if proportion < 0.95)
     downsample_filenames = downsample_sbatch(sp_dir,sp_abbr = config_info["abbv"],sample_dict = config_info["sample_dict"],coverage = config_info["coverage"],coverage_dict = test_sample_info_dict,memory_ds = config_info["memory_ds"])
-
+    '''
     #Submit sbatch files, including memory and time requirements
     downsample_jobids = []
     completed_jobids = {}
@@ -515,14 +515,17 @@ def main():
     except:
         print("There was an error copying summary stat files")
     
-    
+    '''
 
     #####Run HaplotypeCaller
     
     #Create set of array scripts
     ###Check if any files exist for a sample
     for sample in config_info["sample_dict"]:
-        haplotypecaller_sbatch(sp_dir,sp_abbr=config_info["abbv"],sample=sample,coverage=config_info["coverage"],het=config_info["het"],memory_hc=config_info["memory_hc"],nintervals=config_info["nintervals"],pipeline=config_info["pipeline"])
+        sample_files = [name for name in os.listdir(gvcf_dir) if sample in name]
+        #Can look for .tbi files
+    
+            haplotypecaller_sbatch(sp_dir,sp_abbr=config_info["abbv"],sample=sample,coverage=config_info["coverage"],het=config_info["het"],memory_hc=config_info["memory_hc"],nintervals=config_info["nintervals"],pipeline=config_info["pipeline"])
     
     ###Submit all sbatch scripts, include full array #s, memory, time
     #Keep track of sample + array_job_ids    

@@ -144,8 +144,13 @@ def script_create():
     slurm_script = '''#!/bin/bash\n#SBATCH -p {partition}\n#SBATCH -n {cores}\n#SBATCH -N {nodes}\n#SBATCH -J {jobid}\n#SBATCH -o {sp_dir}/logs/{jobid}_%j.out\n#SBATCH -e {sp_dir}/logs/{jobid}_%j.err\n\n{cmd}
     '''
     return(slurm_script)
-
     
+#Create generic slurm script for arrays (-o and -e for arrays)
+def array_script_create():
+    slurm_script = '''#!/bin/bash\n#SBATCH -p {partition}\n#SBATCH -n {cores}\n#SBATCH -N {nodes}\n#SBATCH -J {jobid}\n#SBATCH -o {sp_dir}/logs/{jobid}_%A_%a.out\n#SBATCH -e {sp_dir}/logs/{jobid}_%A_%a.err\n\n{cmd}
+    '''
+    return(slurm_script)
+
 #Submit filename to slurm with sbatch with a given amount of time and memroy, returns job id number
 def sbatch_submit(filename,memory,timelimit):
     proc = Popen('sbatch --mem %s --time %s %s '%(memory,timelimit,filename),shell=True,stdout=PIPE,stderr=PIPE)
@@ -307,7 +312,7 @@ def downsample_sbatch(sp_dir,sp_abbr,sample_dict,coverage,coverage_dict,memory_d
 
 #Create a haplotypecaller sbatch file for a sample
 def haplotypecaller_sbatch(sp_dir,sp_abbr,sample,coverage,het,memory_hc,nintervals,pipeline):
-    slurm_script = script_create()
+    slurm_script = array_script_create()
 
     #Load modules and get versions for all programs used
     ##For now, using my own installation of GATK as it is not yet installed on the cluster
@@ -315,10 +320,10 @@ def haplotypecaller_sbatch(sp_dir,sp_abbr,sample,coverage,het,memory_hc,ninterva
     
     if pipeline == "highcoverage":
     #Command to donwsample if proportion <0.95, if >0.95, just copy
-        cmd_2 = 'gatk --java-options "-Xmx%dg -XX:ParallelGCThreads=1" HaplotypeCaller -I %s/%s.%sX.dedup.sorted.bam -O %s/gvcf/%s.%sX.${SLURM_ARRAY_TASK_ID}.g.vcf.gz -R %s/genome/%s.fa --heterozygosity %s --ERC GVCF --intervals %s/genome/%s_splits_interval_lists/%s_${SLURM_ARRAY_TASK_ID}.interval_list'%((int(memory_hc)-2),sp_dir,sample,coverage,sp_dir,sample,coverage,sp_dir,sp_abbr,het,sp_dir,nintervals,sp_abbr)
+        cmd_2 = 'gatk --java-options "-Xmx%dg -XX:ParallelGCThreads=1" HaplotypeCaller -I %s/dedup/%s.%sX.dedup.sorted.bam -O %s/gvcf/%s.%sX.${SLURM_ARRAY_TASK_ID}.g.vcf.gz -R %s/genome/%s.fa --heterozygosity %s --ERC GVCF --intervals %s/genome/%s_splits_interval_lists/%s_${SLURM_ARRAY_TASK_ID}.interval_list'%((int(memory_hc)-2),sp_dir,sample,coverage,sp_dir,sample,coverage,sp_dir,sp_abbr,het,sp_dir,nintervals,sp_abbr)
     
     elif pipeline == "lowcoverage":
-        cmd_2 = 'gatk --java-options "-Xmx%dg -XX:ParallelGCThreads=1" HaplotypeCaller -I %s/%s.%sX.dedup.sorted.bam -O %s/gvcf/%s.%sX.${SLURM_ARRAY_TASK_ID}.g.vcf.gz -R %s/genome/%s.fa --heterozygosity %s --ERC GVCF --intervals %s/genome/%s_splits_interval_lists/%s_${SLURM_ARRAY_TASK_ID}.interval_list --minDanglingBranchLength 1 --minPruning 1'%((int(memory_hc)-2),sp_dir,sample,coverage,sp_dir,sample,coverage,sp_dir,sp_abbr,het,sp_dir,nintervals,sp_abbr)
+        cmd_2 = 'gatk --java-options "-Xmx%dg -XX:ParallelGCThreads=1" HaplotypeCaller -I %s/dedup/%s.%sX.dedup.sorted.bam -O %s/gvcf/%s.%sX.${SLURM_ARRAY_TASK_ID}.g.vcf.gz -R %s/genome/%s.fa --heterozygosity %s --ERC GVCF --intervals %s/genome/%s_splits_interval_lists/%s_${SLURM_ARRAY_TASK_ID}.interval_list --minDanglingBranchLength 1 --minPruning 1'%((int(memory_hc)-2),sp_dir,sample,coverage,sp_dir,sample,coverage,sp_dir,sp_abbr,het,sp_dir,nintervals,sp_abbr)
     
     cmd_list = [cmd_1,cmd_2]
 
@@ -421,7 +426,8 @@ def main():
     proc = Popen('cp %s.dict %s'%(orig_genome,genome_dir),shell=True)
         
     #Split into N specified intervals, create directory to store interval files
-    
+    #Added sleep to give proc time to copy the .fai file
+    sleep(60)
     directory_create('%s/%s_splits_interval_lists/'%(genome_dir,config_info["nintervals"]))
     split_genome(sp_dir,config_info["abbv"],config_info["nintervals"],"%s/%s_splits_interval_lists/"%(genome_dir,config_info["nintervals"]))
     

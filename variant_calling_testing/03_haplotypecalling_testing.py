@@ -263,8 +263,8 @@ def downsample_sbatch(sp_dir,sp_abbr,sample_dict,coverage,coverage_dict,memory_d
     
     for sample in sample_dict.keys():
         #First check if dedup file is already present (already downloaded), or final BAM file already present. If it has, print statment and continue with next sample. 
-        dedup_filename = '%s/dedup/%s.%sX.dedup.bam'%(sp_dir,coverage,sample)
-        dedup_sorted_filename = '%s/dedup/%s.%sX.dedup.sorted.bam'%(sp_dir,coverage,sample)
+        dedup_filename = '%s/dedup/%s.%sX.dedup.bam'%(sp_dir,sample,coverage)
+        dedup_sorted_filename = '%s/dedup/%s.%sX.dedup.sorted.bam'%(sp_dir,sample,coverage)
         if os.path.isfile(dedup_filename) or os.path.isfile(dedup_sorted_filename):
             print('%s.%sX.dedup.bam already present, skipping'%(sample))
         else:
@@ -417,13 +417,16 @@ def main():
 
 
     #####Get genome file from previous runs, copy to this genome directory, create interval file to split up jobs; create jobs to subset original dedup files to desired coverage (based on median original coverage) **Assumes working in directory on same level as SPECIES_DATASETS and comp-pop-gen
-    
+
     #Copy genome + fai and dict file from original directory to new directory
     orig_genome = "../SPECIES_DATASETS/%s/genome/%s"%(config_info["abbv"],config_info["abbv"])
     
-    proc = Popen('cp %s.fa %s'%(orig_genome,genome_dir),shell=True)
-    proc = Popen('cp %s.fa.fai %s'%(orig_genome,genome_dir),shell=True)
-    proc = Popen('cp %s.dict %s'%(orig_genome,genome_dir),shell=True)
+    if not os.path.isfile('%s/genome/%s.fa'%(sp_dir,config_info["abbv"])):
+        proc = Popen('cp %s.fa %s'%(orig_genome,genome_dir),shell=True)
+    if not os.path.isfile('%s/genome/%s.fa.fai'%(sp_dir,config_info["abbv"])):
+        proc = Popen('cp %s.fa.fai %s'%(orig_genome,genome_dir),shell=True)
+    if not os.path.isfile('%s/genome/%s.dict'%(sp_dir,config_info["abbv"])):
+        proc = Popen('cp %s.dict %s'%(orig_genome,genome_dir),shell=True)
         
     #Split into N specified intervals, create directory to store interval files
     #Added sleep to give proc time to copy the .fai file

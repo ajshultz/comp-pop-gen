@@ -203,55 +203,82 @@ def num_pend_run(job_id_list,date):
 
 def split_genome(sp_dir,sp_abbr,nintervals,outputdir):
 	#Open input		
-	fai = open("%s/genome/%s.fa.fai"%(sp_dir,sp_abbr),"r")
+    fai = open("%s/genome/%s.fa.fai"%(sp_dir,sp_abbr),"r")
+    outHandle = sp_abbr
 
-	faiList = []
-	totLen = 1
-	cumStart = []
-	cumEnd = []
-	
-	n = int(nintervals)
-	
-	#For each line in the .fai file, append data to a list, and create two additional lists with cumulative start and end positions.
-	for line in fai:
-		line = line.strip().split("\t")
-		faiList.append(line)
-		cumStart.append(totLen)
-		totLen = totLen + int(line[1])
-		cumEnd.append(totLen)
+    if nintervals != "CHROMOSOME":
+        faiList = []
+        totLen = 1
+        cumStart = []
+        cumEnd = []
+    
+        n = int(nintervals)
+    
+        #For each line in the .fai file, append data to a list, and create two additional lists with cumulative start and end positions.
+        for line in fai:
+            line = line.strip().split("\t")
+            faiList.append(line)
+            cumStart.append(totLen)
+            totLen = totLen + int(line[1])
+            cumEnd.append(totLen)
 
-	#Create interval based on total length of scaffolds, and create list of start and end values
-	interval = (totLen/n)+1
-	intervalNums = range(1,n+1)
-	intervalEnd = [x * interval for x in intervalNums]
-	intervalStart = [(x - interval) + 1 for x in intervalEnd]
-	
-	#Create list of which file each scaffold should go to, depending on where it falls on the interval list. Note that scaffolds that span intervals will be moved to the preceeding interval.
-	fileDes = []
-	for i in range(len(faiList)):
-		fileDes.append(0)
-		for j in range(n):
-			if cumStart[i] >= intervalStart[j] and cumEnd[i] < intervalEnd[j]:
-				fileDes[i] = (j+1)
-			elif j < (n-1) and cumStart[i] >= intervalStart[j] and cumEnd[i] < intervalEnd[(j+1)] and cumStart[i] < intervalStart[(j+1)]:
-				fileDes[i] = (j+1)
-	
-	#Create list of output files based on species abbreviation
-	outHandle = sp_abbr
-	outList = []
-	
-	for i in range(n):
-		outFile = (outputdir+outHandle+"_"+(str(i+1))+".interval_list")
-		outList.append(open(outFile,"w"))
-		
-	#Append scaffold name to appropriate output file.						
-	for i in range(len(faiList)):
-		outList[fileDes[(i)]-1].write(faiList[i][0]+"\n")
-		
-	for i in range(n):
-		outList[i].close()
+        #Create interval based on total length of scaffolds, and create list of start and end values
+        interval = (totLen/n)+1
+        intervalNums = range(1,n+1)
+        intervalEnd = [x * interval for x in intervalNums]
+        intervalStart = [(x - interval) + 1 for x in intervalEnd]
+    
+        #Create list of which file each scaffold should go to, depending on where it falls on the interval list. Note that scaffolds that span intervals will be moved to the preceeding interval.
+        fileDes = []
+        for i in range(len(faiList)):
+            fileDes.append(0)
+            for j in range(n):
+                if cumStart[i] >= intervalStart[j] and cumEnd[i] < intervalEnd[j]:
+                    fileDes[i] = (j+1)
+                elif j < (n-1) and cumStart[i] >= intervalStart[j] and cumEnd[i] < intervalEnd[(j+1)] and cumStart[i] < intervalStart[(j+1)]:
+                    fileDes[i] = (j+1)
+    
+        #Create list of output files based on species abbreviation
+        outList = []
+    
+        for i in range(n):
+            outFile = (outputdir+outHandle+"_"+(str(i+1))+".interval_list")
+            outList.append(open(outFile,"w"))
+        
+        #Append scaffold name to appropriate output file.						
+        for i in range(len(faiList)):
+            outList[fileDes[(i)]-1].write(faiList[i][0]+"\n")
+        
+        for i in range(n):
+            outList[i].close()
+        
+        nintervalfiles = nintervals
+    
+    else:
+        faiList = []
+        for line in fai:
+            line = line.strip().split("\t")
+            faiList.append(line)
+        #Get number of chromosomes, will produce that many interval files + 1
+        nchr = len([name for name in faiList if "NC_" in name[0]])
+        nintervalfiles=(nchr+1)
+        filenum = 1
+        #Open file to write all non-chromosomes
+        randoutFile = open((outputdir+outHandle+"_"+(str(nintervalfiles))+".interval_list"),"w")
+        for i in range(len(faiList)):
+            if "NC_" in faiList[i][0]:
+                outFile = open((outputdir+outHandle+"_"+(str(filenum))+".interval_list"),"w")
+                outFile.write(faiList[i][0])
+                outFile.close()
+                filenum += 1
+            else:
+                randoutFile.write("%s\n"%faiList[i][0])
+                
+        randoutFile.close()
 
-	fai.close()
+    fai.close()
+	
+    return(nintervalfiles)
 
 
 
@@ -425,19 +452,20 @@ def main():
         proc = Popen('cp %s.fa %s'%(orig_genome,genome_dir),shell=True)
     if not os.path.isfile('%s/genome/%s.fa.fai'%(sp_dir,config_info["abbv"])):
         proc = Popen('cp %s.fa.fai %s'%(orig_genome,genome_dir),shell=True)
+        sleep(60)
     if not os.path.isfile('%s/genome/%s.dict'%(sp_dir,config_info["abbv"])):
         proc = Popen('cp %s.dict %s'%(orig_genome,genome_dir),shell=True)
         
-    #Split into N specified intervals, create directory to store interval files
+    #Split into N specified intervals (if CHROMOSOME instead of number, will split into chromosomes, with all unplaced scaffolds in one file), create directory to store interval files. Function returns the number of interval files (nintervalfiles)
     #Added sleep to give proc time to copy the .fai file
-    sleep(60)
+
     directory_create('%s/%s_splits_interval_lists/'%(genome_dir,config_info["nintervals"]))
-    split_genome(sp_dir,config_info["abbv"],config_info["nintervals"],"%s/%s_splits_interval_lists/"%(genome_dir,config_info["nintervals"]))
+    nintervalfiles = split_genome(sp_dir,config_info["abbv"],config_info["nintervals"],"%s/%s_splits_interval_lists/"%(genome_dir,config_info["nintervals"]))
     
     #Read in file with coverage info, create a dictionary with sample name as the key, and the proportion to downsample, calculated as the desired coverage/median coverage
     
-    test_sample_info_file = open("../comp-pop-gen/variant_calling_testing/test_sample_info.csv","r")
-    #test_sample_info_file = open("test_sample_info.csv","r")
+    #test_sample_info_file = open("../comp-pop-gen/variant_calling_testing/test_sample_info.csv","r")
+    test_sample_info_file = open("test_sample_info.csv","r")
     
     test_sample_info_dict={}
     
@@ -525,7 +553,7 @@ def main():
         sample_files = [name for name in os.listdir(gvcf_dir) if sample in name]
         #Can look for .tbi files
     
-        haplotypecaller_sbatch(sp_dir,sp_abbr=config_info["abbv"],sample=sample,coverage=config_info["coverage"],het=config_info["het"],memory_hc=config_info["memory_hc"],nintervals=config_info["nintervals"],pipeline=config_info["pipeline"])
+        haplotypecaller_sbatch(sp_dir,sp_abbr=config_info["abbv"],sample=sample,coverage=config_info["coverage"],het=config_info["het"],memory_hc=config_info["memory_hc"],nintervals=nintervalfiles,pipeline=config_info["pipeline"])
     
     ###Submit all sbatch scripts, include full array #s, memory, time
     #Keep track of sample + array_job_ids    

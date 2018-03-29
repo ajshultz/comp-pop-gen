@@ -312,7 +312,7 @@ def downsample_sbatch(sp_dir,sp_abbr,sample_dict,coverage,coverage_dict,memory_d
         dedup_filename = '%s/dedup/%s.%sX.dedup.bam'%(sp_dir,sample,coverage)
         dedup_sorted_filename = '%s/dedup/%s.%sX.dedup.sorted.bam'%(sp_dir,sample,coverage)
         if os.path.isfile(dedup_filename) or os.path.isfile(dedup_sorted_filename):
-            print('%s.%sX.dedup.bam already present, skipping'%(sample))
+            print('%s.%sX.dedup.bam already present, skipping'%(sample,coverage))
         else:
             print('Will donwsample BAM for sample %s'%(sample))
 

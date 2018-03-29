@@ -595,6 +595,9 @@ def main():
         #If the number of sample files is less than the the number of interval files x2 (because of vcf and index), that means some intervals are missing. Only submit those intervals that don't have .tbi (index) files.
         elif len(sample_files) < 2*nintervalfiles:
             #Check each interval, see if it has both a .vcf.gz and .tbi file
+            hc_filename = haplotypecaller_sbatch(sp_dir,sp_abbr=config_info["abbv"],sample=sample,coverage=config_info["coverage"],het=config_info["het"],memory_hc=config_info["memory_hc"],nintervals=nintervalfiles,pipeline=config_info["pipeline"])
+            hc_filenames[sample] = hc_filename
+            
             missing = check_missing_gvcfs(arraystart=1,arrayend=nintervalfiles,sample_files=sample_files,sample=sample,coverage=config_info["coverage"])
             
             missing_vec = ",".join(missing)

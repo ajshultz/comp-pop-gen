@@ -602,8 +602,6 @@ def main():
             
             missing = check_missing_gvcfs(arraystart=1,arrayend=nintervalfiles,sample_files=sample_files,sample=sample,coverage=config_info["coverage"])
             
-            print(missing)
-            
             missing_vec = ",".join(missing)
             
              #Submit job, get base jobid for array

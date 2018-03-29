@@ -210,13 +210,12 @@ def num_pend_run(job_id_list,date):
     return(count)
 
 #Check for missing gvcf interval files for a given sample in list of files. Will return a list of the missing intervals
-def check_missing_gvcfs(arraystart,arrayend,sample_files,sample,coverage)
+def check_missing_gvcfs(arraystart,arrayend,sample_files,sample,coverage):
     missing_ints = []
     #Check if file_ext is a string, if so, just test that one type
     for i in range(arraystart,arrayend+1):
-        if "%s.%sX.%s.g.vcf.gz"%(sample,coverage,str(i)) not in sample_files
- and "%s.%sX.%s.g.vcf.gz.tbi"%(sample,coverage,str(i)) not in sample_files:
-    missing_ints.append(str(i))            
+        if "%s.%sX.%s.g.vcf.gz"%(sample,coverage,str(i)) not in sample_files and "%s.%sX.%s.g.vcf.gz.tbi"%(sample,coverage,str(i)) not in sample_files:
+            missing_ints.append(str(i))            
     
     return(missing_ints)
 
@@ -590,12 +589,12 @@ def main():
         
             #Add jobids for array to dictionary with jobid as key and sample as value
             for i in range(1,nintervalfiles+1):
-            all_jobids["%s_%d"%(base_jobid,i)] = sample
+                all_jobids["%s_%d"%(base_jobid,i)] = sample
         
         #If the number of sample files is less than the the number of interval files x2 (because of vcf and index), that means some intervals are missing. Only submit those intervals that don't have .tbi (index) files.
         elif len(sample_files) < 2*nintervalfiles:
             #Check each interval, see if it has both a .vcf.gz and .tbi file
-            missing = check_missing_gvcfs(arraystart=1,arrayend=nintervalfiles,sample_files=sample_files,sample=sample,coverage=coverage=config_info["coverage"])
+            missing = check_missing_gvcfs(arraystart=1,arrayend=nintervalfiles,sample_files=sample_files,sample=sample,coverage=config_info["coverage"])
             
             missing_vec = ",".joing(missing)
             
@@ -605,7 +604,7 @@ def main():
         
             #Add jobids for array to dictionary with jobid as key and sample as value
             for i in missing:
-            all_jobids["%s_%d"%(base_jobid,i)] = sample
+                all_jobids["%s_%d"%(base_jobid,i)] = sample
             
         elif len(sample_files) == 2*nintervalfiles:
             print("Sample %s has all gvcf files, skipping HaplotypeCaller"%sample)
@@ -645,10 +644,10 @@ def main():
                         elif job_statuses[job] != "COMPLETED" and job not in rerun_jobids:
                             new_mem = str(int(config_info["memory_hc"])*2)
                             new_time =  int(config_info["time_hc"])*2
-                                if new_time > 168:
-                                    new_time = '168'
-                                else:
-                                    new_time = str(new_time)
+                            if new_time > 168:
+                               new_time = '168'
+                            else:
+                                new_time = str(new_time)
                             #Submit array with only that interval
                             resubmitted_jobid = sbatch_submit_array(hc_filenames[all_jobids[job]],memory=new_mem,timelimit=new_time, array_nums=array_id)
                             sleep(1)

@@ -600,6 +600,8 @@ def main():
             
             missing = check_missing_gvcfs(arraystart=1,arrayend=nintervalfiles,sample_files=sample_files,sample=sample,coverage=config_info["coverage"])
             
+            print(missing)
+            
             missing_vec = ",".join(missing)
             
              #Submit job, get base jobid for array
@@ -608,7 +610,7 @@ def main():
         
             #Add jobids for array to dictionary with jobid as key and sample as value
             for i in missing:
-                all_jobids["%s_%d"%(base_jobid,i)] = sample
+                all_jobids["%s_%s"%(base_jobid,i)] = sample
             
         elif len(sample_files) == 2*nintervalfiles:
             print("Sample %s has all gvcf files, skipping HaplotypeCaller"%sample)

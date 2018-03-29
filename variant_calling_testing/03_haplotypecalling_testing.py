@@ -342,17 +342,17 @@ def downsample_sbatch(sp_dir,sp_abbr,sample_dict,coverage,coverage_dict,memory_d
             #Grab only genome output
             cmd_5 = r"""awk '$1 == "genome" {print $0}' %s/stats/%s.%sX.coverage > %s/stats/%s.%sX.genome.coverage"""%(sp_dir,sample,coverage,sp_dir,sample,coverage)
     
-        cmd_list = [cmd_1,cmd_2,cmd_3,cmd_4,cmd_5]
+            cmd_list = [cmd_1,cmd_2,cmd_3,cmd_4,cmd_5]
 
-        final_cmd = "\n\n".join(cmd_list)
+            final_cmd = "\n\n".join(cmd_list)
 
-    #Format sbatch script
-        downsample_script = slurm_script.format(partition="shared",cores="2",nodes="1",jobid="ds_%sX"%coverage,sp_dir=sp_dir,cmd=final_cmd)
-        out_filename = "%s/scripts/05_downsample_%sX_%s.sbatch"%(sp_dir,coverage,sample)
-        out_file = open(out_filename,"w")
-        out_file.write(downsample_script)
-        out_file.close
-        downsample_sbatch_filenames.append(out_filename)
+            #Format sbatch script
+            downsample_script = slurm_script.format(partition="shared",cores="2",nodes="1",jobid="ds_%sX"%coverage,sp_dir=sp_dir,cmd=final_cmd)
+            out_filename = "%s/scripts/05_downsample_%sX_%s.sbatch"%(sp_dir,coverage,sample)
+            out_file = open(out_filename,"w")
+            out_file.write(downsample_script)
+            out_file.close
+            downsample_sbatch_filenames.append(out_filename)
     
     return(downsample_sbatch_filenames)
 

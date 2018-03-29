@@ -634,10 +634,10 @@ def main():
                 if job in job_statuses:#Have to add this because array jobs may be delayed
                     if job_statuses[job] != "PENDING" and job_statuses[job] != "RUNNING":
                         completed_jobids[job] = job_statuses[job]
+                        array_id = "_".split(job)[1]
                         
                         #If job_id is "COMPLETED", check to make sure both the .vcf.gz file and .tbi file are both present. If they are, print and add to successful_samples dictionary (sample:[intervals])
                         if job_statuses[job] == "COMPLETED":
-                            array_id = "_".split(job)[1]
                             if os.path.isfile("%s/gvcf/%s.%sX.%s.g.vcf.gz"%(sp_dir,all_jobids[job],config_info["coverage"])) and os.path.isfile("%s/gvcf/%s.%sX.%s.g.vcf.gz.tbi"%(sp_dir,all_jobids[job],config_info["coverage"])):
                                 print("Job %s completed for sample %s"%(job, all_jobids[job]))
                                 if all_jobids[job] in successful_samples:

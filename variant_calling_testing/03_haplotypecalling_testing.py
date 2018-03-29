@@ -214,7 +214,7 @@ def check_missing_gvcfs(arraystart,arrayend,sample_files,sample,coverage):
     missing_ints = []
     #Check if file_ext is a string, if so, just test that one type
     for i in range(arraystart,arrayend+1):
-        if "%s.%sX.%s.g.vcf.gz"%(sample,coverage,str(i)) not in sample_files and "%s.%sX.%s.g.vcf.gz.tbi"%(sample,coverage,str(i)) not in sample_files:
+        if "%s.%sX.%s.g.vcf.gz"%(sample,coverage,str(i)) not in sample_files or "%s.%sX.%s.g.vcf.gz.tbi"%(sample,coverage,str(i)) not in sample_files:
             missing_ints.append(str(i))            
     
     return(missing_ints)
@@ -623,7 +623,6 @@ def main():
     
     #Give sacct a chance to catch up       
     sleep(20)
-    print(all_jobids)
     
     #Then, enter while loop that will continue until the number of completed jobs matches the number of sbatch files
     #Create dictionary of completed jobids and completion statuses

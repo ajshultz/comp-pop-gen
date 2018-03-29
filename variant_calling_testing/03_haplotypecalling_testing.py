@@ -575,11 +575,13 @@ def main():
     all_jobids = {}
 
     for sample in config_info["sample_dict"]:
+        print(os.listdir(gvcf_dir))
+        print(sample)
         sample_files = [name for name in os.listdir(gvcf_dir) if sample in name]
-        print(sample_files)
+        finished_files = len([name for name in sample_files if ".tbi" in name])
         
         #If no files exist, submit full array
-        if len(sample_files) == 0:
+        if finished_files == 0:
 
             #Create sbatch file, add to filename dictionary with sample as key and filename as value
             hc_filename = haplotypecaller_sbatch(sp_dir,sp_abbr=config_info["abbv"],sample=sample,coverage=config_info["coverage"],het=config_info["het"],memory_hc=config_info["memory_hc"],nintervals=nintervalfiles,pipeline=config_info["pipeline"])
@@ -594,7 +596,7 @@ def main():
                 all_jobids["%s_%d"%(base_jobid,i)] = sample
         
         #If the number of sample files is less than the the number of interval files x2 (because of vcf and index), that means some intervals are missing. Only submit those intervals that don't have .tbi (index) files.
-        elif len(sample_files) < 2*nintervalfiles:
+        elif finished_files) < nintervalfiles:
             #Check each interval, see if it has both a .vcf.gz and .tbi file
             hc_filename = haplotypecaller_sbatch(sp_dir,sp_abbr=config_info["abbv"],sample=sample,coverage=config_info["coverage"],het=config_info["het"],memory_hc=config_info["memory_hc"],nintervals=nintervalfiles,pipeline=config_info["pipeline"])
             hc_filenames[sample] = hc_filename
@@ -613,7 +615,7 @@ def main():
             for i in missing:
                 all_jobids["%s_%s"%(base_jobid,i)] = sample
             
-        elif len(sample_files) == 2*nintervalfiles:
+        elif finished_files == nintervalfiles:
             print("Sample %s has all gvcf files, skipping HaplotypeCaller"%sample)
         
         else:

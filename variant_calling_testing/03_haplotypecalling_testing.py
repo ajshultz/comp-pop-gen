@@ -160,6 +160,14 @@ def sbatch_submit(filename,memory,timelimit):
     stdout = stdout.strip('Submitted batch job ')
     return(stdout)
 
+#Submit filename to slurm with sbatch with a given amount of time and memroy, returns job id number - includes first argument to include memory limit in java opts (use memory - 2)
+def sbatch_submit_array(filename,memory,timelimit, array_nums):
+    proc = Popen('sbatch --mem %s000 --time %s --array=%s %s %d'%(memory,timelimit,array_nums,filename,(int(memory)-2)),shell=True,stdout=PIPE,stderr=PIPE)
+    stdout,stderr = proc.communicate()
+    stdout = stdout.decode("utf-8","ignore")
+    stdout = stdout.strip()
+    stdout = stdout.strip('Submitted batch job ')
+    return(stdout)
 
 #Check job status of specific jobid: returns job status
 def jobid_status(jobid,date):
@@ -192,7 +200,7 @@ def all_jobs_status(date):
                 status_dict[line[0]]=line[1]
     return(status_dict)
     
-
+#Count the number of pending jobs
 def num_pend_run(job_id_list,date):
     count = 0
     status_dict = all_jobs_status(date)
@@ -200,6 +208,18 @@ def num_pend_run(job_id_list,date):
         if status_dict[job] == "PENDING" or status_dict[job] == "RUNNING":
             count += 1
     return(count)
+
+#Check for missing gvcf interval files for a given sample in list of files. Will return a list of the missing intervals
+def check_missing_gvcfs(arraystart,arrayend,sample_files,sample,coverage)
+    missing_ints = []
+    #Check if file_ext is a string, if so, just test that one type
+    for i in range(arraystart,arrayend+1):
+        if "%s.%sX.%s.g.vcf.gz"%(sample,coverage,str(i)) not in sample_files
+ and "%s.%sX.%s.g.vcf.gz.tbi"%(sample,coverage,str(i)) not in sample_files:
+    missing_ints.append(str(i))            
+    
+    return(missing_ints)
+
 
 def split_genome(sp_dir,sp_abbr,nintervals,outputdir):
 	#Open input		
@@ -345,14 +365,16 @@ def haplotypecaller_sbatch(sp_dir,sp_abbr,sample,coverage,het,memory_hc,ninterva
     ##For now, using my own installation of GATK as it is not yet installed on the cluster
     cmd_1 = 'module load java/1.8.0_45-fasrc01'
     
+    cmd_2 = 'MEM=$1'
+    
     if pipeline == "highcoverage":
     #Command to donwsample if proportion <0.95, if >0.95, just copy
-        cmd_2 = 'gatk --java-options "-Xmx%dg -XX:ParallelGCThreads=1" HaplotypeCaller -I %s/dedup/%s.%sX.dedup.sorted.bam -O %s/gvcf/%s.%sX.${SLURM_ARRAY_TASK_ID}.g.vcf.gz -R %s/genome/%s.fa --heterozygosity %s --ERC GVCF --intervals %s/genome/%s_splits_interval_lists/%s_${SLURM_ARRAY_TASK_ID}.interval_list'%((int(memory_hc)-2),sp_dir,sample,coverage,sp_dir,sample,coverage,sp_dir,sp_abbr,het,sp_dir,nintervals,sp_abbr)
+        cmd_3 = 'gatk --java-options "-Xmx${MEM}g -XX:ParallelGCThreads=1" HaplotypeCaller -I %s/dedup/%s.%sX.dedup.sorted.bam -O %s/gvcf/%s.%sX.${SLURM_ARRAY_TASK_ID}.g.vcf.gz -R %s/genome/%s.fa --heterozygosity %s --ERC GVCF --intervals %s/genome/%s_splits_interval_lists/%s_${SLURM_ARRAY_TASK_ID}.interval_list'%(sp_dir,sample,coverage,sp_dir,sample,coverage,sp_dir,sp_abbr,het,sp_dir,nintervals,sp_abbr)
     
     elif pipeline == "lowcoverage":
-        cmd_2 = 'gatk --java-options "-Xmx%dg -XX:ParallelGCThreads=1" HaplotypeCaller -I %s/dedup/%s.%sX.dedup.sorted.bam -O %s/gvcf/%s.%sX.${SLURM_ARRAY_TASK_ID}.g.vcf.gz -R %s/genome/%s.fa --heterozygosity %s --ERC GVCF --intervals %s/genome/%s_splits_interval_lists/%s_${SLURM_ARRAY_TASK_ID}.interval_list --minDanglingBranchLength 1 --minPruning 1'%((int(memory_hc)-2),sp_dir,sample,coverage,sp_dir,sample,coverage,sp_dir,sp_abbr,het,sp_dir,nintervals,sp_abbr)
+        cmd_3 = 'gatk --java-options "-Xmx${MEM}g -XX:ParallelGCThreads=1" HaplotypeCaller -I %s/dedup/%s.%sX.dedup.sorted.bam -O %s/gvcf/%s.%sX.${SLURM_ARRAY_TASK_ID}.g.vcf.gz -R %s/genome/%s.fa --heterozygosity %s --ERC GVCF --intervals %s/genome/%s_splits_interval_lists/%s_${SLURM_ARRAY_TASK_ID}.interval_list --minDanglingBranchLength 1 --minPruning 1'%(sp_dir,sample,coverage,sp_dir,sample,coverage,sp_dir,sp_abbr,het,sp_dir,nintervals,sp_abbr)
     
-    cmd_list = [cmd_1,cmd_2]
+    cmd_list = [cmd_1,cmd_2,cmd_3]
 
     final_cmd = "\n\n".join(cmd_list)
 
@@ -478,7 +500,7 @@ def main():
     
     #Create sbatch script to grab deduped BAM files, downsample to desired proportion (just copy if proportion < 0.95)
     downsample_filenames = downsample_sbatch(sp_dir,sp_abbr = config_info["abbv"],sample_dict = config_info["sample_dict"],coverage = config_info["coverage"],coverage_dict = test_sample_info_dict,memory_ds = config_info["memory_ds"])
-    '''
+
     #Submit sbatch files, including memory and time requirements
     downsample_jobids = []
     completed_jobids = {}
@@ -543,39 +565,127 @@ def main():
     except:
         print("There was an error copying summary stat files")
     
-    '''
 
     #####Run HaplotypeCaller
     
-    #Create set of array scripts
-    ###Check if any files exist for a sample
+    #Submit all jobs the first time
+    #hc_filenames is a dictionary with the sample as key and filename as value
+    hc_filenames = {}
+    #all_jobids is a dictionary with jobid (including array numbers as key and sample as value)
+    all_jobids = {}
+
     for sample in config_info["sample_dict"]:
         sample_files = [name for name in os.listdir(gvcf_dir) if sample in name]
-        #Can look for .tbi files
-    
-        haplotypecaller_sbatch(sp_dir,sp_abbr=config_info["abbv"],sample=sample,coverage=config_info["coverage"],het=config_info["het"],memory_hc=config_info["memory_hc"],nintervals=nintervalfiles,pipeline=config_info["pipeline"])
-    
-    ###Submit all sbatch scripts, include full array #s, memory, time
-    #Keep track of sample + array_job_ids    
-    #job_id_dict[sample][job_id][job_id_1,job_id_2,job_id_3...job_id_n]
-    
-    
-    '''
-    #Check that the final sorted bam and index is available, if so, remove intermediate files (unsorted dedup, all aligned bams)
-    ###Only delete if validate says no errors found.
-    for sample in config_info["sample_dict"]:
-        if os.path.isfile('%s/dedup/%s.dedup.sorted.bam'%(sp_dir,sample)) and os.path.isfile('%s/dedup/%s.dedup.sorted.bai'%(sp_dir,sample)) and all_validation_stats[sample] == "ok":
-            if os.path.isfile('%s/dedup/%s.dedup.bam'%(sp_dir,sample)):
-                proc = Popen('rm %s/dedup/%s.dedup.bam'%(sp_dir,sample),shell=True)
-            for sra in config_info["sample_dict"][sample]:
-                if os.path.isfile('%s/alignment/%s.sorted.rg.bam'%(sp_dir,sra)):
-                    proc = Popen('rm %s/alignment/%s.sorted*'%(sp_dir,sra),shell=True)
+        
+        #If no files exist, submit full array
+        if len(sample_files) == 0:
+
+            #Create sbatch file, add to filename dictionary with sample as key and filename as value
+            hc_filename = haplotypecaller_sbatch(sp_dir,sp_abbr=config_info["abbv"],sample=sample,coverage=config_info["coverage"],het=config_info["het"],memory_hc=config_info["memory_hc"],nintervals=nintervalfiles,pipeline=config_info["pipeline"])
+            hc_filenames[sample] = hc_filename
+        
+            #Submit job, get base jobid for array
+            base_jobid = sbatch_submit_array(hc_filename,memory=config_info["memory_hc"],timelimit=config_info["time_hc"], array_nums="1-%s"%nintervalfiles)
+            sleep(1)
+        
+            #Add jobids for array to dictionary with jobid as key and sample as value
+            for i in range(1,nintervalfiles+1):
+            all_jobids["%s_%d"%(base_jobid,i)] = sample
+        
+        #If the number of sample files is less than the the number of interval files x2 (because of vcf and index), that means some intervals are missing. Only submit those intervals that don't have .tbi (index) files.
+        elif len(sample_files) < 2*nintervalfiles:
+            #Check each interval, see if it has both a .vcf.gz and .tbi file
+            missing = check_missing_gvcfs(arraystart=1,arrayend=nintervalfiles,sample_files=sample_files,sample=sample,coverage=coverage=config_info["coverage"])
+            
+            missing_vec = ",".joing(missing)
+            
+             #Submit job, get base jobid for array
+            base_jobid = sbatch_submit_array(hc_filename,memory=config_info["memory_hc"],timelimit=config_info["time_hc"], array_nums=missing_vec)
+            sleep(1)
+        
+            #Add jobids for array to dictionary with jobid as key and sample as value
+            for i in missing:
+            all_jobids["%s_%d"%(base_jobid,i)] = sample
+            
+        elif len(sample_files) == 2*nintervalfiles:
+            print("Sample %s has all gvcf files, skipping HaplotypeCaller"%sample)
+        
         else:
-            print("Something happened with sample deduping: %s"%(sample))     
+            print("Sample %s has more gvcfs than expected, check"%sample)
+            
+    
+    #Give sacct a chance to catch up       
+    sleep(20)
+    
+    #Then, enter while loop that will continue until the number of completed jobs matches the number of sbatch files
+    #Create dictionary of completed jobids and completion statuses
+    completed_jobids = {}
+    rerun_jobids = {}
+    successful_samples = {}
+    failed_samples = {}
+    
+    while len(completed_jobids) < len(all_jobids):
+        job_statuses = all_jobs_status(start_date)
+        for job in all_jobids:
+            if job not in completed_jobids:
+                if job in job_statuses:#Have to add this because array jobs may be delayed
+                    if job_statuses[job] != "PENDING" and job_statuses[job] != "RUNNING":
+                        completed_jobids[job] = job_statuses[job]
+                        
+                        #If job_id is "COMPLETED", check to make sure both the .vcf.gz file and .tbi file are both present. If they are, print and add to successful_samples dictionary (sample:[intervals])
+                        if job_statuses[job] == "COMPLETED":
+                            array_id = "_".split(job)[1]
+                            if os.path.isfile("%s/gvcf/%s.%sX.%s.g.vcf.gz"%(sp_dir,all_jobids[job],config_info["coverage"])) and os.path.isfile("%s/gvcf/%s.%sX.%s.g.vcf.gz.tbi"%(sp_dir,all_jobids[job],config_info["coverage"])):
+                                print("Job %s completed for sample %s"%(job, all_jobids[job]))
+                                if all_jobids[job] in successful_samples:
+                                    successful_sample[all_jobids[job]].append(array_id)
+                                else:
+                                    successful_sample[all_jobids[job]] = [array_id]
+                        #If job_id is not COMPLETED, it means there was some sort of failure in the job. Resubmit with 2x time (up to 7 days, or 168 hours) and 2x memory
+                        elif job_statuses[job] != "COMPLETED" and job not in rerun_jobids:
+                            new_mem = str(int(config_info["memory_hc"])*2)
+                            new_time =  int(config_info["time_hc"])*2
+                                if new_time > 168:
+                                    new_time = '168'
+                                else:
+                                    new_time = str(new_time)
+                            #Submit array with only that interval
+                            resubmitted_jobid = sbatch_submit_array(hc_filenames[all_jobids[job]],memory=new_mem,timelimit=new_time, array_nums=array_id)
+                            sleep(1)
+                            
+                            #Add job id (including array number) to both rerun_jobids and all_jobids
+                            rerun_jobids['%s_%s'%(resubmitted_jobid,array_id)] = [all_jobids[job]]
+                            
+                            all_jobids['%s_%s'%(resubmitted_jobid,array_id)] = [all_jobids[job]]
+                        
+                        #If just doesn't finished and already resubmitted, do not submit again, print failure to log file, and add to failed_samples dictionary
+                        elif job_statuses[job] != "COMPLETED" and job in rerun_jobids:
+                            print("HaplotypeCaller failure 2x for sample %s and interval %s"%(all_jobids[job],array_id))    
+                            if all_jobids[job] in failed_samples:
+                                failed_samples[all_jobids[job]].append(array_id)
+                            else:
+                                failed_samples[all_jobids[job]] = [array_id]
+                                
+                        else:
+                            print("Error with HaplotypeCaller job checking and resubmissions")
+                        
+        sleep(30)
+    
+    #After all jobs have finished, report which samples and intervals failed twice
+    for sample in failed_samples:
+        failed_intervals = ",".join(failed_samples[sample])
+        print("Sample %s, failed for intervals: %s"%(sample,failed_intervals))
+     
+
+    #Check that the final downsampled sorted bam and index are available, if so, remove intermediate files (unsorted dedup)
+    for sample in config_info["sample_dict"]:
+        if os.path.isfile('%s/dedup/%s.%sX.dedup.sorted.bam'%(sp_dir,sample,config_info["coverage"])) and os.path.isfile('%s/dedup/%s.%sX.dedup.sorted.bai'%(sp_dir,sample,config_info["coverage"])):
+            if os.path.isfile('%s/dedup/%s.%sX.dedup.bam'%(sp_dir,sample,config_info["coverage"])):
+                proc = Popen('%s/dedup/%s.%sX.dedup.bam'%(sp_dir,sample,config_info["coverage"]),shell=True)
                
     now = datetime.datetime.now()
-    print('Finished script 02: %s'%now)
+    print('Finished script 03: %s'%now)
 
-    '''
+
 if __name__ == "__main__":
     main()

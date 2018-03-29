@@ -36,13 +36,13 @@
 --COVERAGE 30
 
 #Number of intervals to run at a time?
---NINTERVALS 10
+--NINTERVALS 15
 
 #Memory for downsampling (GB)
 --MEMORY_DS 8
 
 #Starting memory (GB) for running HaplotypeCaller
---MEMORY_HC 8
+--MEMORY_HC 12
 
 #Starting time (hours) for running HaplotypeCaller
---TIME_HC 24
+--TIME_HC 48

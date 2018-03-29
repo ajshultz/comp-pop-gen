@@ -162,7 +162,7 @@ def sbatch_submit(filename,memory,timelimit):
 
 #Submit filename to slurm with sbatch with a given amount of time and memroy, returns job id number - includes first argument to include memory limit in java opts (use memory - 2)
 def sbatch_submit_array(filename,memory,timelimit, array_nums):
-    proc = Popen('sbatch --mem %s000 --time %s --array=%s %s %d'%(memory,timelimit,array_nums,filename,(int(memory)-2)),shell=True,stdout=PIPE,stderr=PIPE)
+    proc = Popen('sbatch --mem %s000 --time %s:00:00 --array=%s %s %d'%(memory,timelimit,array_nums,filename,(int(memory)-2)),shell=True,stdout=PIPE,stderr=PIPE)
     stdout,stderr = proc.communicate()
     stdout = stdout.decode("utf-8","ignore")
     stdout = stdout.strip()

@@ -637,7 +637,7 @@ def main():
                     if job_statuses[job] != "PENDING" and job_statuses[job] != "RUNNING":
                         completed_jobids[job] = job_statuses[job]
                         print(job)
-                        array_id = "_".split(job)[1]
+                        array_id = job.split("_")[1]
                         
                         #If job_id is "COMPLETED", check to make sure both the .vcf.gz file and .tbi file are both present. If they are, print and add to successful_samples dictionary (sample:[intervals])
                         if job_statuses[job] == "COMPLETED":

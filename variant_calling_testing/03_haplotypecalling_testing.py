@@ -271,7 +271,7 @@ def split_genome(sp_dir,sp_abbr,nintervals,outputdir):
         for i in range(n):
             outList[i].close()
         
-        nintervalfiles = nintervals
+        nintervalfiles = int(nintervals)
     
     else:
         faiList = []
@@ -359,6 +359,7 @@ def downsample_sbatch(sp_dir,sp_abbr,sample_dict,coverage,coverage_dict,memory_d
 #Create a haplotypecaller sbatch file for a sample
 def haplotypecaller_sbatch(sp_dir,sp_abbr,sample,coverage,het,memory_hc,nintervals,pipeline):
     slurm_script = array_script_create()
+    nintervals = str(nintervals)
 
     #Load modules and get versions for all programs used
     ##For now, using my own installation of GATK as it is not yet installed on the cluster
@@ -584,7 +585,7 @@ def main():
             hc_filenames[sample] = hc_filename
         
             #Submit job, get base jobid for array
-            base_jobid = sbatch_submit_array(hc_filename,memory=config_info["memory_hc"],timelimit=config_info["time_hc"], array_nums="1-%s"%nintervalfiles)
+            base_jobid = sbatch_submit_array(hc_filename,memory=config_info["memory_hc"],timelimit=config_info["time_hc"], array_nums="1-%d"%nintervalfiles)
             sleep(1)
         
             #Add jobids for array to dictionary with jobid as key and sample as value

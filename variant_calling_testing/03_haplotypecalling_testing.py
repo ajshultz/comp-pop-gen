@@ -576,6 +576,7 @@ def main():
 
     for sample in config_info["sample_dict"]:
         sample_files = [name for name in os.listdir(gvcf_dir) if sample in name]
+        print(sample_files)
         
         #If no files exist, submit full array
         if len(sample_files) == 0:

@@ -597,7 +597,7 @@ def main():
             #Check each interval, see if it has both a .vcf.gz and .tbi file
             missing = check_missing_gvcfs(arraystart=1,arrayend=nintervalfiles,sample_files=sample_files,sample=sample,coverage=config_info["coverage"])
             
-            missing_vec = ",".joing(missing)
+            missing_vec = ",".join(missing)
             
              #Submit job, get base jobid for array
             base_jobid = sbatch_submit_array(hc_filename,memory=config_info["memory_hc"],timelimit=config_info["time_hc"], array_nums=missing_vec)

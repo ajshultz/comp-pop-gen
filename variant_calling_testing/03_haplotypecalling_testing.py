@@ -575,8 +575,7 @@ def main():
     all_jobids = {}
 
     for sample in config_info["sample_dict"]:
-        print(os.listdir(gvcf_dir))
-        print(sample)
+
         sample_files = [name for name in os.listdir(gvcf_dir) if sample in name]
         finished_files = len([name for name in sample_files if ".tbi" in name])
         

@@ -623,6 +623,7 @@ def main():
     
     #Give sacct a chance to catch up       
     sleep(20)
+    print(all_jobids)
     
     #Then, enter while loop that will continue until the number of completed jobs matches the number of sbatch files
     #Create dictionary of completed jobids and completion statuses

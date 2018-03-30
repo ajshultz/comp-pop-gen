@@ -1,0 +1,44 @@
+#Example config file:
+
+#Path to desired output directory (directory for each species will be created within this directory). If not specified will be current working directory
+--OUT_DIR .
+
+#Species abbreviation for use in file headers (e.g. CCornix for hooded crow)
+--ABBV Charengus
+
+#Enter sample IDs and information, must include SRA accession numbers for download from NCBI: --SAMPLE <SAMPLE_ID> <SRA,SRA,SRA>
+#From Bioproject:PRJNA338612
+--SAMPLE_NCBI SAMN05589101 SRR5410393
+--SAMPLE_NCBI SAMN05589100 SRR5410394
+--SAMPLE_NCBI SAMN05589099 SRR5410395
+--SAMPLE_NCBI SAMN05589098 SRR5410396
+--SAMPLE_NCBI SAMN05589097 SRR5410397
+--SAMPLE_NCBI SAMN05589096 SRR5410398
+--SAMPLE_NCBI SAMN05589095 SRR5410399
+--SAMPLE_NCBI SAMN05589094 SRR5410400
+--SAMPLE_NCBI SAMN05589093 SRR5410401
+--SAMPLE_NCBI SAMN05589092 SRR5410402
+--SAMPLE_NCBI SAMN05589091 SRR5410403
+--SAMPLE_NCBI SAMN05589090 SRR5410404
+--SAMPLE_NCBI SAMN05589089 SRR5410405
+--SAMPLE_NCBI SAMN05589088 SRR5410406
+--SAMPLE_NCBI SAMN05589087 SRR5410407
+--SAMPLE_NCBI SAMN05589086 SRR5410408
+--SAMPLE_NCBI SAMN05589085 SRR5410409
+--SAMPLE_NCBI SAMN05589084 SRR5410410
+--SAMPLE_NCBI SAMN05589083 SRR5410411
+--SAMPLE_NCBI SAMN05589081 SRR5410413
+--SAMPLE_NCBI SAMN05589082 SRR5410412
+
+
+#At this time, using local fastq files is not supported. We will add this feature in the future.
+#--SAMPLE_LOCAL Ind_1
+
+#A genome must be supplied, either hosted on NCBI (use --GENOME_NCBI flag) or locally (use --GENOME_LOCAL flag). See examples below.
+
+#Enter name of species with genome assembly for mapping if genome hosted on Genbank. Must correspond to name of organism on NCBI if download is necessary (e.g. for Corvus cornix: Corvus_cornix_cornix)
+--GENOME_NCBI ftp://ftp.ncbi.nlm.nih.gov/genomes/all/GCF/000/966/335/GCF_000966335.1_ASM96633v1/GCF_000966335.1_ASM96633v1_genomic.fna.gz
+
+#If genome available locally, input path to fasta filename. If local fasta path is supplied, file will be copied into genome directory and renamed ABBV.fa for downstream use.
+#For example:
+#--GENOME_LOCAL ./Charengus/genome/Charengus.fa

@@ -1,0 +1,48 @@
+#Example config file:
+
+#Path to desired output directory (directory for each species will be created within this directory). If not specified will be current working directory
+--OUT_DIR .
+
+#Species abbreviation for use in file headers (e.g. CCornix for hooded crow)
+--ABBV Herato
+
+#Enter sample IDs and information, must include SRA accession numbers for download from NCBI: --SAMPLE <SAMPLE_ID> <SRA,SRA,SRA>
+#From Bioproject:PRJNA324415
+
+--SAMPLE_NCBI SAMN08049966 SRR6313531
+--SAMPLE_NCBI SAMN05224097 SRR4031993
+--SAMPLE_NCBI SAMN05224196 SRR4031995
+--SAMPLE_NCBI SAMN05224197 SRR4031996
+--SAMPLE_NCBI SAMN05224198 SRR4031997
+--SAMPLE_NCBI SAMN05224208 SRR4032008
+--SAMPLE_NCBI SAMN05224210 SRR4032010
+--SAMPLE_NCBI SAMN05224098 SRR4032020
+--SAMPLE_NCBI SAMN05224117 SRR4032022
+--SAMPLE_NCBI SAMN05224099 SRR4032031
+
+
+#If genome available locally, input path to fasta filename. If local fasta path is supplied, file will be copied into genome directory and renamed ABBV.fa for downstream use.
+#For example:
+#Herato downloaded from LepBase: 
+--GENOME_LOCAL ./Herato_genome/Heliconius_erato_demophoon_v1_-_scaffolds.fa
+
+#Heterozygosity for running haplotypecaller and genotypegvcf
+--HETEROZYGOSITY 0.025
+
+#Which version of pipeline to run (lowcoverage or highcoverage)
+--PIPELINE highcoverage
+
+#What is desired coverage to test?
+--COVERAGE 15
+
+#Number of intervals to run at a time?
+--NINTERVALS 15
+
+#Memory for downsampling (GB)
+--MEMORY_DS 8
+
+#Starting memory (GB) for running HaplotypeCaller
+--MEMORY_HC 12
+
+#Starting time (hours) for running HaplotypeCaller
+--TIME_HC 48

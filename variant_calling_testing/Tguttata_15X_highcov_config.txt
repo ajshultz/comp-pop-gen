@@ -31,7 +31,7 @@
 --PIPELINE highcoverage
 
 #What is desired coverage to test?
---COVERAGE 30
+--COVERAGE 15
 
 #Number of intervals to run at a time?
 --NINTERVALS CHROMOSOME

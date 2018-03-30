@@ -28,10 +28,10 @@
 --HETEROZYGOSITY 0.013
 
 #Which version of pipeline to run (lowcoverage or highcoverage)
---PIPELINE highcoverage
+--PIPELINE lowcoverage
 
 #What is desired coverage to test?
---COVERAGE 30
+--COVERAGE 4
 
 #Number of intervals to run at a time?
 --NINTERVALS CHROMOSOME

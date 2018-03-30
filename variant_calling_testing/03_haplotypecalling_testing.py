@@ -643,7 +643,7 @@ def main():
                         
                         #If job_id is "COMPLETED", check to make sure both the .vcf.gz file and .tbi file are both present. If they are, print and add to successful_samples dictionary (sample:[intervals])
                         if job_statuses[job] == "COMPLETED":
-                            if os.path.isfile("%s/gvcf/%s.%sX.%s.g.vcf.gz"%(sp_dir,all_jobids[job],config_info["coverage"])) and os.path.isfile("%s/gvcf/%s.%sX.%s.g.vcf.gz.tbi"%(sp_dir,all_jobids[job],config_info["coverage"])):
+                            if os.path.isfile("%s/gvcf/%s.%sX.%s.g.vcf.gz"%(sp_dir,all_jobids[job],config_info["coverage"],array_id)) and os.path.isfile("%s/gvcf/%s.%sX.%s.g.vcf.gz.tbi"%(sp_dir,all_jobids[job],config_info["coverage"],array_id)):
                                 print("Job %s completed for sample %s"%(job, all_jobids[job]))
                                 if all_jobids[job] in successful_samples:
                                     successful_sample[all_jobids[job]].append(array_id)

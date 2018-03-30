@@ -442,8 +442,10 @@ def main():
     config_info = extract_config(config_filename)
 
     #####Check if working directories exist, if not creates them
-    
-    sp_dir = "%s/%s_%sX"%(config_info["out_dir"],config_info["abbv"],config_info["coverage"])
+    if config_info["pipeline"] == "lowcoverage":
+        sp_dir = "%s/%s_%sX_LC"%(config_info["out_dir"],config_info["abbv"],config_info["coverage"])
+    elif config_info["pipeline"] == "highcoverage":
+        sp_dir = "%s/%s_%sX_HC"%(config_info["out_dir"],config_info["abbv"],config_info["coverage"])
     
     print("\nOutput will be written to %s\n"%sp_dir)
     

@@ -631,7 +631,8 @@ def main():
     
     while len(completed_jobids) < len(all_jobids):
         job_statuses = all_jobs_status(start_date)
-        for job in all_jobids:
+        current_jobs = list(all_jobids.keys())
+        for job in current_jobs:
             if job not in completed_jobids:
                 if job in job_statuses:#Have to add this because array jobs may be delayed
                     if job_statuses[job] != "PENDING" and job_statuses[job] != "RUNNING":

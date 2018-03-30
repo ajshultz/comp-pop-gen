@@ -637,7 +637,6 @@ def main():
                 if job in job_statuses:#Have to add this because array jobs may be delayed
                     if job_statuses[job] != "PENDING" and job_statuses[job] != "RUNNING":
                         completed_jobids[job] = job_statuses[job]
-                        print(job)
                         array_id = job.split("_")[1]
                         
                         #If job_id is "COMPLETED", check to make sure both the .vcf.gz file and .tbi file are both present. If they are, print and add to successful_samples dictionary (sample:[intervals])
@@ -664,6 +663,8 @@ def main():
                             rerun_jobids['%s_%s'%(resubmitted_jobid,array_id)] = [all_jobids[job]]
                             
                             all_jobids['%s_%s'%(resubmitted_jobid,array_id)] = [all_jobids[job]]
+                            
+                            print("Retrying sample %s, interval %s with %s memory and %s time"%(all_jobids[job],array_id,new_mem,new_time))
                         
                         #If just doesn't finished and already resubmitted, do not submit again, print failure to log file, and add to failed_samples dictionary
                         elif job_statuses[job] != "COMPLETED" and job in rerun_jobids:

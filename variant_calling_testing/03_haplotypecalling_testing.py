@@ -372,7 +372,7 @@ def haplotypecaller_sbatch(sp_dir,sp_abbr,sample,coverage,het,memory_hc,ninterva
         cmd_3 = 'gatk --java-options "-Xmx${MEM}g -XX:ParallelGCThreads=1" HaplotypeCaller -I %s/dedup/%s.%sX.dedup.sorted.bam -O %s/gvcf/%s.%sX.${SLURM_ARRAY_TASK_ID}.g.vcf.gz -R %s/genome/%s.fa --heterozygosity %s --ERC GVCF --intervals %s/genome/%s_splits_interval_lists/%s_${SLURM_ARRAY_TASK_ID}.interval_list'%(sp_dir,sample,coverage,sp_dir,sample,coverage,sp_dir,sp_abbr,het,sp_dir,nintervals,sp_abbr)
     
     elif pipeline == "lowcoverage":
-        cmd_3 = 'gatk --java-options "-Xmx${MEM}g -XX:ParallelGCThreads=1" HaplotypeCaller -I %s/dedup/%s.%sX.dedup.sorted.bam -O %s/gvcf/%s.%sX.${SLURM_ARRAY_TASK_ID}.g.vcf.gz -R %s/genome/%s.fa --heterozygosity %s --ERC GVCF --intervals %s/genome/%s_splits_interval_lists/%s_${SLURM_ARRAY_TASK_ID}.interval_list --minDanglingBranchLength 1 --minPruning 1'%(sp_dir,sample,coverage,sp_dir,sample,coverage,sp_dir,sp_abbr,het,sp_dir,nintervals,sp_abbr)
+        cmd_3 = 'gatk --java-options "-Xmx${MEM}g -XX:ParallelGCThreads=1" HaplotypeCaller -I %s/dedup/%s.%sX.dedup.sorted.bam -O %s/gvcf/%s.%sX.${SLURM_ARRAY_TASK_ID}.g.vcf.gz -R %s/genome/%s.fa --heterozygosity %s --ERC GVCF --intervals %s/genome/%s_splits_interval_lists/%s_${SLURM_ARRAY_TASK_ID}.interval_list --min-dangling-branch-length 1 --min-pruning 1'%(sp_dir,sample,coverage,sp_dir,sample,coverage,sp_dir,sp_abbr,het,sp_dir,nintervals,sp_abbr)
     
     cmd_list = [cmd_1,cmd_2,cmd_3]
 
@@ -662,9 +662,9 @@ def main():
                             sleep(1)
                             
                             #Add job id (including array number) to both rerun_jobids and all_jobids
-                            rerun_jobids['%s_%s'%(resubmitted_jobid,array_id)] = [all_jobids[job]]
+                            rerun_jobids['%s_%s'%(resubmitted_jobid,array_id)] = all_jobids[job]
                             
-                            all_jobids['%s_%s'%(resubmitted_jobid,array_id)] = [all_jobids[job]]
+                            all_jobids['%s_%s'%(resubmitted_jobid,array_id)] = all_jobids[job]
                             
                             print("Retrying sample %s, interval %s with %s memory and %s time"%(all_jobids[job],array_id,new_mem,new_time))
                         

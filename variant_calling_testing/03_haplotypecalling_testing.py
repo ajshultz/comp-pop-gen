@@ -646,9 +646,9 @@ def main():
                             if os.path.isfile("%s/gvcf/%s.%sX.%s.g.vcf.gz"%(sp_dir,all_jobids[job],config_info["coverage"],array_id)) and os.path.isfile("%s/gvcf/%s.%sX.%s.g.vcf.gz.tbi"%(sp_dir,all_jobids[job],config_info["coverage"],array_id)):
                                 print("Job %s completed for sample %s"%(job, all_jobids[job]))
                                 if all_jobids[job] in successful_samples:
-                                    successful_sample[all_jobids[job]].append(array_id)
+                                    successful_samples[all_jobids[job]].append(array_id)
                                 else:
-                                    successful_sample[all_jobids[job]] = [array_id]
+                                    successful_samples[all_jobids[job]] = [array_id]
                         #If job_id is not COMPLETED, it means there was some sort of failure in the job. Resubmit with 2x time (up to 7 days, or 168 hours) and 2x memory
                         elif job_statuses[job] != "COMPLETED" and job not in rerun_jobids:
                             new_mem = str(int(config_info["memory_hc"])*2)

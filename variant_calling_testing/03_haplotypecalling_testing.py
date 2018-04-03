@@ -691,7 +691,7 @@ def main():
     for sample in config_info["sample_dict"]:
         if os.path.isfile('%s/dedup/%s.%sX.dedup.sorted.bam'%(sp_dir,sample,config_info["coverage"])) and os.path.isfile('%s/dedup/%s.%sX.dedup.sorted.bai'%(sp_dir,sample,config_info["coverage"])):
             if os.path.isfile('%s/dedup/%s.%sX.dedup.bam'%(sp_dir,sample,config_info["coverage"])):
-                proc = Popen('%s/dedup/%s.%sX.dedup.bam'%(sp_dir,sample,config_info["coverage"]),shell=True)
+                proc = Popen('rm %s/dedup/%s.%sX.dedup.bam'%(sp_dir,sample,config_info["coverage"]),shell=True)
                
     now = datetime.datetime.now()
     print('Finished script 03: %s'%now)

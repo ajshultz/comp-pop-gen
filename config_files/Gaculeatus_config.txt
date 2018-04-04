@@ -814,8 +814,10 @@
 #A genome must be supplied, either hosted on NCBI (use --GENOME_NCBI flag) or locally (use --GENOME_LOCAL flag). See examples below.
 
 #Enter name of species with genome assembly for mapping if genome hosted on Genbank. Must correspond to name of organism on NCBI if download is necessary (e.g. for Corvus cornix: Corvus_cornix_cornix)
---GENOME_NCBI 
+#--GENOME_NCBI 
 
 #If genome available locally, input path to fasta filename. If local fasta path is supplied, file will be copied into genome directory and renamed ABBV.fa for downstream use.
 #For example:
-#--GENOME_LOCAL ./Gaculeatus/genome/Gaculeatus.fa
+--GENOME_LOCAL ./Gaculeatus/genome/Gaculeatus.fa
+#From ftp://ftp.ensembl.org/pub/release-91/fasta/gasterosteus_aculeatus/dna/Gasterosteus_aculeatus.BROADS1.dna.toplevel.fa.gz 
+#Annotation:  ftp://ftp.ensembl.org/pub/release-91/gff3/gasterosteus_aculeatus/Gasterosteus_aculeatus.BROADS1.91.gff3.gz

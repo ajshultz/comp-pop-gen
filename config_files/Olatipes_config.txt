@@ -1,0 +1,47 @@
+#Example config file:
+
+#Path to desired output directory (directory for each species will be created within this directory). If not specified will be current working directory
+--OUT_DIR .
+
+#Species abbreviation for use in file headers (e.g. CCornix for hooded crow)
+--ABBV Olatipes
+
+#Enter sample IDs and information, must include SRA accession numbers for download from NCBI: --SAMPLE <SAMPLE_ID> <SRA,SRA,SRA>
+#From Bioproject:PRJEB2759
+--SAMPLE_NCBI SAMEA1317600 ERR110345
+--SAMPLE_NCBI SAMEA1317593 ERR110346
+--SAMPLE_NCBI SAMEA1317611 ERR110347
+--SAMPLE_NCBI SAMEA1317608 ERR110348
+--SAMPLE_NCBI SAMEA1317601 ERR110349
+--SAMPLE_NCBI SAMEA1317595 ERR110350
+--SAMPLE_NCBI SAMEA1317614 ERR110351
+--SAMPLE_NCBI SAMEA1317615 ERR110352
+--SAMPLE_NCBI SAMEA1317607 ERR110353
+--SAMPLE_NCBI SAMEA1317604 ERR110354
+--SAMPLE_NCBI SAMEA1317610 ERR110355
+--SAMPLE_NCBI SAMEA1317613 ERR110356
+--SAMPLE_NCBI SAMEA1317612 ERR110357
+--SAMPLE_NCBI SAMEA1317616 ERR110358
+--SAMPLE_NCBI SAMEA1317597 ERR110359
+--SAMPLE_NCBI SAMEA1317599 ERR110360
+--SAMPLE_NCBI SAMEA1317605 ERR110361
+--SAMPLE_NCBI SAMEA1317609 ERR110362
+--SAMPLE_NCBI SAMEA1317598 ERR110363
+--SAMPLE_NCBI SAMEA1317596 ERR110364
+--SAMPLE_NCBI SAMEA1317602 ERR110365
+--SAMPLE_NCBI SAMEA1317594 ERR110366
+--SAMPLE_NCBI SAMEA1317603 ERR110367
+--SAMPLE_NCBI SAMEA1317606 ERR110368
+
+
+#At this time, using local fastq files is not supported. We will add this feature in the future.
+#--SAMPLE_LOCAL Ind_1
+
+#A genome must be supplied, either hosted on NCBI (use --GENOME_NCBI flag) or locally (use --GENOME_LOCAL flag). See examples below.
+
+#Enter name of species with genome assembly for mapping if genome hosted on Genbank. Must correspond to name of organism on NCBI if download is necessary (e.g. for Corvus cornix: Corvus_cornix_cornix)
+--GENOME_NCBI ftp://ftp.ncbi.nlm.nih.gov/genomes/all/GCF/002/234/675/GCF_002234675.1_ASM223467v1/GCF_002234675.1_ASM223467v1_genomic.fna.gz
+
+#If genome available locally, input path to fasta filename. If local fasta path is supplied, file will be copied into genome directory and renamed ABBV.fa for downstream use.
+#For example:
+#--GENOME_LOCAL ./Olatipes/genome/Olatipes.fa

@@ -559,9 +559,12 @@ def main():
         job_statuses = all_jobs_status(start_date)
         for job in sra_dl_jobids:
             if job not in completed_jobids:
-                if job_statuses[job] != "PENDING" and job_statuses[job] != "RUNNING":
-                    completed_jobids[job] = job_statuses[job]
-                    print("Job %s completed"%job)
+                try:
+                    if job_statuses[job] != "PENDING" and job_statuses[job] != "RUNNING":
+                        completed_jobids[job] = job_statuses[job]
+                        print("Job %s completed"%job)
+                except:
+                    pass
         sleep(30)
     
     #After all jobs have finished, report which jobs failed

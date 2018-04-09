@@ -123,7 +123,7 @@ def extract_config(config_filename):
         print("No specification of how much memory to use for downsampling. Using 8GB by default")
 
     if "time_ds" not in config_info:
-        config_info["time_hc"] = "8"
+        config_info["time_ds"] = "8"
         print("No specification of how much time to use for downsampling, using 8 hours by default")
     
     if "memory_hc" not in config_info:

@@ -666,11 +666,11 @@ def main():
                             
                             all_jobids['%s_%s'%(resubmitted_jobid,array_id)] = all_jobids[job]
                             
-                            print("Retrying sample %s, interval %s with %s memory and %s time"%(all_jobids[job],array_id,new_mem,new_time))
+                            print("Job %s failed, retrying sample %s, interval %s with %s memory and %s time"%(job, all_jobids[job],array_id,new_mem,new_time))
                         
                         #If just doesn't finished and already resubmitted, do not submit again, print failure to log file, and add to failed_samples dictionary
                         elif job_statuses[job] != "COMPLETED" and job in rerun_jobids:
-                            print("HaplotypeCaller failure 2x for sample %s and interval %s"%(all_jobids[job],array_id))    
+                            print("HaplotypeCaller job %s failure 2x for sample %s and interval %s"%(job,all_jobids[job],array_id))    
                             if all_jobids[job] in failed_samples:
                                 failed_samples[all_jobids[job]].append(array_id)
                             else:

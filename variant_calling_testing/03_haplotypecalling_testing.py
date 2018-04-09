@@ -523,9 +523,14 @@ def main():
         sleep(30)
     
     #After all jobs have finished, report which jobs failed
+    need_to_stop = []
     for job in completed_jobids:
         if completed_jobids[job] != "COMPLETED":
             print("Downsample %s failed with code: %s"%(job,completed_jobids[job]))
+            need_to_stop.append(job)
+    
+    if len(need_to_stop) >= 1:
+        sys.exit("Errors in downsampling, check before continuing")
  
  
     #####Collate coverage summary statistics from downsampled files

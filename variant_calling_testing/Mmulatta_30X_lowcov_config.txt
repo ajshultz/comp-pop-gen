@@ -40,6 +40,9 @@
 #Memory for downsampling (GB)
 --MEMORY_DS 12
 
+#Time for downsampling (hours)
+--TIME_DS 24
+
 #Starting memory (GB) for running HaplotypeCaller
 --MEMORY_HC 16
 

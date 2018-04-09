@@ -74,6 +74,8 @@ def extract_config(config_filename):
                 config_info["nintervals"] = line[1]
             elif line[0] == "--MEMORY_DS":
                 config_info["memory_ds"] = line[1]
+            elif line[0] == "--TIME_DS":
+                config_info["time_ds"] = line[1]
             elif line[0] == "--MEMORY_HC":
                 config_info["memory_hc"] = line[1]
             elif line[0] == "--TIME_HC":
@@ -119,6 +121,10 @@ def extract_config(config_filename):
     if "memory_ds" not in config_info:
         config_info["memory_ds"] = "8"
         print("No specification of how much memory to use for downsampling. Using 8GB by default")
+
+    if "time_ds" not in config_info:
+        config_info["time_hc"] = "8"
+        print("No specification of how much time to use for downsampling, using 8 hours by default")
     
     if "memory_hc" not in config_info:
         config_info["memory_hc"] = "8"
@@ -153,7 +159,7 @@ def array_script_create():
 
 #Submit filename to slurm with sbatch with a given amount of time and memroy, returns job id number
 def sbatch_submit(filename,memory,timelimit):
-    proc = Popen('sbatch --mem %s --time %s %s '%(memory,timelimit,filename),shell=True,stdout=PIPE,stderr=PIPE)
+    proc = Popen('sbatch --mem %s --time %s:00:00 %s '%(memory,timelimit,filename),shell=True,stdout=PIPE,stderr=PIPE)
     stdout,stderr = proc.communicate()
     stdout = stdout.decode("utf-8","ignore")
     stdout = stdout.strip()
@@ -507,7 +513,7 @@ def main():
     downsample_jobids = []
     completed_jobids = {}
     for i in range(0,len(downsample_filenames)):
-        downsample_jobids.append(sbatch_submit(downsample_filenames[i],memory="%s000"%config_info["memory_ds"],timelimit="0-08:00"))
+        downsample_jobids.append(sbatch_submit(downsample_filenames[i],memory="%s000"%config_info["memory_ds"],timelimit=config_info["time_ds"]))
         sleep(1)
     #Add an extra sleep to give sacct a chance to catch up
     sleep(20)

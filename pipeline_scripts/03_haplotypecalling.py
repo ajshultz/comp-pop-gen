@@ -198,11 +198,11 @@ def num_pend_run(job_id_list,date):
     return(count)
 
 #Check for missing gvcf interval files for a given sample in list of files. Will return a list of the missing intervals
-def check_missing_gvcfs(arraystart,arrayend,sample_files,sample,coverage):
+def check_missing_gvcfs(arraystart,arrayend,sample_files,sample):
     missing_ints = []
     #Check if file_ext is a string, if so, just test that one type
     for i in range(arraystart,arrayend+1):
-        if "%s.%sX.%s.g.vcf.gz"%(sample,coverage,str(i)) not in sample_files or "%s.%sX.%s.g.vcf.gz.tbi"%(sample,coverage,str(i)) not in sample_files:
+        if "%s.%s.g.vcf.gz"%(sample,str(i)) not in sample_files or "%s.%s.g.vcf.gz.tbi"%(sample,str(i)) not in sample_files:
             missing_ints.append(str(i))            
     
     return(missing_ints)
@@ -291,7 +291,7 @@ def split_genome(sp_dir,sp_abbr,nintervals,outputdir):
 
 ###Create sbatch scripts
 #Create a haplotypecaller sbatch file for a sample
-def haplotypecaller_sbatch(sp_dir,sp_abbr,sample,coverage,het,memory_hc,nintervals,pipeline):
+def haplotypecaller_sbatch(sp_dir,sp_abbr,sample,het,memory_hc,nintervals,pipeline):
     slurm_script = array_script_create()
     nintervals = str(nintervals)
 
@@ -303,18 +303,18 @@ def haplotypecaller_sbatch(sp_dir,sp_abbr,sample,coverage,het,memory_hc,ninterva
     
     if pipeline == "highcoverage":
     #Command to donwsample if proportion <0.95, if >0.95, just copy
-        cmd_3 = 'gatk --java-options "-Xmx${MEM}g -XX:ParallelGCThreads=1" HaplotypeCaller -I %s/dedup/%s.%sX.dedup.sorted.bam -O %s/gvcf/%s.%sX.${SLURM_ARRAY_TASK_ID}.g.vcf.gz -R %s/genome/%s.fa --heterozygosity %s --ERC GVCF --intervals %s/genome/%s_splits_interval_lists/%s_${SLURM_ARRAY_TASK_ID}.interval_list'%(sp_dir,sample,coverage,sp_dir,sample,coverage,sp_dir,sp_abbr,het,sp_dir,nintervals,sp_abbr)
+        cmd_3 = 'gatk --java-options "-Xmx${MEM}g -XX:ParallelGCThreads=1" HaplotypeCaller -I %s/dedup/%s.dedup.sorted.bam -O %s/gvcf/%s.${SLURM_ARRAY_TASK_ID}.g.vcf.gz -R %s/genome/%s.fa --heterozygosity %s --ERC GVCF --intervals %s/genome/%s_splits_interval_lists/%s_${SLURM_ARRAY_TASK_ID}.interval_list'%(sp_dir,sample,sp_dir,sample,sp_dir,sp_abbr,het,sp_dir,nintervals,sp_abbr)
     
     elif pipeline == "lowcoverage":
-        cmd_3 = 'gatk --java-options "-Xmx${MEM}g -XX:ParallelGCThreads=1" HaplotypeCaller -I %s/dedup/%s.%sX.dedup.sorted.bam -O %s/gvcf/%s.%sX.${SLURM_ARRAY_TASK_ID}.g.vcf.gz -R %s/genome/%s.fa --heterozygosity %s --ERC GVCF --intervals %s/genome/%s_splits_interval_lists/%s_${SLURM_ARRAY_TASK_ID}.interval_list --min-dangling-branch-length 1 --min-pruning 1'%(sp_dir,sample,coverage,sp_dir,sample,coverage,sp_dir,sp_abbr,het,sp_dir,nintervals,sp_abbr)
+        cmd_3 = 'gatk --java-options "-Xmx${MEM}g -XX:ParallelGCThreads=1" HaplotypeCaller -I %s/dedup/%s.dedup.sorted.bam -O %s/gvcf/%s.${SLURM_ARRAY_TASK_ID}.g.vcf.gz -R %s/genome/%s.fa --heterozygosity %s --ERC GVCF --intervals %s/genome/%s_splits_interval_lists/%s_${SLURM_ARRAY_TASK_ID}.interval_list --min-dangling-branch-length 1 --min-pruning 1'%(sp_dir,sample,sp_dir,sample,sp_dir,sp_abbr,het,sp_dir,nintervals,sp_abbr)
     
     cmd_list = [cmd_1,cmd_2,cmd_3]
 
     final_cmd = "\n\n".join(cmd_list)
 
 #Format sbatch script
-    haplocaller_script = slurm_script.format(partition="shared",cores="2",nodes="1",jobid="hc_%sX"%coverage,sp_dir=sp_dir,cmd=final_cmd)
-    out_filename = "%s/scripts/06_haplotypecaller_%sX_%s_array.sbatch"%(sp_dir,coverage,sample)
+    haplocaller_script = slurm_script.format(partition="shared",cores="2",nodes="1",jobid="hc",sp_dir=sp_dir,cmd=final_cmd)
+    out_filename = "%s/scripts/06_haplotypecaller_%s_array.sbatch"%(sp_dir,sample)
     out_file = open(out_filename,"w")
     out_file.write(haplocaller_script)
     out_file.close
@@ -340,10 +340,9 @@ def main():
     config_info = extract_config(config_filename)
 
     #####Check if working directories exist, if not creates them
-    if config_info["pipeline"] == "lowcoverage":
-        sp_dir = "%s/%s_%sX_LC"%(config_info["out_dir"],config_info["abbv"],config_info["coverage"])
-    elif config_info["pipeline"] == "highcoverage":
-        sp_dir = "%s/%s_%sX_HC"%(config_info["out_dir"],config_info["abbv"],config_info["coverage"])
+    sp_dir = "%s/%s"%(config_info["out_dir"],config_info["abbv"])
+    
+    print("\nOutput will be written to %s\n"%sp_dir)
     
     print("\nOutput will be written to %s\n"%sp_dir)
     
@@ -389,7 +388,7 @@ def main():
         if finished_files == 0:
 
             #Create sbatch file, add to filename dictionary with sample as key and filename as value
-            hc_filename = haplotypecaller_sbatch(sp_dir,sp_abbr=config_info["abbv"],sample=sample,coverage=config_info["coverage"],het=config_info["het"],memory_hc=config_info["memory_hc"],nintervals=config_info["nintervals"],pipeline=config_info["pipeline"])
+            hc_filename = haplotypecaller_sbatch(sp_dir,sp_abbr=config_info["abbv"],sample=sample,het=config_info["het"],memory_hc=config_info["memory_hc"],nintervals=config_info["nintervals"],pipeline=config_info["pipeline"])
             hc_filenames[sample] = hc_filename
         
             #Submit job, get base jobid for array
@@ -403,10 +402,10 @@ def main():
         #If the number of sample files is less than the the number of interval files x2 (because of vcf and index), that means some intervals are missing. Only submit those intervals that don't have .tbi (index) files.
         elif finished_files < nintervalfiles:
             #Check each interval, see if it has both a .vcf.gz and .tbi file
-            hc_filename = haplotypecaller_sbatch(sp_dir,sp_abbr=config_info["abbv"],sample=sample,coverage=config_info["coverage"],het=config_info["het"],memory_hc=config_info["memory_hc"],nintervals=config_info["nintervals"],pipeline=config_info["pipeline"])
+            hc_filename = haplotypecaller_sbatch(sp_dir,sp_abbr=config_info["abbv"],sample=sample,het=config_info["het"],memory_hc=config_info["memory_hc"],nintervals=config_info["nintervals"],pipeline=config_info["pipeline"])
             hc_filenames[sample] = hc_filename
             
-            missing = check_missing_gvcfs(arraystart=1,arrayend=nintervalfiles,sample_files=sample_files,sample=sample,coverage=config_info["coverage"])
+            missing = check_missing_gvcfs(arraystart=1,arrayend=nintervalfiles,sample_files=sample_files,sample=sample)
             
             missing_vec = ",".join(missing)
             
@@ -447,7 +446,7 @@ def main():
                         
                         #If job_id is "COMPLETED", check to make sure both the .vcf.gz file and .tbi file are both present. If they are, print and add to successful_samples dictionary (sample:[intervals])
                         if job_statuses[job] == "COMPLETED":
-                            if os.path.isfile("%s/gvcf/%s.%sX.%s.g.vcf.gz"%(sp_dir,all_jobids[job],config_info["coverage"],array_id)) and os.path.isfile("%s/gvcf/%s.%sX.%s.g.vcf.gz.tbi"%(sp_dir,all_jobids[job],config_info["coverage"],array_id)):
+                            if os.path.isfile("%s/gvcf/%s.%s.g.vcf.gz"%(sp_dir,all_jobids[job],array_id)) and os.path.isfile("%s/gvcf/%s.%s.g.vcf.gz.tbi"%(sp_dir,all_jobids[job],array_id)):
                                 print("Job %s completed for sample %s"%(job, all_jobids[job]))
                                 if all_jobids[job] in successful_samples:
                                     successful_samples[all_jobids[job]].append(array_id)
@@ -490,12 +489,6 @@ def main():
         failed_intervals = ",".join(failed_samples[sample])
         print("Sample %s, failed for intervals: %s"%(sample,failed_intervals))
      
-
-    #Check that the final downsampled sorted bam and index are available, if so, remove intermediate files (unsorted dedup)
-    for sample in config_info["sample_dict"]:
-        if os.path.isfile('%s/dedup/%s.%sX.dedup.sorted.bam'%(sp_dir,sample,config_info["coverage"])) and os.path.isfile('%s/dedup/%s.%sX.dedup.sorted.bai'%(sp_dir,sample,config_info["coverage"])):
-            if os.path.isfile('%s/dedup/%s.%sX.dedup.bam'%(sp_dir,sample,config_info["coverage"])):
-                proc = Popen('rm %s/dedup/%s.%sX.dedup.bam'%(sp_dir,sample,config_info["coverage"]),shell=True)
                
     now = datetime.datetime.now()
     print('Finished script 03: %s'%now)

@@ -413,7 +413,7 @@ def main():
     
     while len(completed_jobids) < len(all_jobids):
         job_statuses = all_jobs_status(start_date)
-        current_jobs = list(all_jobids.keys())
+        current_jobs = all_jobids
         for job in current_jobs:
             if job not in completed_jobids:
                 if job in job_statuses:#Have to add this because array jobs may be delayed

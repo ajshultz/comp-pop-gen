@@ -281,7 +281,7 @@ def genotypegvcf_sbatch(sp_dir,sp_abbr,sample_list,coverage,het,nintervals,memor
     
     cmd_4 = 'gatk --java-options "-Xmx${MEM}g -XX:ParallelGCThreads=1" GenotypeGVCFs -R %s/genome/%s.fa -V %s/gvcf/%s.%sX.${SLURM_ARRAY_TASK_ID}.g.vcf.gz -O %s/vcf/%s.%sX.${SLURM_ARRAY_TASK_ID}.vcf.gz --heterozygosity %s --intervals %s/genome/%s_splits_interval_lists/%s_${SLURM_ARRAY_TASK_ID}.interval_list'%(sp_dir,sp_abbr,sp_dir,sp_abbr,coverage,sp_dir,sp_abbr,coverage,het,sp_dir,nintervals,sp_abbr)
     
-    cmd_5 = 'gatk --java-options "-Xmx${MEM}g -XX:ParallelGCThreads=1" VariantsToTable -V %s/vcf/%s.%sX.${SLURM_ARRAY_TASK_ID}.vcf.gz -F CHROM -F POS -F TYPE -F HET -F HOM-REF -F HOM-VAR -F NO-CALL -F NCALLED -F QD -F MQ -F FS -F SOR -F MQRankSum -F ReadPosRankSum -R %s/genome/%s.fa --intervals %s/genome/%s_splits_interval_lists/%s_${SLURM_ARRAY_TASK_ID}.interval_list'%(sp_dir,sp_abbr,coverage,sp_dir,sp_abbr,sp_dir,nintervals,sp_abbr)
+    cmd_5 = 'gatk --java-options "-Xmx${MEM}g -XX:ParallelGCThreads=1" VariantsToTable -V %s/vcf/%s.%sX.${SLURM_ARRAY_TASK_ID}.vcf.gz -O %s/stats/%s_%sX_${SLURM_ARRAY_TASK_ID}_unfilteredVCFstats.txt -F CHROM -F POS -F TYPE -F HET -F HOM-REF -F HOM-VAR -F NO-CALL -F NCALLED -F QD -F MQ -F FS -F SOR -F MQRankSum -F ReadPosRankSum -R %s/genome/%s.fa --intervals %s/genome/%s_splits_interval_lists/%s_${SLURM_ARRAY_TASK_ID}.interval_list'%(sp_dir,sp_abbr,coverage,sp_dir,sp_abbr,coverage,sp_dir,sp_abbr,sp_dir,nintervals,sp_abbr)
         
     cmd_list = [cmd_1,cmd_2,cmd_3,cmd_4,cmd_5]
 
@@ -444,7 +444,7 @@ def main():
                             
                             all_jobids.append('%s_%s'%(resubmitted_jobid,array_id))
                             
-                            print("Job %s failed, retrying interval %s with %s memory and %s time"%(job,array_id,new_mem,new_time))
+                            print("GenotypeGVCF job %s failed, retrying interval %s with %s memory and %s time"%(job,array_id,new_mem,new_time))
                         
                         #If just doesn't finish and already resubmitted, do not submit again, print failure to log file, and add to failed_intervals list
                         elif job_statuses[job] != "COMPLETED" and job in rerun_jobids:

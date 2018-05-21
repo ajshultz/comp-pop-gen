@@ -448,7 +448,7 @@ def main():
                         
                         #If just doesn't finish and already resubmitted, do not submit again, print failure to log file, and add to failed_intervals list
                         elif job_statuses[job] != "COMPLETED" and job in rerun_jobids:
-                            print("GenotypeGVCF job %s failure 2x for and interval %s"%(array_id))
+                            print("GenotypeGVCF job %s failure 2x for and interval %s"%(job,array_id))
                             failed_intervals.append(array_id)
                                 
                         else:

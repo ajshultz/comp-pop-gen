@@ -48,3 +48,6 @@
 
 #Starting time (hours) for running HaplotypeCaller
 --TIME_HC 96
+
+#Starting time (hours) for running GenotypeGVCF
+--TIME_GG 4

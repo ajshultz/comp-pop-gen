@@ -305,7 +305,7 @@ def main():
     config_filename = args.config
     
     now = datetime.datetime.now()
-    print('Staring work on script 03: %s'%now)
+    print('Staring work on script 04: %s'%now)
     start_date = now.strftime("%Y-%m-%d")
     
     #Open config file and get attributes
@@ -424,7 +424,7 @@ def main():
                         #If job_id is "COMPLETED", check to make sure both the .vcf.gz file and .tbi file are both present. If they are, print and add to successful_samples dictionary (sample:[intervals])
                         if job_statuses[job] == "COMPLETED":
                             if os.path.isfile("%s/vcf/%s.%sX.%s.vcf.gz"%(sp_dir,config_info["abbv"],config_info["coverage"],array_id)) and os.path.isfile("%s/vcf/%s.%sX.%s.vcf.gz.tbi"%(sp_dir,config_info["abbv"],config_info["coverage"],array_id)):
-                                print("Job %s completed for interval %s"%(job, array_id))
+                                print("GenotypeGVCF job %s completed for interval %s"%(job, array_id))
                                 successful_intervals.append(array_id)
 
                         #If job_id is not COMPLETED, it means there was some sort of failure in the job. Resubmit with 2x time (up to 7 days, or 168 hours) and 2x memory

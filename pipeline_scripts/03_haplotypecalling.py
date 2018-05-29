@@ -267,13 +267,13 @@ def split_genome(sp_dir,sp_abbr,nintervals,outputdir):
             line = line.strip().split("\t")
             faiList.append(line)
         #Get number of chromosomes, will produce that many interval files + 1
-        nchr = len([name for name in faiList if "NC_" in name[0]])
+        nchr = len([name for name in faiList if ("NC_" in name[0] or "CM" in name[0])])
         nintervalfiles=(nchr+1)
         filenum = 1
         #Open file to write all non-chromosomes
         randoutFile = open((outputdir+outHandle+"_"+(str(nintervalfiles))+".interval_list"),"w")
         for i in range(len(faiList)):
-            if "NC_" in faiList[i][0]:
+            if "NC_" in faiList[i][0] or "CM" in faiList[i][0]:
                 outFile = open((outputdir+outHandle+"_"+(str(filenum))+".interval_list"),"w")
                 outFile.write(faiList[i][0])
                 outFile.close()

@@ -36,7 +36,7 @@
 --PIPELINE lowcoverage
 
 #Number of intervals to run at a time?
---NINTERVALS 15
+--NINTERVALS CHROMOSOME
 
 #Starting memory (GB) for running HaplotypeCaller
 --MEMORY_HC 16

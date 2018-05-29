@@ -50,4 +50,4 @@
 --TIME_HC 96
 
 #Starting time (hours) for running GenotypeGVCF
---TIME_GG 4
+--TIME_GG 12

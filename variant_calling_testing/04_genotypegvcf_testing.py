@@ -429,8 +429,8 @@ def main():
 
                         #If job_id is not COMPLETED, it means there was some sort of failure in the job. Resubmit with 2x time (up to 7 days, or 168 hours) and 2x memory
                         elif job_statuses[job] != "COMPLETED" and job not in rerun_jobids:
-                            new_mem = str(int(config_info["memory_hc"])*2)
-                            new_time =  int(config_info["time_hc"])*2
+                            new_mem = str(int(config_info["memory_gg"])*2)
+                            new_time =  int(config_info["time_gg"])*2
                             if new_time > 168:
                                new_time = '168'
                             else:

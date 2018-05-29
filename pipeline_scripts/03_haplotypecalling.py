@@ -297,7 +297,7 @@ def haplotypecaller_sbatch(sp_dir,sp_abbr,sample,het,memory_hc,nintervals,pipeli
 
     #Load modules and get versions for all programs used
     ##For now, using my own installation of GATK as it is not yet installed on the cluster
-    cmd_1 = 'module load java/1.8.0_45-fasrc01'
+    cmd_1 = 'module load jdk/1.8.0_45-fasrc01'
     
     cmd_2 = 'MEM=$1'
     

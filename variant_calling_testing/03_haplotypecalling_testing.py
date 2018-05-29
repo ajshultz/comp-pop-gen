@@ -327,7 +327,7 @@ def downsample_sbatch(sp_dir,sp_abbr,sample_dict,coverage,coverage_dict,memory_d
 
             #Load modules and get versions for all programs used
             ##For now, using my own installation of GATK as it is not yet installed on the cluster
-            cmd_1 = 'module load java/1.8.0_45-fasrc01'
+            cmd_1 = 'module load jdk/1.8.0_45-fasrc01'
             
             #Command to donwsample if proportion <0.95, if >0.95, just copy
             if coverage_dict[sample] < 0.95:
@@ -369,7 +369,7 @@ def haplotypecaller_sbatch(sp_dir,sp_abbr,sample,coverage,het,memory_hc,ninterva
 
     #Load modules and get versions for all programs used
     ##For now, using my own installation of GATK as it is not yet installed on the cluster
-    cmd_1 = 'module load java/1.8.0_45-fasrc01'
+    cmd_1 = 'module load jdk/1.8.0_45-fasrc01'
     
     cmd_2 = 'MEM=$1'
     

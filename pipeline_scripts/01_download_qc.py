@@ -368,7 +368,7 @@ def fastq_trim_align_stats(sp_dir,sra,sp_abbr,sample):
 	read_group_info = '@RG\\tID:%s\\tSM:%s\\tPU:%s.%s\\tLB:%s\\tPL:illumina'%(sra,sample,sra,sample,sample)
 
 	#Load necessary modules
-	cmd_1 = 'module load NGmerge/0.2-fasrc01\nmodule load gcc/4.8.2-fasrc01 bwa/0.7.15-fasrc01\nmodule load java/1.8.0_45-fasrc01'
+	cmd_1 = 'module load NGmerge/0.2-fasrc01\nmodule load gcc/4.8.2-fasrc01 bwa/0.7.15-fasrc01\nmodule load jdk/1.8.0_45-fasrc01'
 
 	#If paired end data:
 	#Trim adapters with NGmerge

@@ -50,7 +50,7 @@
 --TIME_HC 96
 
 #Starting time (hours) for running GenotypeGVCF
---TIME_GG 12
+--TIME_GG 36
 
 #Memory (GB) for running GenotypeGVCF
 --MEMORY_GG 24

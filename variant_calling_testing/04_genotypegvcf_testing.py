@@ -289,7 +289,7 @@ def genotypegvcf_sbatch(sp_dir,sp_abbr,sample_list,coverage,het,nintervals,memor
     
         cmd_4 = 'gatk --java-options "-Xmx${MEM}g -XX:ParallelGCThreads=1" GenotypeGVCFs -R %s/genome/%s.fa -V %s/gvcf/%s.%sX.${SLURM_ARRAY_TASK_ID}.g.vcf.gz -O %s/vcf/%s.%sX.${SLURM_ARRAY_TASK_ID}.vcf.gz --heterozygosity %s --intervals %s/genome/%s_splits_interval_lists/%s_${SLURM_ARRAY_TASK_ID}.interval_list'%(sp_dir,sp_abbr,sp_dir,sp_abbr,coverage,sp_dir,sp_abbr,coverage,het,sp_dir,nintervals,sp_abbr)
     elif combine_gvcf_program == "GenomicsDBImport":
-        cmd_3 = 'gatk --java-options "-Xmx${MEM}g -XX:ParallelGCThreads=1" GenomicsDBImport -R %s/genome/%s.fa %s --intervals %s/genome/%s_splits_interval_lists/%s_${SLURM_ARRAY_TASK_ID}.interval_list --genomicsdb-workspace-path %s/genomics_db/interval_${SLURM_ARRAY_TASK_ID}'%(sp_dir,sp_abbr,all_sample_variant_call,sp_dir,nintervals,sp_abbr, sp_abbr)
+        cmd_3 = 'gatk --java-options "-Xmx${MEM}g -XX:ParallelGCThreads=1" GenomicsDBImport -R %s/genome/%s.fa %s --intervals %s/genome/%s_splits_interval_lists/%s_${SLURM_ARRAY_TASK_ID}.interval_list --genomicsdb-workspace-path %s/genomics_db/interval_${SLURM_ARRAY_TASK_ID}'%(sp_dir,sp_abbr,all_sample_variant_call,sp_dir,nintervals,sp_abbr,sp_dir)
     
         cmd_4 = 'gatk --java-options "-Xmx${MEM}g -XX:ParallelGCThreads=1" GenotypeGVCFs -R %s/genome/%s.fa -V gendb://%s/genomics_db/interval_${SLURM_ARRAY_TASK_ID} -O %s/vcf/%s.%sX.${SLURM_ARRAY_TASK_ID}.vcf.gz --heterozygosity %s --intervals %s/genome/%s_splits_interval_lists/%s_${SLURM_ARRAY_TASK_ID}.interval_list'%(sp_dir,sp_abbr,sp_dir,sp_dir,sp_abbr,coverage,het,sp_dir,nintervals,sp_abbr)
     

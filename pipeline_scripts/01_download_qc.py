@@ -207,9 +207,30 @@ def ncbi_sra_download_sbatch(sp_dir,sample_ncbi_dict):
                 cmd_1 = 'module load fastqc/0.11.5-fasrc01'
                 cmd_2 = 'wget -P %s/sra/ ftp://ftp-trace.ncbi.nih.gov/sra/sra-instant/reads/ByRun/sra/%s/%s/%s/%s.sra'%(sp_dir,sra[0:3],sra[0:6],sra,sra)
                 cmd_3 = r'%sfastq-dump --outdir %s/fastq --gzip --split-files %s/sra/%s.sra'%(path_to_sratools,sp_dir,sp_dir,sra)
-                cmd_4 = 'fastqc -o %s/fastqc %s/fastq/%s_1.fastq.gz %s/fastq/%s_2.fastq.gz'%(sp_dir,sp_dir,sra,sp_dir,sra) 
+                
+                #add check to see if SRA download worked, and if not, try ENA
+                cmd_4 = 'if [ -f %s/fastq/%s_1.fastq.gz ];\n\nthen'%(sp_dir,sra)
+                                   
+                cmd_5 = 'fastqc -o %s/fastqc %s/fastq/%s_1.fastq.gz %s/fastq/%s_2.fastq.gz'%(sp_dir,sp_dir,sra,sp_dir,sra)
+                
+                cmd_6 = 'else'
+                
+                if len(sra) < 10:
+                    cmd_7 = 'wget -P %s/fastq/ ftp://ftp.sra.ebi.ac.uk/vol1/fastq/%s/%s/%s_1.fastq.gz'%(sp_dir,sra[0:6],sra,sra)
+                else:
+                    cmd_7 = 'wget -P %s/fastq/ ftp://ftp.sra.ebi.ac.uk/vol1/fastq/%s/00%s/%s/%s_1.fastq.gz'%(sp_dir,sra[0:6],sra[-1],sra,sra)
+                if len(sra) < 10:
+                    cmd_8 = 'wget -P %s/fastq/ ftp://ftp.sra.ebi.ac.uk/vol1/fastq/%s/%s/%s_2.fastq.gz'%(sp_dir,sra[0:6],sra,sra)
+                else:
+                    cmd_8 = 'wget -P %s/fastq/ ftp://ftp.sra.ebi.ac.uk/vol1/fastq/%s/00%s/%s/%s_2.fastq.gz'%(sp_dir,sra[0:6],sra[-1],sra,sra)
+                
+                cmd_9 = 'fastqc -o %s/fastqc %s/fastq/%s_1.fastq.gz %s/fastq/%s_2.fastq.gz'%(sp_dir,sp_dir,sra,sp_dir,sra)
+                
+                cmd_10 = 'fi'
+                
+                cmd_list = [cmd_1,cmd_2,cmd_3,cmd_4,cmd_5,cmd_6,cmd_7,cmd_8,cmd_9,cmd_10]
             
-                final_cmd = "%s\n\n%s\n\n%s\n\n%s"%(cmd_1,cmd_2,cmd_3,cmd_4)
+                final_cmd = "\n\n".join(cmd_list)
     
         #Format sbatch script
                 sra_script = slurm_script.format(partition="shared",time="2-0:00",mem="4000",cores="1",nodes="1",jobid="SRA",sp_dir=sp_dir,cmd=final_cmd)
@@ -514,7 +535,7 @@ def main():
             sys.exit("The genome job finished but not all files and indexes are present. Please check, create missing indexes, and resubmit with local genome")
 
         print("\nGenome download and indexing successfully completed\n")
-
+    
     #####Create sbatch files to download SRA files and use fastq-dump to split
     
     #Create sbatch files
@@ -530,7 +551,7 @@ def main():
     
     #Combine sbatch filenames into single object:
     sra_dl_sbatch_filenames = ncbi_sra_dl_sbatch_filenames + ena_sra_dl_sbatch_filenames
-       
+     
     #Submit SRA read sbatch files, only allow 20 SRA jobs to run (or pend) at a time (set max_jobs)  
     max_jobs = 20
     sra_dl_jobids = []
@@ -628,6 +649,6 @@ def main():
     
     now = datetime.datetime.now()
     print('Scripted finished: %s'%now)     
-
+    
 if __name__ == "__main__":
     main()

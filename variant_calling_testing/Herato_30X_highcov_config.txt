@@ -49,3 +49,6 @@
 
 #Starting time (hours) for running GenotypeGVCF
 --TIME_GG 4
+
+#Which program to use for combining GVCFs?
+--Combine_GVCF_Program GenomicsDBImport

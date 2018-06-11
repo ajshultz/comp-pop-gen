@@ -56,4 +56,4 @@
 --MEMORY_GG 24
 
 #Which program to use for combining GVCFs?
---Combine_GVCF_Program  GenomicsDBImport
+--Combine_GVCF_Program GenomicsDBImport

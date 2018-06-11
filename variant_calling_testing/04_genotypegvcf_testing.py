@@ -84,6 +84,8 @@ def extract_config(config_filename):
                 config_info["memory_gg"] = line[1]
             elif line[0] == "--TIME_GG":
                 config_info["time_gg"] = line[1]
+            elif line[0] == "--Combine_GVCF_Program":
+                config_info["combine_gvcf_program"] = line[1]
     config_file.close()
     
     #Make sure all necessary inputs are present
@@ -145,6 +147,10 @@ def extract_config(config_filename):
     if "time_gg" not in config_info:
         config_info["time_gg"] = "12"
         print("No specification of how much time to use for GenotypeGVCF, using 12 hours by default")
+        
+    if "combine_gvcf_program" not in config_info:
+        config_info["combine_gvcf_program"] = "CombineGVCFs"
+        print("No specification of which program to use to combine gvcf files, using CombineGVCFs by default")
     
     #Return objects    
     return(config_info)
@@ -180,7 +186,7 @@ def sbatch_submit(filename,memory,timelimit):
 
 #Submit filename to slurm with sbatch with a given amount of time and memroy, returns job id number - includes first argument to include memory limit in java opts (use memory - 2)
 def sbatch_submit_array(filename,memory,timelimit, array_nums):
-    proc = Popen('sbatch --mem %s000 --time %s:00:00 --array=%s %s %d'%(memory,timelimit,array_nums,filename,(int(memory)-2)),shell=True,stdout=PIPE,stderr=PIPE)
+    proc = Popen('sbatch --mem %s000 --time %s:00:00 --array=%s %s %d'%(memory,timelimit,array_nums,filename,(int(memory)-3)),shell=True,stdout=PIPE,stderr=PIPE)
     stdout,stderr = proc.communicate()
     stdout = stdout.decode("utf-8","ignore")
     stdout = stdout.strip()
@@ -258,7 +264,7 @@ def count_intervals(nintervals,outputdir):
 
 ###Create sbatch scripts
 #Create a genotypegvcf sbatch file for a sample
-def genotypegvcf_sbatch(sp_dir,sp_abbr,sample_list,coverage,het,nintervals,memory_gg):
+def genotypegvcf_sbatch(sp_dir,sp_abbr,sample_list,coverage,het,nintervals,memory_gg,combine_gvcf_program):
     slurm_script = array_script_create()
     nintervals = str(nintervals)
     
@@ -276,11 +282,21 @@ def genotypegvcf_sbatch(sp_dir,sp_abbr,sample_list,coverage,het,nintervals,memor
     
     cmd_2 = 'MEM=$1'    
     
-    #Before running GenotypeGVCFs, need to combine GVCFs for all individuals into a single file      
-    cmd_3 = 'gatk --java-options "-Xmx${MEM}g -XX:ParallelGCThreads=1" CombineGVCFs -R %s/genome/%s.fa %s -O %s/gvcf/%s.%sX.${SLURM_ARRAY_TASK_ID}.g.vcf.gz --intervals %s/genome/%s_splits_interval_lists/%s_${SLURM_ARRAY_TASK_ID}.interval_list'%(sp_dir,sp_abbr,all_sample_variant_call,sp_dir,sp_abbr,coverage,sp_dir,nintervals,sp_abbr)
+    #Before running GenotypeGVCFs, need to combine GVCFs for all individuals into a single file
     
-    cmd_4 = 'gatk --java-options "-Xmx${MEM}g -XX:ParallelGCThreads=1" GenotypeGVCFs -R %s/genome/%s.fa -V %s/gvcf/%s.%sX.${SLURM_ARRAY_TASK_ID}.g.vcf.gz -O %s/vcf/%s.%sX.${SLURM_ARRAY_TASK_ID}.vcf.gz --heterozygosity %s --intervals %s/genome/%s_splits_interval_lists/%s_${SLURM_ARRAY_TASK_ID}.interval_list'%(sp_dir,sp_abbr,sp_dir,sp_abbr,coverage,sp_dir,sp_abbr,coverage,het,sp_dir,nintervals,sp_abbr)
+    if combine_gvcf_program == "CombineGVCFs":
+        cmd_3 = 'gatk --java-options "-Xmx${MEM}g -XX:ParallelGCThreads=1" CombineGVCFs -R %s/genome/%s.fa %s -O %s/gvcf/%s.%sX.${SLURM_ARRAY_TASK_ID}.g.vcf.gz --intervals %s/genome/%s_splits_interval_lists/%s_${SLURM_ARRAY_TASK_ID}.interval_list'%(sp_dir,sp_abbr,all_sample_variant_call,sp_dir,sp_abbr,coverage,sp_dir,nintervals,sp_abbr)
     
+        cmd_4 = 'gatk --java-options "-Xmx${MEM}g -XX:ParallelGCThreads=1" GenotypeGVCFs -R %s/genome/%s.fa -V %s/gvcf/%s.%sX.${SLURM_ARRAY_TASK_ID}.g.vcf.gz -O %s/vcf/%s.%sX.${SLURM_ARRAY_TASK_ID}.vcf.gz --heterozygosity %s --intervals %s/genome/%s_splits_interval_lists/%s_${SLURM_ARRAY_TASK_ID}.interval_list'%(sp_dir,sp_abbr,sp_dir,sp_abbr,coverage,sp_dir,sp_abbr,coverage,het,sp_dir,nintervals,sp_abbr)
+    elif combine_gvcf_program == "GenomicsDBImport":
+        cmd_3 = 'gatk --java-options "-Xmx${MEM}g -XX:ParallelGCThreads=1" GenomicsDBImport -R %s/genome/%s.fa %s --intervals %s/genome/%s_splits_interval_lists/%s_${SLURM_ARRAY_TASK_ID}.interval_list --genomicsdb-workspace-path %s/genomics_db/interval_${SLURM_ARRAY_TASK_ID}'%(sp_dir,sp_abbr,all_sample_variant_call,sp_dir,nintervals,sp_abbr, sp_abbr)
+    
+        cmd_4 = 'gatk --java-options "-Xmx${MEM}g -XX:ParallelGCThreads=1" GenotypeGVCFs -R %s/genome/%s.fa -V gendb://%s/genomics_db/interval_${SLURM_ARRAY_TASK_ID} -O %s/vcf/%s.%sX.${SLURM_ARRAY_TASK_ID}.vcf.gz --heterozygosity %s --intervals %s/genome/%s_splits_interval_lists/%s_${SLURM_ARRAY_TASK_ID}.interval_list'%(sp_dir,sp_abbr,sp_dir,sp_dir,sp_abbr,coverage,het,sp_dir,nintervals,sp_abbr)
+    
+    else:
+        print("Program to combine gvcf files not specified")
+        sys.exit()
+        
     cmd_5 = 'gatk --java-options "-Xmx${MEM}g -XX:ParallelGCThreads=1" VariantsToTable -V %s/vcf/%s.%sX.${SLURM_ARRAY_TASK_ID}.vcf.gz -O %s/stats/%s_%sX_${SLURM_ARRAY_TASK_ID}_unfilteredVCFstats.txt -F CHROM -F POS -F TYPE -F HET -F HOM-REF -F HOM-VAR -F NO-CALL -F NCALLED -F QD -F MQ -F FS -F SOR -F MQRankSum -F ReadPosRankSum -R %s/genome/%s.fa --intervals %s/genome/%s_splits_interval_lists/%s_${SLURM_ARRAY_TASK_ID}.interval_list'%(sp_dir,sp_abbr,coverage,sp_dir,sp_abbr,coverage,sp_dir,sp_abbr,sp_dir,nintervals,sp_abbr)
         
     cmd_list = [cmd_1,cmd_2,cmd_3,cmd_4,cmd_5]
@@ -326,6 +342,7 @@ def main():
     dedup_dir = "%s/dedup"%(sp_dir)
     gvcf_dir = "%s/gvcf"%(sp_dir)
     vcf_dir = "%s/vcf"%(sp_dir)
+    genomics_db_dir = "%s/genomics_db"%(sp_dir)
        
     directory_create(sp_dir)    
     directory_create(logs_dir)
@@ -335,6 +352,7 @@ def main():
     directory_create(dedup_dir)
     directory_create(gvcf_dir)
     directory_create(vcf_dir)
+    directory_create(genomics_db_dir)
 
 
     #Need to count intervals from genome split in previous step. If the genome was split by a number of intervals, this is trivial (it is just the number), but if it was split by chromosome, need to count files.
@@ -365,7 +383,7 @@ def main():
 
     
     #Create GenotypeGVCF file - here we include all samples, so only a single slurm array is needed
-    gg_filename = genotypegvcf_sbatch(sp_dir,sp_abbr=config_info["abbv"],sample_list=list(config_info["sample_dict"].keys()),coverage=config_info["coverage"],het=config_info["het"],nintervals=config_info["nintervals"],memory_gg=config_info["memory_gg"])
+    gg_filename = genotypegvcf_sbatch(sp_dir,sp_abbr=config_info["abbv"],sample_list=list(config_info["sample_dict"].keys()),coverage=config_info["coverage"],het=config_info["het"],nintervals=config_info["nintervals"],memory_gg=config_info["memory_gg"],combine_gvcf_program=config_info["combine_gvcf_program"])
     
     #Get number of finished files
     vcf_files = os.listdir(vcf_dir)
@@ -373,8 +391,16 @@ def main():
     
     #Submit file the first time
     if finished_files == 0:
-        #Submit job
-        base_jobid = sbatch_submit_array(gg_filename,memory=config_info["memory_gg"],timelimit=config_info["time_gg"], array_nums="1-%s"%str(nintervalfiles))
+        #First see if any vcf.gz and .tbi files already exist. If they do, submit only the missing intervals. Otherwise submit a full array.
+        missing_to_start = check_missing_vcfs(arraystart=1,arrayend=nintervalfiles,vcf_files=vcf_files,sp_abbr=config_info["abbv"],coverage=config_info["coverage"])
+        missing_to_start_vec = ",".join(missing)
+        
+        if len(missing_to_start_vec) == nintervalfiles:
+        #Submit job with full array
+            base_jobid = sbatch_submit_array(gg_filename,memory=config_info["memory_gg"],timelimit=config_info["time_gg"], array_nums="1-%s"%str(nintervalfiles))
+        else:
+            #Submit job with only missing intervals
+            base_jobid = sbatch_submit_array(gg_filename,memory=config_info["memory_gg"],timelimit=config_info["time_gg"], array_nums=missing_to_start_vec)
 
         #Expand job IDs
         all_jobids = []
@@ -461,7 +487,7 @@ def main():
     print("Failed for intervals: %s"%(failed_intervals))
      
 
-    #Check that the final vcf is available, if so, remove intermediate files (combined gvcf)
+    #Check that the final vcf is available, if so, remove intermediate files (combined gvcf or genomic db)
     '''
     for i in range(1,nintervalsfiles+1):
         if os.path.isfile('%s/vcf/%s.%sX.%s.vcf.gz'%(sp_dir,config_info["abbv"],config_info["coverage"],str(i))) and os.path.isfile('%s/vcf/%s.%sX.%s.vcf.gz.tbi'%(sp_dir,config_info["abbv"],config_info["coverage"],str(i))):
@@ -469,7 +495,10 @@ def main():
                 proc = Popen('rm %s/gvcf/%s.%sX.%s.g.vcf.gz'%(sp_dir,config_info["abbv"],config_info["coverage"],str(i)),shell=True)
             if os.path.isfile('%s/gvcf/%s.%sX.%s.g.vcf.gz.tbi'%(sp_dir,config_info["abbv"],config_info["coverage"],str(i))):
                 proc = Popen('rm %s/gvcf/%s.%sX.%s.g.vcf.gz.tbi'%(sp_dir,config_info["abbv"],config_info["coverage"],str(i)),shell=True)
-    '''         
+        if os.path.isdir('%s/genomics_db/interval_%s'%(sp_dir,str(i))):
+            proc = Popen('rm -r %s/genomics_db/interval_%s'%(sp_dir,str(i)),shell=True)
+    '''
+             
     now = datetime.datetime.now()
     print('Finished script 04: %s'%now)
 

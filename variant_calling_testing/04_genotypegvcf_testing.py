@@ -389,21 +389,14 @@ def main():
     vcf_files = os.listdir(vcf_dir)
     finished_files = len([name for name in vcf_files if ".tbi" in name])
     
+    all_jobids = []
     #Submit file the first time
     if finished_files == 0:
-        #First see if any vcf.gz and .tbi files already exist. If they do, submit only the missing intervals. Otherwise submit a full array.
-        missing_to_start = check_missing_vcfs(arraystart=1,arrayend=nintervalfiles,vcf_files=vcf_files,sp_abbr=config_info["abbv"],coverage=config_info["coverage"])
-        missing_to_start_vec = ",".join(missing)
         
-        if len(missing_to_start_vec) == nintervalfiles:
-        #Submit job with full array
-            base_jobid = sbatch_submit_array(gg_filename,memory=config_info["memory_gg"],timelimit=config_info["time_gg"], array_nums="1-%s"%str(nintervalfiles))
-        else:
-            #Submit job with only missing intervals
-            base_jobid = sbatch_submit_array(gg_filename,memory=config_info["memory_gg"],timelimit=config_info["time_gg"], array_nums=missing_to_start_vec)
-
+        #Submit job
+        base_jobid = sbatch_submit_array(gg_filename,memory=config_info["memory_gg"],timelimit=config_info["time_gg"],array_nums="1-%s"%str(nintervalfiles))
+        
         #Expand job IDs
-        all_jobids = []
         for i in range(1,int(nintervalfiles)+1):
             all_jobids.append("%s_%d"%(base_jobid,i))
     

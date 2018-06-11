@@ -47,7 +47,10 @@
 --TIME_HC 96
 
 #Starting time (hours) for running GenotypeGVCF
---TIME_GG 36
+--TIME_GG 24
 
 #Memory (GB) for running GenotypeGVCF
 --MEMORY_GG 24
+
+#Which program to use for combining GVCFs?
+--Combine_GVCF_Program  GenomicsDBImport

@@ -285,7 +285,8 @@ def get_ncbi_genome(sp_dir,fasta_ftp,sp_abbr):
     slurm_script = script_create()
     
     #Load modules, also print samtools and bwa versions
-    cmd_1 = 'module load samtools/1.5-fasrc01\nmodule load gcc/4.8.2-fasrc01 bwa/0.7.15-fasrc01'
+    cmd_1 = 'module load samtools/1.5-fasrc02\nmodule load bwa/0.7.15-fasrc02'
+    
     cmd_2 = 'wget -P %s %s'%(genome_dir,fasta_ftp)
     cmd_3 = 'gunzip %s/%s'%(genome_dir,genome_filename)
     cmd_4 = 'mv %s/%s %s/%s.fa'%(genome_dir,genome_filename[:-3],genome_dir,sp_abbr)
@@ -317,7 +318,7 @@ def process_local_genome(sp_dir,genome_local,sp_abbr,genome_present,bwa_index_pr
     genome_dir = "%s/genome"%(sp_dir)
     
     #Load modules, also print samtools and bwa versions
-    cmd_1 = 'module load samtools/1.5-fasrc01\nmodule load gcc/4.8.2-fasrc01 bwa/0.7.15-fasrc01'
+    cmd_1 = 'module load samtools/1.5-fasrc02\nmodule load bwa/0.7.15-fasrc02'
     
     #Copy genome if necessary
     if genome_present == False:
@@ -368,7 +369,7 @@ def fastq_trim_align_stats(sp_dir,sra,sp_abbr,sample):
 	read_group_info = '@RG\\tID:%s\\tSM:%s\\tPU:%s.%s\\tLB:%s\\tPL:illumina'%(sra,sample,sra,sample,sample)
 
 	#Load necessary modules
-	cmd_1 = 'module load NGmerge/0.2-fasrc01\nmodule load gcc/4.8.2-fasrc01 bwa/0.7.15-fasrc01\nmodule load jdk/1.8.0_45-fasrc01'
+	cmd_1 = 'module load NGmerge/0.2-fasrc01\nmodule load bwa/0.7.15-fasrc02\nmodule load jdk/1.8.0_45-fasrc01'
 
 	#If paired end data:
 	#Trim adapters with NGmerge

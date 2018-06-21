@@ -20,8 +20,7 @@
 
 #If genome available locally, input path to fasta filename. If local fasta path is supplied, file will be copied into genome directory and renamed ABBV.fa for downstream use.
 #For example:
---GENOME_LOCAL 
- ./Pmontanus/genome/Pmontanus.fa
+--GENOME_LOCAL ./Pmontanus/genome/Pmontanus.fa
 
 #Heterozygosity for running haplotypecaller and genotypegvcf
 --HETEROZYGOSITY 0.005

@@ -99,3 +99,22 @@
 #If genome available locally, input path to fasta filename. If local fasta path is supplied, file will be copied into genome directory and renamed ABBV.fa for downstream use.
 #For example:
 --GENOME_LOCAL ./Fhypoleuca/genome/Fhypoleuca.fa
+
+
+#Heterozygosity for running haplotypecaller and genotypegvcf
+--HETEROZYGOSITY 0.005
+
+#Which version of pipeline to run (lowcoverage or highcoverage)
+--PIPELINE lowcoverage
+
+#Number of intervals to run at a time?
+--NINTERVALS CHROMOSOME
+
+#Starting memory (GB) for running HaplotypeCaller
+--MEMORY_HC 16
+
+#Starting time (hours) for running HaplotypeCaller
+--TIME_HC 72
+
+#Starting time (hours) for running GenotypeGVCF
+--TIME_GG 8

@@ -469,6 +469,9 @@ def main():
     sum_stat.write("SAMPLE\tMEAN_COVERAGE\tMEDIAN_COVERAGE\tTOTAL_READS\tMEAN_READ_LENGTH\tPCT_PF_READS_ALIGNED\tPCT_PF_HQ_ALIGNED_READS\tPF_HQ_MEDIAN_MISMATCHES\tPF_INDEL_RATE\tPCT_READS_ALIGNED_IN_PAIRS\tSTRAND_BALANCE\tPERCENT_DUPLICATION\tVALIDATION_STATUS\n")
     
     #Iterate through samples and add results from all three dictionaries if present
+    #Also add median coverage to list, to add decision about pipeline recommendation for haplotypecaller
+    all_median_cov = []
+    
     for sample in config_info["sample_dict"]:
         samp_sum = []
         samp_sum.append(sample)
@@ -476,6 +479,7 @@ def main():
         if "mean" in all_coverage_stats[sample]:
             samp_sum.append(str(all_coverage_stats[sample]["mean"]))
             samp_sum.append(str(all_coverage_stats[sample]["median"]))
+            all_median_cov.append(all_coverage_stats[sample]["median"])
         else:
             samp_sum.append("")
             samp_sum.append("")
@@ -521,6 +525,17 @@ def main():
     except:
         print("There was an error copying summary stat files")
     
+    #Extract min and max median coverage, if both fall below 15X, recommend lowcoverage pipeline for haplotype caller. If both fall above 15X, recommend highcoverage pipeline for haplotype caller. If they span 15X, recommend that the user examine coverages to determine best pipeline to use.
+    
+    max_median_cov = max(all_median_cov)
+    min_median_cov = min(all_median_cov)
+    
+    if max_median_cov > 15 and min_median_cov > 15:
+        print("All samples median coverage > 15X, recommended pipline for script 03: highcoverage\n")
+    elif max_median_cov < 15 and min_median_cov < 15:
+        print("All samples median coverage < 15X, recommended pipline for script 03: lowcoverage\n")
+    elif max_median_cov > 15 and min_median_cov < 15:
+        print("Some samples median coverage > 15X and some < 15X, check summary stats file to determine best pipeline\n")
     
     #Check that the final sorted bam and index is available, if so, remove intermediate files (unsorted dedup, all aligned bams)
     ###Only delete if validate says no errors found.

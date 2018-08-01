@@ -198,8 +198,9 @@ def ncbi_sra_download_sbatch(sp_dir,sample_ncbi_dict):
             #First check if fastq file is already present (already downloaded), or final BAM file already present. If it has, print statment and continue with next sample. 
             fastq_1_filename = '%s/fastq/%s_1.fastq.gz'%(sp_dir,sra)
             bam_filename = '%s/alignment/%s.sorted.bam'%(sp_dir,sra)
-            if os.path.isfile(fastq_1_filename) or os.path.isfile(bam_filename):
-                print('%s_1.fastq.gz or %s.sorted.bam already present, skipping'%(sra,sra))
+            dedup_filename = '%s/dedup/%s.dedup.sorted.bam'%(sp_dir,sample)
+            if os.path.isfile(fastq_1_filename) or os.path.isfile(bam_filename) or os.path.isfile(dedup_filename):
+                print('%s_1.fastq.gz or %s.sorted.bam or %s.dedup.sorted.bam already present, skipping'%(sra,sra,sample))
             else:
                 print('Will download %s for sample %s, split, and run through fastqc'%(sra,sample))
     
@@ -610,10 +611,13 @@ def main():
             if os.path.isfile('%s/%s_1.fastq.gz'%(fastq_dir,sra)):
                 if os.path.isfile('%s/%s_2.fastq.gz'%(fastq_dir,sra)):
                     if  os.path.isfile('%s/alignment/%s.sorted.bai'%(sp_dir,sra)) is False:
-                        sra_map_sbatchfile = fastq_trim_align_stats(sp_dir,sra,config_info["abbv"],sample)
-                        sra_map_jobid = sbatch_submit(sra_map_sbatchfile)
-                        mapping_jobids.append(sra_map_jobid)
-                        sleep(1)
+                        if os.path.isfile("%s/dedup/%s.dedup.sorted.bai"%(sp_dir,sample)):
+                            sra_map_sbatchfile = fastq_trim_align_stats(sp_dir,sra,config_info["abbv"],sample)
+                            sra_map_jobid = sbatch_submit(sra_map_sbatchfile)
+                            mapping_jobids.append(sra_map_jobid)
+                            sleep(1)
+                        else:
+                            print('%s.dedup.sorted.bai already present, skipping'%(sample))
                     else:
                         print('%s.sorted.bai already present, skipping'%(sra))
                 else:

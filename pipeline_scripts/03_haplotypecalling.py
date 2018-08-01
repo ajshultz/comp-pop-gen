@@ -344,8 +344,6 @@ def main():
     
     print("\nOutput will be written to %s\n"%sp_dir)
     
-    print("\nOutput will be written to %s\n"%sp_dir)
-    
     logs_dir = "%s/logs"%(sp_dir)
     scripts_dir = "%s/scripts"%(sp_dir)
     genome_dir = "%s/genome"%(sp_dir)

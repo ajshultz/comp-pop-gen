@@ -37,7 +37,8 @@ def write_main_config(config_local, config_out, abbv):
         for line in config_local:
             line=line.split("\t")
             #path = line[0], read = line[1], sample ID = line[2], accession = line[3]
-            print("--SAMPLE_LOCAL", line[2], line[3], sep=" ", file=f)
+            if line[1] == 1:
+                print("--SAMPLE_LOCAL", line[2], line[3], sep=" ", file=f)
     
 #Copy and rename fastqs
 def cp_rename_fastq(config_local, sp_dir):

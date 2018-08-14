@@ -6,7 +6,7 @@
 #Species abbreviation for use in file headers (e.g. CCornix for hooded crow)
 --ABBV Ptristis
 
-#Enter sample IDs and information, must include SRA accession numbers for download from NCBI: --SAMPLE <SAMPLE_ID> <SRA,SRA,SRA>
+#Enter sample IDs and information, must include SRA accession numbers for download from NCBI: --SAMPLE <SAMPLE_ID> <SRA>
 #From Bioproject:PRJEB21643
 --SAMPLE_ENA SAMEA104156767 ERR2029724
 --SAMPLE_ENA SAMEA104156768 ERR2029725
@@ -35,11 +35,11 @@
 #A genome must be supplied, either hosted on NCBI (use --GENOME_NCBI flag) or locally (use --GENOME_LOCAL flag). See examples below.
 
 #Enter name of species with genome assembly for mapping if genome hosted on Genbank. Must correspond to name of organism on NCBI if download is necessary (e.g. for Corvus cornix: Corvus_cornix_cornix)
---GENOME_NCBI ftp://ftp.ncbi.nlm.nih.gov/genomes/all/GCA/002/305/835/GCA_002305835.1_ASM230583v1/GCA_002305835.1_ASM230583v1_genomic.fna.gz
+#--GENOME_NCBI ftp://ftp.ncbi.nlm.nih.gov/genomes/all/GCA/002/305/835/GCA_002305835.1_ASM230583v1/GCA_002305835.1_ASM230583v1_genomic.fna.gz
 
 #If genome available locally, input path to fasta filename. If local fasta path is supplied, file will be copied into genome directory and renamed ABBV.fa for downstream use.
 #For example:
-#--GENOME_LOCAL ./Ptristis/genome/Ptristis.fa
+--GENOME_LOCAL ./Ptristis/genome/Ptristis.fa
 
 #Heterozygosity for running haplotypecaller and genotypegvcf
 --HETEROZYGOSITY 0.005
@@ -48,7 +48,7 @@
 --PIPELINE lowcoverage
 
 #Number of intervals to run at a time?
---NINTERVALS CHROMOSOME
+--NINTERVALS 10
 
 #Starting memory (GB) for running HaplotypeCaller
 --MEMORY_HC 16

@@ -611,7 +611,7 @@ def main():
             if os.path.isfile('%s/%s_1.fastq.gz'%(fastq_dir,sra)):
                 if os.path.isfile('%s/%s_2.fastq.gz'%(fastq_dir,sra)):
                     if  os.path.isfile('%s/alignment/%s.sorted.bai'%(sp_dir,sra)) is False:
-                        if os.path.isfile("%s/dedup/%s.dedup.sorted.bai"%(sp_dir,sample)):
+                        if os.path.isfile("%s/dedup/%s.dedup.sorted.bai"%(sp_dir,sample)) is False:
                             sra_map_sbatchfile = fastq_trim_align_stats(sp_dir,sra,config_info["abbv"],sample)
                             sra_map_jobid = sbatch_submit(sra_map_sbatchfile)
                             mapping_jobids.append(sra_map_jobid)

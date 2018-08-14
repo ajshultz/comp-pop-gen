@@ -1,0 +1,48 @@
+#Example config file:
+
+#Path to desired output directory (directory for each species will be created within this directory). If not specified will be current working directory
+--OUT_DIR .
+
+#Species abbreviation for use in file headers (e.g. CCornix for hooded crow)
+--ABBV Gvarius_Cjap
+
+#Enter sample IDs and information, must include SRA accession numbers for download from NCBI: --SAMPLE <SAMPLE_ID> <SRA,SRA,SRA>
+#From Bioproject:PRJDB4092
+--SAMPLE_NCBI SAMD00077845 DRR089961
+--SAMPLE_NCBI SAMD00077846 DRR089962
+--SAMPLE_NCBI SAMD00077847 DRR089963
+--SAMPLE_NCBI SAMD00077848 DRR089964
+--SAMPLE_NCBI SAMD00077849 DRR089965
+--SAMPLE_NCBI SAMD00077850 DRR089966
+--SAMPLE_NCBI SAMD00077851 DRR089967
+
+
+#At this time, using local fastq files is not supported. We will add this feature in the future.
+#--SAMPLE_LOCAL Ind_1
+
+#A genome must be supplied, either hosted on NCBI (use --GENOME_NCBI flag) or locally (use --GENOME_LOCAL flag). See examples below.
+
+#Enter name of species with genome assembly for mapping if genome hosted on Genbank. Must correspond to name of organism on NCBI if download is necessary (e.g. for Corvus cornix: Corvus_cornix_cornix)
+--GENOME_NCBI ftp://ftp.ncbi.nlm.nih.gov/genomes/all/GCF/001/577/835/GCF_001577835.1_Coturnix_japonica_2.0/GCF_001577835.1_Coturnix_japonica_2.0_genomic.fna.gz
+
+#If genome available locally, input path to fasta filename. If local fasta path is supplied, file will be copied into genome directory and renamed ABBV.fa for downstream use.
+#For example:
+#--GENOME_LOCAL ./Gvarius_Cjap/genome/Gvarius_Cjap.fa
+
+#Heterozygosity for running haplotypecaller and genotypegvcf
+--HETEROZYGOSITY 0.005
+
+#Which version of pipeline to run (lowcoverage or highcoverage)
+--PIPELINE lowcoverage
+
+#Number of intervals to run at a time?
+--NINTERVALS CHROMOSOME
+
+#Starting memory (GB) for running HaplotypeCaller
+--MEMORY_HC 16
+
+#Starting time (hours) for running HaplotypeCaller
+--TIME_HC 72
+
+#Starting time (hours) for running GenotypeGVCF
+--TIME_GG 8

@@ -1,0 +1,43 @@
+#Example config file:
+
+#Path to desired output directory (directory for each species will be created within this directory). If not specified will be current working directory
+--OUT_DIR .
+
+#Species abbreviation for use in file headers (e.g. CCornix for hooded crow)
+--ABBV Pcrispus_Nnip
+
+#Enter sample IDs and information, must include SRA accession numbers for download from NCBI: --SAMPLE <SAMPLE_ID> <SRA,SRA,SRA>
+#From Bioproject:PRJNA212901
+--SAMPLE_NCBI SAMN02339887 SRR959396
+--SAMPLE_NCBI SAMN02339887 SRR959397
+--SAMPLE_NCBI SAMN02339887 SRR959398
+
+#At this time, using local fastq files is not supported. We will add this feature in the future.
+#--SAMPLE_LOCAL Ind_1
+
+#A genome must be supplied, either hosted on NCBI (use --GENOME_NCBI flag) or locally (use --GENOME_LOCAL flag). See examples below.
+
+#Enter name of species with genome assembly for mapping if genome hosted on Genbank. Must correspond to name of organism on NCBI if download is necessary (e.g. for Corvus cornix: Corvus_cornix_cornix)
+--GENOME_NCBI ftp://ftp.ncbi.nlm.nih.gov/genomes/all/GCF/000/708/225/GCF_000708225.1_ASM70822v1/GCF_000708225.1_ASM70822v1_genomic.fna.gz
+
+#If genome available locally, input path to fasta filename. If local fasta path is supplied, file will be copied into genome directory and renamed ABBV.fa for downstream use.
+#For example:
+#--GENOME_LOCAL ./Pcrispus_Nnip/genome/Pcrispus_Nnip.fa
+
+#Heterozygosity for running haplotypecaller and genotypegvcf
+--HETEROZYGOSITY 0.005
+
+#Which version of pipeline to run (lowcoverage or highcoverage)
+--PIPELINE highcoverage
+
+#Number of intervals to run at a time?
+--NINTERVALS 10
+
+#Starting memory (GB) for running HaplotypeCaller
+--MEMORY_HC 16
+
+#Starting time (hours) for running HaplotypeCaller
+--TIME_HC 72
+
+#Starting time (hours) for running GenotypeGVCF
+--TIME_GG 8

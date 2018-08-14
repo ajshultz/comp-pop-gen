@@ -6,7 +6,7 @@
 #Species abbreviation for use in file headers (e.g. CCornix for hooded crow)
 --ABBV Ccornix
 
-#Enter sample IDs and information, must include SRA accession numbers for download from NCBI: --SAMPLE <SAMPLE_ID> <SRA>. Note that sample IDs may be repeated if multiple SRAs
+#Enter sample IDs and information, must include SRA accession numbers for download from NCBI: --SAMPLE <SAMPLE_ID> <SRA>. Note that sample IDs may be repeated if multiple SRAs. To download files from ENA, use --SAMPLE_ENA with same format. To use local fastqs (fastq files assumed to already be in ./ABBV/fastq), use --SAMPLE_LOCAL
 --SAMPLE_NCBI SAMN02439805 SRR1265092
 --SAMPLE_NCBI SAMN02439805 SRR1265093
 --SAMPLE_NCBI SAMN02439805 SRR1265094
@@ -16,10 +16,10 @@
 --SAMPLE_NCBI SAMN02439806 SRR1265101
 --SAMPLE_NCBI SAMN02439806 SRR1265102
 --SAMPLE_NCBI SAMN02439806 SRR1265103
+--SAMPLE_ENA SAMN02439806 SRR1265103
+--SAMPLE_LOCAL SAMN02439806 SRR1265103
 
-
-#At this time, using local fastq files is not supported. We will add this feature in the future.
-#--SAMPLE_LOCAL Ind_1
+#Note that local fastqs are assumed to have naming convention SAMPLE_ID SRA_1.fastq.gz and SRA_2.fastq.gz. Use 00_setup_local_fastq.py to get files in this format from any path
 
 #A genome must be supplied, either hosted on NCBI (use --GENOME_NCBI flag) or locally (use --GENOME_LOCAL flag). See examples below.
 
@@ -29,3 +29,22 @@
 #If genome available locally, input path to fasta filename. If local fasta path is supplied, file will be copied into genome directory and renamed ABBV.fa for downstream use.
 #For example:
 --GENOME_LOCAL ./Ccornix/genome/CCornix.fa
+
+##########Below required for pipeline scripts 03 and 04
+#Heterozygosity for running haplotypecaller and genotypegvcf
+--HETEROZYGOSITY 0.005
+
+#Which version of pipeline to run (lowcoverage or highcoverage)
+--PIPELINE lowcoverage
+
+#Number of intervals to run at a time? (CHROMOSOME if genome in chromosome-scale scaffolds)
+--NINTERVALS 10
+
+#Starting memory (GB) for running HaplotypeCaller
+--MEMORY_HC 16
+
+#Starting time (hours) for running HaplotypeCaller
+--TIME_HC 72
+
+#Starting time (hours) for running GenotypeGVCF
+--TIME_GG 8

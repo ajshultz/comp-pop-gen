@@ -4,18 +4,27 @@
 --OUT_DIR .
 
 #Species abbreviation for use in file headers (e.g. CCornix for hooded crow)
---ABBV Omossambicus
+--ABBV Ppromelas
 
 #Enter sample IDs and information, must include SRA accession numbers for download from NCBI: --SAMPLE <SAMPLE_ID> <SRA,SRA,SRA>
-#From Bioproject:PRJDB1657
---SAMPLE_NCBI SAMD00023995 DRR084053
---SAMPLE_NCBI SAMD00023997 DRR084055
---SAMPLE_NCBI SAMD00023998 DRR084056
---SAMPLE_NCBI SAMD00023999 DRR084057
---SAMPLE_NCBI SAMD00024000 DRR084058
---SAMPLE_NCBI SAMD00024011 DRR084069
---SAMPLE_NCBI SAMD00024017 DRR084075
---SAMPLE_NCBI SAMD00024021 DRR084079
+#From Bioproject:PRJNA298374
+--SAMPLE_NCBI SAMN04158632 SRR2891312
+--SAMPLE_NCBI SAMN04158632 SRR2891315
+--SAMPLE_NCBI SAMN04158632 SRR2891316
+--SAMPLE_NCBI SAMN04158632 SRR2891317
+--SAMPLE_NCBI SAMN04158632 SRR2891318
+--SAMPLE_NCBI SAMN04158632 SRR2891319
+--SAMPLE_NCBI SAMN04158632 SRR2891320
+--SAMPLE_NCBI SAMN04158632 SRR2891324
+--SAMPLE_NCBI SAMN04158632 SRR2891325
+--SAMPLE_NCBI SAMN04158632 SRR2891326
+--SAMPLE_NCBI SAMN04158632 SRR2891327
+--SAMPLE_NCBI SAMN04158632 SRR2891328
+--SAMPLE_NCBI SAMN04158632 SRR2891329
+--SAMPLE_NCBI SAMN04158632 SRR2891330
+--SAMPLE_NCBI SAMN04158632 SRR2891331
+--SAMPLE_NCBI SAMN04158632 SRR2891332
+
 
 #At this time, using local fastq files is not supported. We will add this feature in the future.
 #--SAMPLE_LOCAL Ind_1
@@ -23,20 +32,21 @@
 #A genome must be supplied, either hosted on NCBI (use --GENOME_NCBI flag) or locally (use --GENOME_LOCAL flag). See examples below.
 
 #Enter name of species with genome assembly for mapping if genome hosted on Genbank. Must correspond to name of organism on NCBI if download is necessary (e.g. for Corvus cornix: Corvus_cornix_cornix)
---GENOME_NCBI ftp://ftp.ncbi.nlm.nih.gov/genomes/all/GCF/001/858/045/GCF_001858045.2_O_niloticus_UMD_NMBU/GCF_001858045.2_O_niloticus_UMD_NMBU_genomic.fna.gz
+--GENOME_NCBI ftp://ftp.ncbi.nlm.nih.gov/genomes/all/GCA/900/092/035/GCA_900092035.1_Amur_ide_genome/GCA_900092035.1_Amur_ide_genome_genomic.fna.gz
 
 #If genome available locally, input path to fasta filename. If local fasta path is supplied, file will be copied into genome directory and renamed ABBV.fa for downstream use.
 #For example:
-#--GENOME_LOCAL ./Omossambicus/genome/Omossambicus.fa
+#--GENOME_LOCAL ./Ppromelas/genome/Ppromelas.fa
+
 
 #Heterozygosity for running haplotypecaller and genotypegvcf
 --HETEROZYGOSITY 0.005
 
 #Which version of pipeline to run (lowcoverage or highcoverage)
---PIPELINE lowcoverage
+--PIPELINE highcoverage
 
 #Number of intervals to run at a time?
---NINTERVALS CHROMOSOME
+--NINTERVALS 10
 
 #Starting memory (GB) for running HaplotypeCaller
 --MEMORY_HC 16

@@ -4,18 +4,12 @@
 --OUT_DIR .
 
 #Species abbreviation for use in file headers (e.g. CCornix for hooded crow)
---ABBV Omossambicus
+--ABBV Gwheatlandi
 
 #Enter sample IDs and information, must include SRA accession numbers for download from NCBI: --SAMPLE <SAMPLE_ID> <SRA,SRA,SRA>
-#From Bioproject:PRJDB1657
---SAMPLE_NCBI SAMD00023995 DRR084053
---SAMPLE_NCBI SAMD00023997 DRR084055
---SAMPLE_NCBI SAMD00023998 DRR084056
---SAMPLE_NCBI SAMD00023999 DRR084057
---SAMPLE_NCBI SAMD00024000 DRR084058
---SAMPLE_NCBI SAMD00024011 DRR084069
---SAMPLE_NCBI SAMD00024017 DRR084075
---SAMPLE_NCBI SAMD00024021 DRR084079
+#From Bioproject:PRJDB2374
+--SAMPLE_NCBI SAMD00010751 DRR013347
+
 
 #At this time, using local fastq files is not supported. We will add this feature in the future.
 #--SAMPLE_LOCAL Ind_1
@@ -23,20 +17,22 @@
 #A genome must be supplied, either hosted on NCBI (use --GENOME_NCBI flag) or locally (use --GENOME_LOCAL flag). See examples below.
 
 #Enter name of species with genome assembly for mapping if genome hosted on Genbank. Must correspond to name of organism on NCBI if download is necessary (e.g. for Corvus cornix: Corvus_cornix_cornix)
---GENOME_NCBI ftp://ftp.ncbi.nlm.nih.gov/genomes/all/GCF/001/858/045/GCF_001858045.2_O_niloticus_UMD_NMBU/GCF_001858045.2_O_niloticus_UMD_NMBU_genomic.fna.gz
+#--GENOME_NCBI 
 
 #If genome available locally, input path to fasta filename. If local fasta path is supplied, file will be copied into genome directory and renamed ABBV.fa for downstream use.
 #For example:
-#--GENOME_LOCAL ./Omossambicus/genome/Omossambicus.fa
+--GENOME_LOCAL ./Gaculeatus/genome/Gaculeatus.fa
+#From ftp://ftp.ensembl.org/pub/release-91/fasta/gasterosteus_aculeatus/dna/Gasterosteus_aculeatus.BROADS1.dna.toplevel.fa.gz 
+#Annotation:  ftp://ftp.ensembl.org/pub/release-91/gff3/gasterosteus_aculeatus/Gasterosteus_aculeatus.BROADS1.91.gff3.gz
 
 #Heterozygosity for running haplotypecaller and genotypegvcf
 --HETEROZYGOSITY 0.005
 
 #Which version of pipeline to run (lowcoverage or highcoverage)
---PIPELINE lowcoverage
+--PIPELINE highcoverage
 
 #Number of intervals to run at a time?
---NINTERVALS CHROMOSOME
+--NINTERVALS 8
 
 #Starting memory (GB) for running HaplotypeCaller
 --MEMORY_HC 16

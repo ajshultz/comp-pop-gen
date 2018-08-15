@@ -592,6 +592,7 @@ def main():
     #Create sbatch files
     ncbi_sra_dl_sbatch_filenames = []
     ena_sra_dl_sbatch_filenames = []
+    local_fastq_process_sbatch_filenames = []
     
     #Create sbatch files for ncbi
     if len(config_info["sample_ncbi_dict"]) > 0:

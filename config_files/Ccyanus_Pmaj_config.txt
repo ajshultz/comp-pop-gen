@@ -8,3 +8,28 @@
 
 --SAMPLE_LOCAL CCyanus_Bauer CCyanus_BC9DJ6ANXX
 --SAMPLE_LOCAL CCyanus_Bauer CCyanus_AC9J4EANXX
+
+#Genome info
+--GENOME_NCBI ftp://ftp.ncbi.nlm.nih.gov/genomes/all/GCF/001/522/545/GCF_001522545.2_Parus_major1.1/GCF_001522545.2_Parus_major1.1_genomic.fna.gz
+
+#If genome available locally, input path to fasta filename. If local fasta path is supplied, file will be copied into genome directory and renamed ABBV.fa for downstream use.
+#For example:
+#--GENOME_LOCAL ./Pmajor/genome/Pmajor.fa
+
+#Heterozygosity for running haplotypecaller and genotypegvcf
+--HETEROZYGOSITY 0.005
+
+#Which version of pipeline to run (lowcoverage or highcoverage)
+--PIPELINE highcoverage
+
+#Number of intervals to run at a time?
+--NINTERVALS CHROMOSOME
+
+#Starting memory (GB) for running HaplotypeCaller
+--MEMORY_HC 16
+
+#Starting time (hours) for running HaplotypeCaller
+--TIME_HC 72
+
+#Starting time (hours) for running GenotypeGVCF
+--TIME_GG 8

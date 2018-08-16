@@ -406,7 +406,7 @@ def process_local_fastq_sbatch(sp_dir,sample_local_dict):
             fastq_1_filename = '%s/fastq/%s_1.fastq.gz'%(sp_dir,sra)
             bam_filename = '%s/alignment/%s.sorted.bam'%(sp_dir,sra)
             if os.path.isfile(bam_filename):
-                print('%s.sorted.bam already present, skipping'%(sra,sra))
+                print('%s.sorted.bam already present, skipping'%(sra))
             else:
                 print('Will run %s for sample %s through fastqc'%(sra,sample))
     

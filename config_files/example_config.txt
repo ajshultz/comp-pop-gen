@@ -31,20 +31,29 @@
 --GENOME_LOCAL ./Ccornix/genome/CCornix.fa
 
 ##########Below required for pipeline scripts 03 and 04
-#Heterozygosity for running haplotypecaller and genotypegvcf
+#Heterozygosity for running haplotypecaller and genotypegvcf (Default 0.001)
 --HETEROZYGOSITY 0.005
 
-#Which version of pipeline to run (lowcoverage or highcoverage)
+#Which version of pipeline to run (lowcoverage or highcoverage) (Default lowcoverage)
 --PIPELINE lowcoverage
 
-#Number of intervals to run at a time? (CHROMOSOME if genome in chromosome-scale scaffolds)
+#Number of intervals to run at a time? (CHROMOSOME if genome in chromosome-scale scaffolds) (Default 10)
 --NINTERVALS 10
 
-#Starting memory (GB) for running HaplotypeCaller
+#Starting memory (GB) for running HaplotypeCaller (Default 8)
 --MEMORY_HC 16
 
-#Starting time (hours) for running HaplotypeCaller
+#Starting time (hours) for running HaplotypeCaller (Default 12)
 --TIME_HC 72
 
-#Starting time (hours) for running GenotypeGVCF
+#Starting time (hours) for running GenotypeGVCF (Default 12)
 --TIME_GG 8
+
+#Starting memory (GB) for running GenotypeGVCF (Default 8)
+--MEMORY_GG 8
+
+#Program to combine gvcfs (GenomicsDBImport or CombineGVCFs) (Default GenomicsDBImport)
+--COMBINE_GVCF_Program GenomicsDBImport
+
+#Should missing gvcfs be allowed to continue with GenotypeGVCF? If TRUE will continue despite missing data, if FALSE will print a statement and exit the program (Default FALSE)
+--BYPASS_INTERVAL FALSE

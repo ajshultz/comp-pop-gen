@@ -325,7 +325,7 @@ def haplotypecaller_sbatch(sp_dir,sp_abbr,sample,het,memory_hc,nintervals,pipeli
 
 #Format sbatch script
     haplocaller_script = slurm_script.format(partition="shared",cores="2",nodes="1",jobid="hc",sp_dir=sp_dir,cmd=final_cmd)
-    out_filename = "%s/scripts/06_haplotypecaller_%s_array.sbatch"%(sp_dir,sample)
+    out_filename = "%s/scripts/05_haplotypecaller_%s_array.sbatch"%(sp_dir,sample)
     out_file = open(out_filename,"w")
     out_file.write(haplocaller_script)
     out_file.close

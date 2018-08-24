@@ -405,8 +405,9 @@ def process_local_fastq_sbatch(sp_dir,sample_local_dict):
             #First check if fastq file is already present (already downloaded), or final BAM file already present. If it has, print statment and continue with next sample. 
             fastq_1_filename = '%s/fastq/%s_1.fastq.gz'%(sp_dir,sra)
             bam_filename = '%s/alignment/%s.sorted.bam'%(sp_dir,sra)
-            if os.path.isfile(bam_filename):
-                print('%s.sorted.bam already present, skipping'%(sra))
+            dedup_filename = '%s/dedup/%s.dedup.sorted.bam'%(sp_dir,sample)
+            if os.path.isfile(fastq_1_filename) or os.path.isfile(bam_filename) or os.path.isfile(dedup_filename):
+                print('%s_1.fastq.gz or %s.sorted.bam or %s.dedup.sorted.bam already present, skipping'%(sra,sra,sample))
             else:
                 print('Will run %s for sample %s through fastqc'%(sra,sample))
     

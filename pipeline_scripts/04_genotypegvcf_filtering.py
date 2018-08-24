@@ -494,7 +494,44 @@ def main():
     #After all jobs have finished, report intervals failed twice
     failed_intervals = ",".join(failed_intervals)
     print("Failed for intervals: %s"%(failed_intervals))
-     
+    
+    #Concatenate all missingness information into single file, adding additional column for easy manipulation in R, and additional file with mean and SD missingness per individual
+    all_missing_file = open('%s/stats/_%s_all_all_missingness_info.txt'%(sp_dir,sp_abbr),'r')
+    mean_sd_missing_file = open('%s/stats/%s_all_mean_missingness_info.txt'%(sp_dir,sp_abbr),'r')
+    
+    sample_miss_dict = {}
+    
+    #Write headers
+    all_missing_file.write('INDV	N_DATA	N_GENOTYPES_FILTERED	N_MISS	F_MISS	INTERVAL\n')
+    mean_sd_missing_file.write('INDV	MEAN_MISS	SD_MISS	MAX_MISS	MIN_MISS\n')
+    
+    #If missingness file exists for interval, write results to all_missing_file, and add fraction missing to dictionary for each sample
+    for i in range(1,int(nintervalfiles)+1):
+        
+        if os.path.isfile('%s/stats/%s_ind_missingness.%d.imiss'%(sp_dir,sp_abbr,i)):
+            missing_file = open('%s/stats/%s_ind_missingness.%d.imiss'%(sp_dir,sp_abbr,i),'r')
+            for line in missing_file:
+                line = line.strip()
+                split_line = line.split()
+                if split_line[0] != 'INDV':
+                    all_missing_file.write('%s\t%d'%(line,i))
+                    if line[0] in sample_miss_dict:
+                        sample_miss_dict[line[0]].append(float(line[4]))
+                    else:
+                        sample_miss_dict[line[0]] = [float(line[4])]
+            
+            missing_file.close()
+    
+     for sample in sample_miss_dict:
+        sample_mean = numpy.round(numpy.mean(sample_miss_dict[sample]),2)
+        sample_sd = numpy.round(numpy.std(sample_miss_dict[sample]),2)
+        sample_min = numpy.min(sample_miss_dict[sample])
+        sample_max = numpy.max(sample_miss_dict[sample])
+        
+        mean_sd_missing_file.write('%s\t%s\t%s\t%s\t%s\n'%(sample,str(sample_mean),str(sample_sd),str(sample_min),str(sample_max)))
+    
+    all_missing_file.close()
+    mean_sd_missing_file.close()
     #Check that the final vcf is available, if so, remove intermediate files (combined gvcf or genomic db)
     '''
     for i in range(1,nintervalsfiles+1):

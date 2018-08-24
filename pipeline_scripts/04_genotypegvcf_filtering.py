@@ -522,7 +522,7 @@ def main():
             
             missing_file.close()
     
-     for sample in sample_miss_dict:
+    for sample in sample_miss_dict:
         sample_mean = numpy.round(numpy.mean(sample_miss_dict[sample]),2)
         sample_sd = numpy.round(numpy.std(sample_miss_dict[sample]),2)
         sample_min = numpy.min(sample_miss_dict[sample])

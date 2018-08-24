@@ -48,7 +48,7 @@ def cp_rename_fastq(config_local, sp_dir):
     #checks to make sure that the input is actually gzipped only by checking for extension
     #will gzip fastqs if not already, otherwise, just copies them
     for line in config_local:
-        line = line.split("\t")
+        line = line.split()
         #path = line[0], read = line[1], sample ID = line[2], accession = line[3]
         #if path ends with .gz, use gzip -cd
         #else use cp

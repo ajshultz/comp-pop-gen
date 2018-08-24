@@ -306,7 +306,7 @@ def genotypegvcf_sbatch(sp_dir,sp_abbr,sample_list,het,nintervals,memory_gg,comb
     cmd_6 = r"""/n/home13/ashultz/sw/progs/gatk-4.0.8.1/gatk --java-options "-Xmx${MEM}g -XX:ParallelGCThreads=1" VariantFiltration -R %s/genome/%s.fa -V  %s/vcf/%s.${SLURM_ARRAY_TASK_ID}.vcf.gz -O  %s/vcf/%s_hardfilters.${SLURM_ARRAY_TASK_ID}.vcf.gz --filterExpression "(vc.isSNP() && (vc.hasAttribute('ReadPosRankSum') && ReadPosRankSum < -8.0)) || ((vc.isIndel() || vc.isMixed()) && (vc.hasAttribute('ReadPosRankSum') && ReadPosRankSum < -20.0)) || (vc.hasAttribute('QD') && QD < 2.0) " --filterName "badSeq" --filterExpression "(vc.isSNP() && ((vc.hasAttribute('FS') && FS > 60.0) || (vc.hasAttribute('SOR') &&  SOR > 3.0))) || ((vc.isIndel() || vc.isMixed()) && ((vc.hasAttribute('FS') && FS > 200.0) || (vc.hasAttribute('SOR') &&  SOR > 10.0)))" --filterName "badStrand" --filterExpression "vc.isSNP() && ((vc.hasAttribute('MQ') && MQ < 40.0) || (vc.hasAttribute('MQRankSum') && MQRankSum < -12.5))" --filterName "badMap" """%(sp_dir,sp_abbr,sp_dir,sp_abbr,sp_dir,sp_abbr)
     
     #Calculate missingness per individual
-    cmd_7 = 'vcftools --gzvcf %s/vcf/%s_hardfilters.${SLURM_ARRAY_TASK_ID}.vcf.gz --missing-indv --out %s/stats/%s_ind_missingness.${SLURM_ARRAY_TASK_ID}'
+    cmd_7 = 'vcftools --gzvcf %s/vcf/%s_hardfilters.${SLURM_ARRAY_TASK_ID}.vcf.gz --missing-indv --out %s/stats/%s_ind_missingness.${SLURM_ARRAY_TASK_ID}'%(sp_dir,sp_abbr,sp_dir,sp_abbr)
         
     cmd_list = [cmd_1,cmd_2,cmd_3,cmd_4,cmd_5,cmd_6,cmd_7]
 

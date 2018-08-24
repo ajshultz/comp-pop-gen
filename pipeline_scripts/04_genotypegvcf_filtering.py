@@ -465,6 +465,11 @@ def main():
                                new_time = '168'
                             else:
                                 new_time = str(new_time)
+                            
+                            #Remove previous GenomicsDB if it exists - will throw error if directory already exists.
+                            if os.path.isdir('%s/genomics_db/interval_%s'%(sp_dir,str(i))):
+                                proc = Popen('rm -r %s/genomics_db/interval_%s'%(sp_dir,str(i)),shell=True)
+                            
                             #Submit array with only that interval
                             resubmitted_jobid = sbatch_submit_array(gg_filename,memory=new_mem,timelimit=new_time, array_nums=array_id)
                             sleep(1)

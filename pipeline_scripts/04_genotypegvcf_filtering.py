@@ -137,12 +137,12 @@ def extract_config(config_filename):
         print("No specification of how much time to use for HaplotypeCaller, using 12 hours by default")
     
     if "memory_gg" not in config_info:
-        config_info["memory_gg"] = "8"
-        print("No specification of how much memory to use for GenotypeGVCF, using 8 GB by default")
+        config_info["memory_gg"] = "16"
+        print("No specification of how much memory to use for GenotypeGVCF, using 16 GB by default")
     
     if "time_gg" not in config_info:
-        config_info["time_gg"] = "12"
-        print("No specification of how much time to use for GenotypeGVCF, using 12 hours by default")
+        config_info["time_gg"] = "24"
+        print("No specification of how much time to use for GenotypeGVCF, using 24 hours by default")
         
     if "combine_gvcf_program" not in config_info:
         config_info["combine_gvcf_program"] = "GenomicsDBImport"

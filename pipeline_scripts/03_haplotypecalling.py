@@ -218,7 +218,7 @@ def check_missing_gvcfs(arraystart,arrayend,sample_files,sample):
     
     return(missing_ints)
 
-
+##Currently requires NCBI names if you specify chromosome. Add config option to specify regex to identify chromosomes, have default be NCBI.
 def split_genome(sp_dir,sp_abbr,nintervals,outputdir):
 	#Open input		
     fai = open("%s/genome/%s.fa.fai"%(sp_dir,sp_abbr),"r")
@@ -241,6 +241,7 @@ def split_genome(sp_dir,sp_abbr,nintervals,outputdir):
             cumEnd.append(totLen)
 
         #Create interval based on total length of scaffolds, and create list of start and end values
+        #### Would be better to refactor to just compute interval size, and add scaffolds to intervals until the interval exceeds size, then move on to the next interval.
         interval = (totLen/n)+1
         intervalNums = range(1,n+1)
         intervalEnd = [x * interval for x in intervalNums]

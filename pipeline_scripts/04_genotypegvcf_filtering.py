@@ -7,6 +7,7 @@ import sys
 import os
 import argparse
 from subprocess import Popen,PIPE
+import shutil
 from time import sleep
 import datetime
 import numpy as np
@@ -119,7 +120,7 @@ def extract_config(config_filename):
     
     if "pipeline" not in config_info:
         config_info["pipeline"] = "lowcoverage"
-        print("No pipeline specified (highcoverage or lowcoverage), using lowcoverage.")
+        #print("No pipeline specified (highcoverage or lowcoverage), using lowcoverage.")
         
     if config_info["pipeline"] != "highcoverage" and config_info["pipeline"] != "lowcoverage":
         sys.exit("Pipeline must be set to either 'highcoverage' or 'lowcoverage")
@@ -130,11 +131,11 @@ def extract_config(config_filename):
     
     if "memory_hc" not in config_info:
         config_info["memory_hc"] = "8"
-        print("No specification of how much memory to use for HaplotypeCaller, using 8GB by default")
+        #print("No specification of how much memory to use for HaplotypeCaller, using 8GB by default")
     
     if "time_hc" not in config_info:
         config_info["time_hc"] = "12"
-        print("No specification of how much time to use for HaplotypeCaller, using 12 hours by default")
+        #print("No specification of how much time to use for HaplotypeCaller, using 12 hours by default")
     
     if "memory_gg" not in config_info:
         config_info["memory_gg"] = "16"
@@ -303,7 +304,7 @@ def genotypegvcf_sbatch(sp_dir,sp_abbr,sample_list,het,nintervals,memory_gg,comb
     cmd_5 = '/n/home13/ashultz/sw/progs/gatk-4.0.8.1/gatk --java-options "-Xmx${MEM}g -XX:ParallelGCThreads=1" VariantsToTable -V %s/vcf/%s.${SLURM_ARRAY_TASK_ID}.vcf.gz -O %s/stats/%s_${SLURM_ARRAY_TASK_ID}_unfilteredVCFstats.txt -F CHROM -F POS -F TYPE -F HET -F HOM-REF -F HOM-VAR -F NO-CALL -F NCALLED -F QD -F MQ -F FS -F SOR -F MQRankSum -F ReadPosRankSum -R %s/genome/%s.fa --intervals %s/genome/%s_splits_interval_lists/%s_${SLURM_ARRAY_TASK_ID}.interval_list'%(sp_dir,sp_abbr,sp_dir,sp_abbr,sp_dir,sp_abbr,sp_dir,nintervals,sp_abbr)
     
     #Apply default GATK hard filters
-    cmd_6 = r"""/n/home13/ashultz/sw/progs/gatk-4.0.8.1/gatk --java-options "-Xmx${MEM}g -XX:ParallelGCThreads=1" VariantFiltration -R %s/genome/%s.fa -V  %s/vcf/%s.${SLURM_ARRAY_TASK_ID}.vcf.gz -O  %s/vcf/%s_hardfilters.${SLURM_ARRAY_TASK_ID}.vcf.gz --filter-expression "(vc.isSNP() && (vc.hasAttribute('ReadPosRankSum') && ReadPosRankSum < -8.0)) || ((vc.isIndel() || vc.isMixed()) && (vc.hasAttribute('ReadPosRankSum') && ReadPosRankSum < -20.0)) || (vc.hasAttribute('QD') && QD < 2.0) " --filter-name "badSeq" --filter-expression "(vc.isSNP() && ((vc.hasAttribute('FS') && FS > 60.0) || (vc.hasAttribute('SOR') &&  SOR > 3.0))) || ((vc.isIndel() || vc.isMixed()) && ((vc.hasAttribute('FS') && FS > 200.0) || (vc.hasAttribute('SOR') &&  SOR > 10.0)))" --filter-name "badStrand" --filter-expression "vc.isSNP() && ((vc.hasAttribute('MQ') && MQ < 40.0) || (vc.hasAttribute('MQRankSum') && MQRankSum < -12.5))" --filter-name "badMap" """%(sp_dir,sp_abbr,sp_dir,sp_abbr,sp_dir,sp_abbr)
+    cmd_6 = r"""/n/home13/ashultz/sw/progs/gatk-4.0.8.1/gatk --java-options "-Xmx${MEM}g -XX:ParallelGCThreads=1" VariantFiltration -R %s/genome/%s.fa -V  %s/vcf/%s.${SLURM_ARRAY_TASK_ID}.vcf.gz -O  %s/vcf/%s_hardfilters.${SLURM_ARRAY_TASK_ID}.vcf.gz --filter-expression "(vc.isSNP() && (vc.hasAttribute('ReadPosRankSum') && ReadPosRankSum < -8.0)) || ((vc.isIndel() || vc.isMixed()) && (vc.hasAttribute('ReadPosRankSum') && ReadPosRankSum < -20.0)) || (vc.hasAttribute('QD') && QD < 2.0) " --filter-name "GATK_default" --filter-expression "(vc.isSNP() && ((vc.hasAttribute('FS') && FS > 60.0) || (vc.hasAttribute('SOR') &&  SOR > 3.0))) || ((vc.isIndel() || vc.isMixed()) && ((vc.hasAttribute('FS') && FS > 200.0) || (vc.hasAttribute('SOR') &&  SOR > 10.0)))" --filter-name "GATK_default" --filter-expression "vc.isSNP() && ((vc.hasAttribute('MQ') && MQ < 40.0) || (vc.hasAttribute('MQRankSum') && MQRankSum < -12.5))" --filter-name "GATK_default" """%(sp_dir,sp_abbr,sp_dir,sp_abbr,sp_dir,sp_abbr)
     
     #Calculate missingness per individual
     cmd_7 = 'vcftools --gzvcf %s/vcf/%s_hardfilters.${SLURM_ARRAY_TASK_ID}.vcf.gz --missing-indv --out %s/stats/%s_ind_missingness.${SLURM_ARRAY_TASK_ID}'%(sp_dir,sp_abbr,sp_dir,sp_abbr)
@@ -468,7 +469,7 @@ def main():
                             
                             #Remove previous GenomicsDB if it exists - will throw error if directory already exists.
                             if os.path.isdir('%s/genomics_db/interval_%s'%(sp_dir,str(i))):
-                                proc = Popen('rm -r %s/genomics_db/interval_%s'%(sp_dir,str(i)),shell=True)
+                                shutil.rmtree(path = '%s/genomics_db/interval_%s'%(sp_dir,str(i)))
                             
                             #Submit array with only that interval
                             resubmitted_jobid = sbatch_submit_array(gg_filename,memory=new_mem,timelimit=new_time, array_nums=array_id)
@@ -496,8 +497,8 @@ def main():
     print("Failed for intervals: %s"%(failed_intervals))
     
     #Concatenate all missingness information into single file, adding additional column for easy manipulation in R, and additional file with mean and SD missingness per individual
-    all_missing_file = open('%s/stats/_%s_all_all_missingness_info.txt'%(sp_dir,sp_abbr),'r')
-    mean_sd_missing_file = open('%s/stats/%s_all_mean_missingness_info.txt'%(sp_dir,sp_abbr),'r')
+    all_missing_file = open('%s/stats/_%s_all_all_missingness_info.txt'%(sp_dir,config_info["abbv"]),'r')
+    mean_sd_missing_file = open('%s/stats/%s_all_mean_missingness_info.txt'%(sp_dir,config_info["abbv"]),'r')
     
     sample_miss_dict = {}
     
@@ -508,8 +509,8 @@ def main():
     #If missingness file exists for interval, write results to all_missing_file, and add fraction missing to dictionary for each sample
     for i in range(1,int(nintervalfiles)+1):
         
-        if os.path.isfile('%s/stats/%s_ind_missingness.%d.imiss'%(sp_dir,sp_abbr,i)):
-            missing_file = open('%s/stats/%s_ind_missingness.%d.imiss'%(sp_dir,sp_abbr,i),'r')
+        if os.path.isfile('%s/stats/%s_ind_missingness.%d.imiss'%(sp_dir,config_info["abbv"],i)):
+            missing_file = open('%s/stats/%s_ind_missingness.%d.imiss'%(sp_dir,config_info["abbv"],i),'r')
             for line in missing_file:
                 line = line.strip()
                 split_line = line.split()
@@ -532,17 +533,8 @@ def main():
     
     all_missing_file.close()
     mean_sd_missing_file.close()
-    #Check that the final vcf is available, if so, remove intermediate files (combined gvcf or genomic db)
-    '''
-    for i in range(1,nintervalsfiles+1):
-        if os.path.isfile('%s/vcf/%s.%s.vcf.gz'%(sp_dir,config_info["abbv"],str(i))) and os.path.isfile('%s/vcf/%s.%s.vcf.gz.tbi'%(sp_dir,config_info["abbv"],str(i))):
-            if os.path.isfile('%s/gvcf/%s.%s.g.vcf.gz'%(sp_dir,config_info["abbv"],str(i))):
-                proc = Popen('rm %s/gvcf/%s.%s.g.vcf.gz'%(sp_dir,config_info["abbv"],str(i)),shell=True)
-            if os.path.isfile('%s/gvcf/%s.%s.g.vcf.gz.tbi'%(sp_dir,config_info["abbv"],str(i))):
-                proc = Popen('rm %s/gvcf/%s.%s.g.vcf.gz.tbi'%(sp_dir,config_info["abbv"],str(i)),shell=True)
-        if os.path.isdir('%s/genomics_db/interval_%s'%(sp_dir,str(i))):
-            proc = Popen('rm -r %s/genomics_db/interval_%s'%(sp_dir,str(i)),shell=True)
-    '''
+
+    #Check that the hardfilters VCF exists, and if it does, remove the other VCF
                
     now = datetime.datetime.now()
     print('Finished script 04: %s'%now)

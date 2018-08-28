@@ -8,11 +8,15 @@ import os
 import argparse
 from subprocess import Popen,PIPE
 from time import sleep
+import shutil
 import datetime
 import numpy as np
 import matplotlib.pyplot as plt
 plt.switch_backend('agg') #Added to get working on the cluster
 from matplotlib.backends.backend_pdf import PdfPages
+
+
+#####May wish to run scripts 01 and 02 on regal until final deduplicated BAM is produced. After that, copy to "permanent" directory on holylfs. Create script 2.5 to just set up working dir on holylfs, mv dedup dir, logs, scripts, stats over and end.
 
 #Extract Sample, SRA and genome info from config file. Sample data will be stored as a dictionary with sample ID as keys and a list of SRA accessions as values. Returns a dictionary of this info.
 def extract_config(config_filename):
@@ -551,6 +555,9 @@ def main():
     
     #Check that the final sorted bam and index is available, if so, remove intermediate files (unsorted dedup, all aligned bams)
     ###Only delete if validate says no errors found.
+        ####Move this to script 2 after validation has occurred.         
+    #Check that the final sorted bam and index is available, if so, remove intermediate files (SRA, fastq,unsorted BAM)
+
     for sample in config_info["sample_dict"]:
         if os.path.isfile('%s/dedup/%s.dedup.sorted.bam'%(sp_dir,sample)) and os.path.isfile('%s/dedup/%s.dedup.sorted.bai'%(sp_dir,sample)) and all_validation_stats[sample] == "ok":
             if os.path.isfile('%s/dedup/%s.dedup.bam'%(sp_dir,sample)):
@@ -558,6 +565,11 @@ def main():
             for sra in config_info["sample_dict"][sample]:
                 if os.path.isfile('%s/alignment/%s.sorted.rg.bam'%(sp_dir,sra)):
                     proc = Popen('rm %s/alignment/%s.sorted*'%(sp_dir,sra),shell=True)
+                if os.path.isfile('%s/%s.sorted.bam'%(alignment_dir,sra)) and os.path.isfile('%s/%s.sorted.bai'%(alignment_dir,sra)):
+                if os.path.isfile('%s/%s_1.fastq.gz'%(fastq_dir,sra)):
+                    proc = Popen('rm %s/%s*'%(fastq_dir,sra),shell=True)
+                if os.path.isfile('%s/%s.sra'%(sra_dir,sra)):
+                    proc = Popen('rm %s/%s.sra'%(sra_dir,sra),shell=True)
         else:
             print("Something happened with sample deduping: %s"%(sample))     
                

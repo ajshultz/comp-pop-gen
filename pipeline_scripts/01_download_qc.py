@@ -694,17 +694,8 @@ def main():
     for job in mapping_completed_jobids:
         if mapping_completed_jobids[job] != "COMPLETED":
             print("SRA trimming, mapping, sorting, and stats job %s failed with code: %s"%(job,mapping_completed_jobids[job]))
-            
-    #Check that the final sorted bam and index is available, if so, remove intermediate files (SRA, fastq,unsorted BAM)
-    for sample in config_info["sample_dict"]:
-        for sra in config_info["sample_dict"][sample]:
-            if os.path.isfile('%s/%s.sorted.bam'%(alignment_dir,sra)) and os.path.isfile('%s/%s.sorted.bai'%(alignment_dir,sra)):
-                if os.path.isfile('%s/%s_1.fastq.gz'%(fastq_dir,sra)):
-                    proc = Popen('rm %s/%s*'%(fastq_dir,sra),shell=True)
-                if os.path.isfile('%s/%s.sra'%(sra_dir,sra)):
-                    proc = Popen('rm %s/%s.sra'%(sra_dir,sra),shell=True)
-            else:
-                print("Something happened with SRA: %s for sample: %s"%(sra,sample))   
+    
+
     
     now = datetime.datetime.now()
     print('Scripted finished: %s'%now)     

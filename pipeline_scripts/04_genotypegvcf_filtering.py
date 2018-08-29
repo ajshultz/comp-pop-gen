@@ -432,7 +432,7 @@ def main():
             all_jobids.append("%s_%s"%(base_jobid,i))
             
     elif finished_files == int(nintervalfiles):
-        sys.exit("All vcf files present, exiting")
+        print("All vcf files present")
         
     else:
         sys.exit("More vcf files present than expected, check")

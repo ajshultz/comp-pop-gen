@@ -537,6 +537,12 @@ def main():
     
     all_missing_file.close()
     mean_sd_missing_file.close()
+    
+    #Copy summary missingness file over to summary directory
+    general_dir = "_ALL_SPECIES_SUMMARIES"
+    
+    try:
+        proc = Popen('cp %s/stats/_%s_all_mean_missingness_info.txt %s/%s_all_mean_missingness_info.txt'%(sp_dir,config_info["abbv"],general_dir,config_info["abbv"]),shell=True)
 
     #Check that the hardfilters VCF exists, and if it does, remove the other VCF
                

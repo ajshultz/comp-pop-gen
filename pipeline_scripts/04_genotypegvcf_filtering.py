@@ -519,7 +519,7 @@ def main():
                 line = line.strip()
                 split_line = line.split()
                 if split_line[0] != 'INDV':
-                    all_missing_file.write('%s\t%d'%(line,i))
+                    all_missing_file.write('%s\t%d\n'%(line,i))
                     if split_line[0] in sample_miss_dict:
                         sample_miss_dict[split_line[0]].append(float(split_line[4]))
                     else:
@@ -528,12 +528,12 @@ def main():
             missing_file.close()
     
     for sample in sample_miss_dict:
-        sample_mean = np.round(np.mean(sample_miss_dict[sample]),2)
-        sample_sd = np.round(np.std(sample_miss_dict[sample]),2)
+        sample_mean = np.round(np.mean(sample_miss_dict[sample]),3)
+        sample_sd = np.round(np.std(sample_miss_dict[sample]),3)
         sample_min = np.min(sample_miss_dict[sample])
         sample_max = np.max(sample_miss_dict[sample])
         
-        mean_sd_missing_file.write('%s\t%s\t%s\t%s\t%s\n'%(sample,str(sample_mean),str(sample_sd),str(sample_min),str(sample_max)))
+        mean_sd_missing_file.write('%s\t%s\t%s\t%s\t%s\n'%(sample,str(sample_mean),str(sample_sd),str(sample_max),str(sample_min)))
     
     all_missing_file.close()
     mean_sd_missing_file.close()

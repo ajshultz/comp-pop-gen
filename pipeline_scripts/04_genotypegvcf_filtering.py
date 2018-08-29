@@ -543,8 +543,8 @@ def main():
     
     try:
         proc = Popen('cp %s/stats/_%s_all_mean_missingness_info.txt %s/%s_all_mean_missingness_info.txt'%(sp_dir,config_info["abbv"],general_dir,config_info["abbv"]),shell=True)
-
-    #Check that the hardfilters VCF exists, and if it does, remove the other VCF
+    except:
+        print("There was an error copying summary missingness file")
                
     now = datetime.datetime.now()
     print('Finished script 04: %s'%now)

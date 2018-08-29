@@ -417,7 +417,7 @@ def main():
         for i in range(1,int(nintervalfiles)+1):
             all_jobids.append("%s_%d"%(base_jobid,i))
     
-    elif finished_files < nintervalfiles:
+    elif finished_files < int(nintervalfiles):
         #Check each interval, see if it has both a .vcf.gz and .tbi file
         
         missing = check_missing_vcfs(arraystart=1,arrayend=nintervalfiles,vcf_files=vcf_files,sp_abbr=config_info["abbv"])
@@ -431,7 +431,7 @@ def main():
         for i in missing:
             all_jobids.append("%s_%s"%(base_jobid,i))
             
-    elif finished_files == nintervalfiles:
+    elif finished_files == int(nintervalfiles):
         sys.exit("All vcf files present, exiting")
         
     else:

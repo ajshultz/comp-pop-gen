@@ -528,8 +528,8 @@ def main():
             missing_file.close()
     
     for sample in sample_miss_dict:
-        sample_mean = np.round(numpy.mean(sample_miss_dict[sample]),2)
-        sample_sd = np.round(numpy.std(sample_miss_dict[sample]),2)
+        sample_mean = np.round(np.mean(sample_miss_dict[sample]),2)
+        sample_sd = np.round(np.std(sample_miss_dict[sample]),2)
         sample_min = np.min(sample_miss_dict[sample])
         sample_max = np.max(sample_miss_dict[sample])
         

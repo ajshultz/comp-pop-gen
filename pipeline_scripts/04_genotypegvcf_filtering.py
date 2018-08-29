@@ -497,8 +497,8 @@ def main():
     print("Failed for intervals: %s"%(failed_intervals))
     
     #Concatenate all missingness information into single file, adding additional column for easy manipulation in R, and additional file with mean and SD missingness per individual
-    all_missing_file = open('%s/stats/_%s_all_all_missingness_info.txt'%(sp_dir,config_info["abbv"]),'r')
-    mean_sd_missing_file = open('%s/stats/%s_all_mean_missingness_info.txt'%(sp_dir,config_info["abbv"]),'r')
+    all_missing_file = open('%s/stats/_%s_all_all_missingness_info.txt'%(sp_dir,config_info["abbv"]),'w')
+    mean_sd_missing_file = open('%s/stats/%s_all_mean_missingness_info.txt'%(sp_dir,config_info["abbv"]),'w')
     
     sample_miss_dict = {}
     

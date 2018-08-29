@@ -250,7 +250,7 @@ def check_missing_vcfs(arraystart,arrayend,vcf_files,sp_abbr):
     missing_ints = []
     #Check if file_ext is a string, if so, just test that one type
     for i in range(arraystart,arrayend+1):
-        if "%s.%s.vcf.gz"%(sp_abbr,str(i)) not in vcf_files or "%s.%s.vcf.gz.tbi"%(sp_abbr,str(i)) not in vcf_files:
+        if "%s_hardfilters.%s.vcf.gz"%(sp_abbr,str(i)) not in vcf_files or "%s_hardfilters.%s.vcf.gz.tbi"%(sp_abbr,str(i)) not in vcf_files:
             missing_ints.append(str(i))            
     return(missing_ints)
 
@@ -308,6 +308,8 @@ def genotypegvcf_sbatch(sp_dir,sp_abbr,sample_list,het,nintervals,memory_gg,comb
     
     #Calculate missingness per individual
     cmd_7 = 'vcftools --gzvcf %s/vcf/%s_hardfilters.${SLURM_ARRAY_TASK_ID}.vcf.gz --missing-indv --out %s/stats/%s_ind_missingness.${SLURM_ARRAY_TASK_ID}'%(sp_dir,sp_abbr,sp_dir,sp_abbr)
+    
+    cmd_8 = 'rm %s/vcf/%s.${SLURM_ARRAY_TASK_ID}.vcf.gz'%(sp_dir,sp_abbr)
         
     cmd_list = [cmd_1,cmd_2,cmd_3,cmd_4,cmd_5,cmd_6,cmd_7]
 
@@ -400,6 +402,9 @@ def main():
     #Get number of finished files
     vcf_files = os.listdir(vcf_dir)
     finished_files = len([name for name in vcf_files if ".tbi" in name])
+    
+    print(nintervalfiles)
+    print(finished_files)
     
     all_jobids = []
     #Submit file the first time

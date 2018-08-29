@@ -442,64 +442,66 @@ def main():
     
     #Then, enter while loop that will continue until the number of completed jobs matches the number of intervals
     #Create dictionary of completed jobids and completion statuses
-    completed_jobids = {}
-    rerun_jobids = []
-    successful_intervals = []
-    failed_intervals = []
     
-    while len(completed_jobids) < len(all_jobids):
-        job_statuses = all_jobs_status(start_date)
-        current_jobs = all_jobids
-        for job in current_jobs:
-            if job not in completed_jobids:
-                if job in job_statuses:#Have to add this because array jobs may be delayed
-                    if job_statuses[job] != "PENDING" and job_statuses[job] != "RUNNING":
-                        completed_jobids[job] = job_statuses[job]
-                        array_id = job.split("_")[1]
+    if finished_files != int(nintervalfiles):
+        completed_jobids = {}
+        rerun_jobids = []
+        successful_intervals = []
+        failed_intervals = []
+    
+        while len(completed_jobids) < len(all_jobids):
+            job_statuses = all_jobs_status(start_date)
+            current_jobs = all_jobids
+            for job in current_jobs:
+                if job not in completed_jobids:
+                    if job in job_statuses:#Have to add this because array jobs may be delayed
+                        if job_statuses[job] != "PENDING" and job_statuses[job] != "RUNNING":
+                            completed_jobids[job] = job_statuses[job]
+                            array_id = job.split("_")[1]
                         
-                        #If job_id is "COMPLETED", check to make sure both the .vcf.gz file and .tbi file are both present. If they are, print and add to successful_samples dictionary (sample:[intervals])
-                        if job_statuses[job] == "COMPLETED":
-                            if os.path.isfile("%s/vcf/%s.%s.vcf.gz"%(sp_dir,config_info["abbv"],array_id)) and os.path.isfile("%s/vcf/%s.%s.vcf.gz.tbi"%(sp_dir,config_info["abbv"],array_id)):
-                                print("GenotypeGVCF job %s completed for interval %s"%(job, array_id))
-                                successful_intervals.append(array_id)
+                            #If job_id is "COMPLETED", check to make sure both the .vcf.gz file and .tbi file are both present. If they are, print and add to successful_samples dictionary (sample:[intervals])
+                            if job_statuses[job] == "COMPLETED":
+                                if os.path.isfile("%s/vcf/%s.%s.vcf.gz"%(sp_dir,config_info["abbv"],array_id)) and os.path.isfile("%s/vcf/%s.%s.vcf.gz.tbi"%(sp_dir,config_info["abbv"],array_id)):
+                                    print("GenotypeGVCF job %s completed for interval %s"%(job, array_id))
+                                    successful_intervals.append(array_id)
 
-                        #If job_id is not COMPLETED, it means there was some sort of failure in the job. Resubmit with 2x time (up to 7 days, or 168 hours) and 2x memory
-                        elif job_statuses[job] != "COMPLETED" and job not in rerun_jobids:
-                            new_mem = str(int(config_info["memory_gg"])*2)
-                            new_time =  int(config_info["time_gg"])*2
-                            if new_time > 168:
-                               new_time = '168'
-                            else:
-                                new_time = str(new_time)
+                            #If job_id is not COMPLETED, it means there was some sort of failure in the job. Resubmit with 2x time (up to 7 days, or 168 hours) and 2x memory
+                            elif job_statuses[job] != "COMPLETED" and job not in rerun_jobids:
+                                new_mem = str(int(config_info["memory_gg"])*2)
+                                new_time =  int(config_info["time_gg"])*2
+                                if new_time > 168:
+                                   new_time = '168'
+                                else:
+                                    new_time = str(new_time)
                             
-                            #Remove previous GenomicsDB if it exists - will throw error if directory already exists.
-                            if os.path.isdir('%s/genomics_db/interval_%s'%(sp_dir,str(i))):
-                                shutil.rmtree(path = '%s/genomics_db/interval_%s'%(sp_dir,str(i)))
+                                #Remove previous GenomicsDB if it exists - will throw error if directory already exists.
+                                if os.path.isdir('%s/genomics_db/interval_%s'%(sp_dir,str(i))):
+                                    shutil.rmtree(path = '%s/genomics_db/interval_%s'%(sp_dir,str(i)))
                             
-                            #Submit array with only that interval
-                            resubmitted_jobid = sbatch_submit_array(gg_filename,memory=new_mem,timelimit=new_time, array_nums=array_id)
-                            sleep(1)
+                                #Submit array with only that interval
+                                resubmitted_jobid = sbatch_submit_array(gg_filename,memory=new_mem,timelimit=new_time, array_nums=array_id)
+                                sleep(1)
                             
-                            #Add job id (including array number) to both rerun_jobids and all_jobids
-                            rerun_jobids.append('%s_%s'%(resubmitted_jobid,array_id))
+                                #Add job id (including array number) to both rerun_jobids and all_jobids
+                                rerun_jobids.append('%s_%s'%(resubmitted_jobid,array_id))
                             
-                            all_jobids.append('%s_%s'%(resubmitted_jobid,array_id))
+                                all_jobids.append('%s_%s'%(resubmitted_jobid,array_id))
                             
-                            print("GenotypeGVCF job %s failed, retrying interval %s with %s memory and %s time"%(job,array_id,new_mem,new_time))
+                                print("GenotypeGVCF job %s failed, retrying interval %s with %s memory and %s time"%(job,array_id,new_mem,new_time))
                         
-                        #If just doesn't finish and already resubmitted, do not submit again, print failure to log file, and add to failed_intervals list
-                        elif job_statuses[job] != "COMPLETED" and job in rerun_jobids:
-                            print("GenotypeGVCF job %s failure 2x for and interval %s"%(job,array_id))
-                            failed_intervals.append(array_id)
+                            #If just doesn't finish and already resubmitted, do not submit again, print failure to log file, and add to failed_intervals list
+                            elif job_statuses[job] != "COMPLETED" and job in rerun_jobids:
+                                print("GenotypeGVCF job %s failure 2x for and interval %s"%(job,array_id))
+                                failed_intervals.append(array_id)
                                 
-                        else:
-                            print("Error with GenotypeGVCF job checking and resubmissions")
+                            else:
+                                print("Error with GenotypeGVCF job checking and resubmissions")
                         
-        sleep(30)
+            sleep(30)
     
-    #After all jobs have finished, report intervals failed twice
-    failed_intervals = ",".join(failed_intervals)
-    print("Failed for intervals: %s"%(failed_intervals))
+        #After all jobs have finished, report intervals failed twice
+        failed_intervals = ",".join(failed_intervals)
+        print("Failed for intervals: %s"%(failed_intervals))
     
     #Concatenate all missingness information into single file, adding additional column for easy manipulation in R, and additional file with mean and SD missingness per individual
     all_missing_file = open('%s/stats/_%s_all_all_missingness_info.txt'%(sp_dir,config_info["abbv"]),'w')

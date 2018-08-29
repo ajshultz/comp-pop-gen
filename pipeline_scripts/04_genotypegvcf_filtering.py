@@ -403,9 +403,6 @@ def main():
     vcf_files = os.listdir(vcf_dir)
     finished_files = len([name for name in vcf_files if ".tbi" in name])
     
-    print(nintervalfiles)
-    print(finished_files)
-    
     all_jobids = []
     #Submit file the first time
     if finished_files == 0:
@@ -505,7 +502,7 @@ def main():
     
     #Concatenate all missingness information into single file, adding additional column for easy manipulation in R, and additional file with mean and SD missingness per individual
     all_missing_file = open('%s/stats/_%s_all_all_missingness_info.txt'%(sp_dir,config_info["abbv"]),'w')
-    mean_sd_missing_file = open('%s/stats/%s_all_mean_missingness_info.txt'%(sp_dir,config_info["abbv"]),'w')
+    mean_sd_missing_file = open('%s/stats/_%s_all_mean_missingness_info.txt'%(sp_dir,config_info["abbv"]),'w')
     
     sample_miss_dict = {}
     
@@ -523,10 +520,10 @@ def main():
                 split_line = line.split()
                 if split_line[0] != 'INDV':
                     all_missing_file.write('%s\t%d'%(line,i))
-                    if line[0] in sample_miss_dict:
-                        sample_miss_dict[line[0]].append(float(line[4]))
+                    if split_line[0] in sample_miss_dict:
+                        sample_miss_dict[split_line[0]].append(float(split_line[4]))
                     else:
-                        sample_miss_dict[line[0]] = [float(line[4])]
+                        sample_miss_dict[split_line[0]] = [float(split_line[4])]
             
             missing_file.close()
     

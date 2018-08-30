@@ -431,4 +431,7 @@
 --TIME_HC 72
 
 #Starting time (hours) for running GenotypeGVCF
---TIME_GG 8
+--TIME_GG 72
+
+#Program for running GenotypeGVCF
+--COMBINE_GVCF_PROGRAM CombineGVCFs

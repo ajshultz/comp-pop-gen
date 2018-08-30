@@ -565,10 +565,10 @@ def main():
             for sra in config_info["sample_dict"][sample]:
                 if os.path.isfile('%s/alignment/%s.sorted.rg.bam'%(sp_dir,sra)):
                     proc = Popen('rm %s/alignment/%s.sorted*'%(sp_dir,sra),shell=True)
-                if os.path.isfile('%s/%s_1.fastq.gz'%(fastq_dir,sra)):
-                    proc = Popen('rm %s/%s*'%(fastq_dir,sra),shell=True)
-                if os.path.isfile('%s/%s.sra'%(sra_dir,sra)):
-                    proc = Popen('rm %s/%s.sra'%(sra_dir,sra),shell=True)
+                if os.path.isfile('%s/fastq/%s_1.fastq.gz'%(sp_dir,sra)):
+                    proc = Popen('rm %s/fastq/%s*'%(sp_dir,sra),shell=True)
+                if os.path.isfile('%s/sra/%s.sra'%(sp_dir,sra)):
+                    proc = Popen('rm %s/sra/%s.sra'%(sp_dir,sra),shell=True)
         else:
             print("Something happened with sample deduping: %s"%(sample))     
                

@@ -25,7 +25,7 @@
 --HETEROZYGOSITY 0.005
 
 #Which version of pipeline to run (lowcoverage or highcoverage)
---PIPELINE lowcoverage
+--PIPELINE highcoverage
 
 #Number of intervals to run at a time?
 --NINTERVALS CHROMOSOME

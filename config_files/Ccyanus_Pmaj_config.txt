@@ -6,6 +6,8 @@
 #Species abbreviation for use in file headers (e.g. CCornix for hooded crow)
 --ABBV Ccyanus_Pmaj
 
+#Sample from: Allison Shultz
+#Species binomial: Cyanistes cyanus
 --SAMPLE_LOCAL CCyanus_Bauer CCyanus_BC9DJ6ANXX
 --SAMPLE_LOCAL CCyanus_Bauer CCyanus_AC9J4EANXX
 

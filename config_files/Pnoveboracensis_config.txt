@@ -6,6 +6,8 @@
 #Species abbreviation for use in file headers (e.g. CCornix for hooded crow)
 --ABBV Pnoveboracensis
 
+#Sample from: Allison Shultz
+#Species binomial: Parkesia noveboracensis
 #Sample information
 --SAMPLE_LOCAL Pnoveboracensis_Bauer Pnoveboracensis_BC9DJ6ANXX
 --SAMPLE_LOCAL Pnoveboracensis_Bauer Pnoveboracensis_AC9J4EANXX

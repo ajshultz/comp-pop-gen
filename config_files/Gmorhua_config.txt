@@ -6,6 +6,8 @@
 #Species abbreviation for use in file headers (e.g. CCornix for hooded crow)
 --ABBV Gmorhua
 
+#Sample from: Einar Arnason
+#Species binomial: Gadus morhua
 --SAMPLE_LOCAL 105652Nse 105652Nse_Lane1
 --SAMPLE_LOCAL 105652Nse 105652Nse_Lane2
 --SAMPLE_LOCAL 106488Nse 106488Nse_Lane1

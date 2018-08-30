@@ -565,7 +565,6 @@ def main():
             for sra in config_info["sample_dict"][sample]:
                 if os.path.isfile('%s/alignment/%s.sorted.rg.bam'%(sp_dir,sra)):
                     proc = Popen('rm %s/alignment/%s.sorted*'%(sp_dir,sra),shell=True)
-                if os.path.isfile('%s/%s.sorted.bam'%(alignment_dir,sra)) and os.path.isfile('%s/%s.sorted.bai'%(alignment_dir,sra)):
                 if os.path.isfile('%s/%s_1.fastq.gz'%(fastq_dir,sra)):
                     proc = Popen('rm %s/%s*'%(fastq_dir,sra),shell=True)
                 if os.path.isfile('%s/%s.sra'%(sra_dir,sra)):

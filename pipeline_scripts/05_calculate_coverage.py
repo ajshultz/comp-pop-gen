@@ -273,28 +273,26 @@ def sample_coverage_sbatch(sp_dir,sp_abbr,sample):
     dedup_sorted_filename = '%s/dedup/%s.dedup.sorted.bam'%(sp_dir,sample)
     genome_cov_filename = '%s/stats_coverage/%s.bg'%(sp_dir,sample)
     if os.path.isfile(dedup_sorted_filename):
-        if os.path.isfile(genome_cov_filename) and os.path.getsize(genome_cov_filename) > 0:
-            print("Coverage file for sample %s already exists, will not recalculate"%(sample))
-        else:
-            #Load modules and get versions for all programs used
-            cmd_1 = 'module load bedtools2/2.26.0-fasrc01'
-        
-            #Create bedgraph with bedtools of coverage (include regions with 0 coverage)
-            cmd_2 = 'bedtools genomecov -bga -ibam %s/dedup/%s.dedup.sorted.bam -g %s/genome/%s.fa > %s/stats_coverage/%s.bg'%(sp_dir,sample,sp_dir,sp_abbr,sp_dir,sample)
+
+        #Load modules and get versions for all programs used
+        cmd_1 = 'module load bedtools2/2.26.0-fasrc01'
     
-    
-            cmd_list = [cmd_1,cmd_2]
-
-            final_cmd = "\n\n".join(cmd_list)
+        #Create bedgraph with bedtools of coverage (include regions with 0 coverage)
+        cmd_2 = 'bedtools genomecov -bga -ibam %s/dedup/%s.dedup.sorted.bam -g %s/genome/%s.fa > %s/stats_coverage/%s.bg'%(sp_dir,sample,sp_dir,sp_abbr,sp_dir,sample)
 
 
-    #Format sbatch script
-            sample_coverage_script = slurm_script.format(partition="shared",time="0-12:00",mem="8000",cores="1",nodes="1",jobid="genomecov",sp_dir=sp_dir,cmd=final_cmd)
-            out_filename = "%s/scripts/07_coverage_bedgraph_%s.sbatch"%(sp_dir,sample)
-            out_file = open(out_filename,"w")
-            out_file.write(sample_coverage_script)
-            out_file.close
-            return(out_filename)
+        cmd_list = [cmd_1,cmd_2]
+
+        final_cmd = "\n\n".join(cmd_list)
+
+
+#Format sbatch script
+        sample_coverage_script = slurm_script.format(partition="shared",time="0-12:00",mem="8000",cores="1",nodes="1",jobid="genomecov",sp_dir=sp_dir,cmd=final_cmd)
+        out_filename = "%s/scripts/07_coverage_bedgraph_%s.sbatch"%(sp_dir,sample)
+        out_file = open(out_filename,"w")
+        out_file.write(sample_coverage_script)
+        out_file.close
+        return(out_filename)
 
     else:
         print('No sorted dedup file for %s, cannot compute coverage bedgraph.'%(sample))
@@ -385,7 +383,11 @@ def main():
     all_jobids = {}
 
     for sample in config_info["sample_dict"]:
-        coverage_filenames[sample] = sample_coverage_sbatch(sp_dir,config_info["abbv"],sample)
+        genome_cov_filename = '%s/stats_coverage/%s.bg'%(sp_dir,sample)
+        if os.path.isfile(genome_cov_filename) and os.path.getsize(genome_cov_filename) > 0:
+            print("Coverage file for sample %s already exists, will not recalculate"%(sample))
+        else:
+            coverage_filenames[sample] = sample_coverage_sbatch(sp_dir,config_info["abbv"],sample)
     if len(coverage_filenames) > 0:
         #Submit dedup read sbatch files
         coverage_jobids = {}
@@ -423,7 +425,7 @@ def main():
         genome_cov_filename = '%s/stats_coverage/%s.bg'%(sp_dir,sample)
         if sample in failed_samples:
             print("Will not include sample %s in genome coverage calculation, job failed")
-        elif os.path.isfile(genome_cov_filename):
+        elif os.path.isfile(genome_cov_filename) and os.path.getsize(genome_cov_filename) > 0:
             sample_bedgraph_file_list.append(genome_cov_filename)
     
     #Create and submit file for union bedgraph job        

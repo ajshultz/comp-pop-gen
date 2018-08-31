@@ -121,7 +121,7 @@ def extract_config(config_filename):
         config_info["pipeline"] = "lowcoverage"
         #print("No pipeline specified (highcoverage or lowcoverage), using lowcoverage.")
         
-    if config_info["pipeline"] != "highcoverage" and config_info["pipeline"] != "lowcoverage":
+    #if config_info["pipeline"] != "highcoverage" and config_info["pipeline"] != "lowcoverage":
         #sys.exit("Pipeline must be set to either 'highcoverage' or 'lowcoverage")
     
     if "nintervals" not in config_info:

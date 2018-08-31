@@ -273,7 +273,7 @@ def sample_coverage_sbatch(sp_dir,sp_abbr,sample):
     dedup_sorted_filename = '%s/dedup/%s.dedup.sorted.bam'%(sp_dir,sample)
     genome_cov_filename = '%s/stats_coverage/%s.bg'%(sp_dir,sample)
     if os.path.isfile(dedup_sorted_filename):
-        if os.path.isfile(genome_cov_filename):
+        if os.path.isfile(genome_cov_filename) and os.path.getsize(genome_cov_filename) > 0:
             print("Coverage file for sample %s already exists, will not recalculate"%(sample))
         else:
             #Load modules and get versions for all programs used

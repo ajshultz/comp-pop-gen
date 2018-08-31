@@ -386,32 +386,32 @@ def main():
 
     for sample in config_info["sample_dict"]:
         coverage_filenames[sample] = sample_coverage_sbatch(sp_dir,config_info["abbv"],sample)
-
-    #Submit dedup read sbatch files
-    coverage_jobids = {}
-    completed_jobids = {}
-    for sample in coverage_filenames:
-        all_jobids[sbatch_submit(coverage_filenames[sample],memory=8,timelimit=8)] = sample
-        sleep(1)
-    #Add an extra sleep to give sacct a chance to catch up
-    sleep(20)
-    #Then, enter while loop that will continue until the number of completed jobs matches the number of sbatch files
-    while len(completed_jobids) < len(coverage_filenames):
-        num_running = num_pend_run(all_jobids,start_date)
-        job_statuses = all_jobs_status(start_date)
-        for job in all_jobids:
-            if job not in completed_jobids:
-                if job_statuses[job] != "PENDING" and job_statuses[job] != "RUNNING":
-                    completed_jobids[job] = job_statuses[job]
-                    print("Job %s completed for sample %s"%(job,all_jobids[job]))
-        sleep(30)
+    if lencoverage_filenames) > 0:
+        #Submit dedup read sbatch files
+        coverage_jobids = {}
+        completed_jobids = {}
+        for sample in coverage_filenames:
+            all_jobids[sbatch_submit(coverage_filenames[sample],memory=8,timelimit=8)] = sample
+            sleep(1)
+        #Add an extra sleep to give sacct a chance to catch up
+        sleep(20)
+        #Then, enter while loop that will continue until the number of completed jobs matches the number of sbatch files
+        while len(completed_jobids) < len(coverage_filenames):
+            num_running = num_pend_run(all_jobids,start_date)
+            job_statuses = all_jobs_status(start_date)
+            for job in all_jobids:
+                if job not in completed_jobids:
+                    if job_statuses[job] != "PENDING" and job_statuses[job] != "RUNNING":
+                        completed_jobids[job] = job_statuses[job]
+                        print("Job %s completed for sample %s"%(job,all_jobids[job]))
+            sleep(30)
     
-    #After all jobs have finished, report which jobs failed, also add samples that failed to list to exclude from whole-genome calculations
-    failed_samples = []
-    for job in completed_jobids:
-        if completed_jobids[job] != "COMPLETED":
-            print("Coverage bedgraph job %s failed with code: %s for sample %s"%(job,completed_jobids[job],all_jobids[job]))
-            failed_samples.append(all_jobids[job])
+        #After all jobs have finished, report which jobs failed, also add samples that failed to list to exclude from whole-genome calculations
+        failed_samples = []
+        for job in completed_jobids:
+            if completed_jobids[job] != "COMPLETED":
+                print("Coverage bedgraph job %s failed with code: %s for sample %s"%(job,completed_jobids[job],all_jobids[job]))
+                failed_samples.append(all_jobids[job])
 
 
     print("Now computing whole-genome coverage bedgraph")

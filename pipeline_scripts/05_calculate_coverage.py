@@ -309,7 +309,7 @@ def union_coverage_sbatch(sp_dir,sp_abbr,sample_bedgraph_file_list):
     cmd_1 = 'module load bedtools2/2.26.0-fasrc01'
 
     #Create bedgraph with bedtools of coverage (include regions with 0 coverage)
-    cmd_2 = 'bedtools unionbedg -header -empty -g %s/genome/%s.fa -i %s > %s/stats_coverage/_%s_all_samples_union.bg'%(sp_dir,sp_abbr,sample_bedgraph_files,sp_dir,sp_abbr)
+    cmd_2 = 'bedtools unionbedg -header -empty -g %s/genome/%s.fa.fai -i %s > %s/stats_coverage/_%s_all_samples_union.bg'%(sp_dir,sp_abbr,sample_bedgraph_files,sp_dir,sp_abbr)
 
 
     cmd_list = [cmd_1,cmd_2]

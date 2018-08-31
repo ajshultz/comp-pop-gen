@@ -386,7 +386,7 @@ def main():
 
     for sample in config_info["sample_dict"]:
         coverage_filenames[sample] = sample_coverage_sbatch(sp_dir,config_info["abbv"],sample)
-    if lencoverage_filenames) > 0:
+    if len(coverage_filenames) > 0:
         #Submit dedup read sbatch files
         coverage_jobids = {}
         completed_jobids = {}

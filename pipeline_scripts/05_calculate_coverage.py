@@ -391,7 +391,7 @@ def main():
     coverage_jobids = {}
     completed_jobids = {}
     for sample in coverage_filenames:
-        all_jobids[sbatch_submit(coverage_filenames[sample],memory=8,time=8)] = sample
+        all_jobids[sbatch_submit(coverage_filenames[sample],memory=8,timelimit=8)] = sample
         sleep(1)
     #Add an extra sleep to give sacct a chance to catch up
     sleep(20)
@@ -428,7 +428,7 @@ def main():
     
     #Create and submit file for union bedgraph job        
     union_sbatch_file = union_coverage_sbatch(sp_dir,config_info["abbv"],sample_bedgraph_file_list)
-    union_job_id = sbatch_submit(union_sbatch_file,memory=8,time=8)
+    union_job_id = sbatch_submit(union_sbatch_file,memory=8,timelimit=8)
     sleep(30)
 
     #Only check on union job if actually submitted. 

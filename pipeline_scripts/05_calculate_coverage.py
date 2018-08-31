@@ -381,6 +381,7 @@ def main():
     coverage_filenames = {}
     #all_jobids is a dictionary with jobid (including array numbers as key and sample as value)
     all_jobids = {}
+    failed_samples = []
 
     for sample in config_info["sample_dict"]:
         genome_cov_filename = '%s/stats_coverage/%s.bg'%(sp_dir,sample)
@@ -409,7 +410,6 @@ def main():
             sleep(30)
     
         #After all jobs have finished, report which jobs failed, also add samples that failed to list to exclude from whole-genome calculations
-        failed_samples = []
         for job in completed_jobids:
             if completed_jobids[job] != "COMPLETED":
                 print("Coverage bedgraph job %s failed with code: %s for sample %s"%(job,completed_jobids[job],all_jobids[job]))

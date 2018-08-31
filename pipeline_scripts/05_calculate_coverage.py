@@ -385,7 +385,7 @@ def main():
     all_jobids = {}
 
     for sample in config_info["sample_dict"]:
-        coverage_filenames[sample] = sample_coverage_sbatch(sp_dir,sp_abbr,sample)
+        coverage_filenames[sample] = sample_coverage_sbatch(sp_dir,config_info["abbv"],sample)
 
     #Submit dedup read sbatch files
     coverage_jobids = {}
@@ -427,7 +427,7 @@ def main():
             sample_bedgraph_file_list.append(genome_cov_filename)
     
     #Create and submit file for union bedgraph job        
-    union_sbatch_file = union_coverage_sbatch(sp_dir,sp_abbr,sample_bedgraph_file_list)
+    union_sbatch_file = union_coverage_sbatch(sp_dir,config_info["abbv"],sample_bedgraph_file_list)
     union_job_id = sbatch_submit(union_sbatch_file)
     sleep(30)
 

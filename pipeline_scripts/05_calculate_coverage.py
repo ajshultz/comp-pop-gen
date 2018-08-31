@@ -320,7 +320,7 @@ def union_coverage_sbatch(sp_dir,sp_abbr,sample_bedgraph_file_list):
 
 #Format sbatch script
     sample_coverage_script = slurm_script.format(partition="shared",time="0-12:00",mem="8000",cores="1",nodes="1",jobid="genomecov",sp_dir=sp_dir,cmd=final_cmd)
-    out_filename = "%s/scripts/08_union_coverage_bedgraph_all_samples.sbatch"%(sp_dir,sample)
+    out_filename = "%s/scripts/08_union_coverage_bedgraph_all_samples.sbatch"%(sp_dir)
     out_file = open(out_filename,"w")
     out_file.write(sample_coverage_script)
     out_file.close

@@ -280,7 +280,7 @@ def sample_coverage_sbatch(sp_dir,sp_abbr,sample):
             cmd_1 = 'module load bedtools2/2.26.0-fasrc01'
         
             #Create bedgraph with bedtools of coverage (include regions with 0 coverage)
-            cmd_2 = 'bedtools genomecov -bga -ibam -ibam %s/dedup/%s.dedup.sorted.bam -g %s/genome/%s.fa > %s/stats_coverage/%s.bg'%(sp_dir,sample,sp_dir,sp_abbr,sp_dir,sample)
+            cmd_2 = 'bedtools genomecov -bga -ibam %s/dedup/%s.dedup.sorted.bam -g %s/genome/%s.fa > %s/stats_coverage/%s.bg'%(sp_dir,sample,sp_dir,sp_abbr,sp_dir,sample)
     
     
             cmd_list = [cmd_1,cmd_2]

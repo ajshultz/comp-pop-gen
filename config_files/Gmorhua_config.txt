@@ -425,13 +425,13 @@
 --NINTERVALS CHROMOSOME
 
 #Starting memory (GB) for running HaplotypeCaller
---MEMORY_HC 16
+--MEMORY_HC 24
 
 #Starting time (hours) for running HaplotypeCaller
---TIME_HC 72
+--TIME_HC 168
 
 #Starting time (hours) for running GenotypeGVCF
---TIME_GG 72
+--TIME_GG 168
 
 #Program for running GenotypeGVCF
 --COMBINE_GVCF_PROGRAM CombineGVCFs

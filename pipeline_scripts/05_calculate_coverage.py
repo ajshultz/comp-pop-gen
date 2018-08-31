@@ -115,42 +115,42 @@ def extract_config(config_filename):
         
     if "het" not in config_info:
         config_info["het"] = "0.001"
-        print("No heterozygosity specified, using default human value (0.001)")
+        #print("No heterozygosity specified, using default human value (0.001)")
     
     if "pipeline" not in config_info:
         config_info["pipeline"] = "lowcoverage"
-        print("No pipeline specified (highcoverage or lowcoverage), using lowcoverage.")
+        #print("No pipeline specified (highcoverage or lowcoverage), using lowcoverage.")
         
     if config_info["pipeline"] != "highcoverage" and config_info["pipeline"] != "lowcoverage":
-        sys.exit("Pipeline must be set to either 'highcoverage' or 'lowcoverage")
+        #sys.exit("Pipeline must be set to either 'highcoverage' or 'lowcoverage")
     
     if "nintervals" not in config_info:
         config_info["nintervals"] = "10"
-        print("No specification for the number of intervals to analyze, using 10")
+        #print("No specification for the number of intervals to analyze, using 10")
     
     if "memory_hc" not in config_info:
         config_info["memory_hc"] = "8"
-        print("No specification of how much memory to use for HaplotypeCaller, using 8GB by default")
+        #print("No specification of how much memory to use for HaplotypeCaller, using 8GB by default")
     
     if "time_hc" not in config_info:
         config_info["time_hc"] = "12"
-        print("No specification of how much time to use for HaplotypeCaller, using 12 hours by default")
+        #print("No specification of how much time to use for HaplotypeCaller, using 12 hours by default")
     
     if "memory_gg" not in config_info:
         config_info["memory_gg"] = "8"
-        print("No specification of how much memory to use for GenotypeGVCF, using 8 GB by default")
+        #print("No specification of how much memory to use for GenotypeGVCF, using 8 GB by default")
     
     if "time_gg" not in config_info:
         config_info["time_gg"] = "12"
-        print("No specification of how much time to use for GenotypeGVCF, using 12 hours by default")
+        #print("No specification of how much time to use for GenotypeGVCF, using 12 hours by default")
         
     if "combine_gvcf_program" not in config_info:
         config_info["combine_gvcf_program"] = "GenomicsDBImport"
-        print("No specification of which program to use to combine gvcf files, using GenomicsDBImport by default")
+        #print("No specification of which program to use to combine gvcf files, using GenomicsDBImport by default")
         
     if "bypass_interval" not in config_info:
         config_info["bypass_interval"] = "FALSE"
-        print("BYPASS_INTERVAL set to FALSE, will require gvcfs from all samples for all intervals to proceed")
+        #print("BYPASS_INTERVAL set to FALSE, will require gvcfs from all samples for all intervals to proceed")
     
     
     #Return objects    
@@ -368,13 +368,13 @@ def main():
     genome_dir = "%s/genome"%(sp_dir)
     stats_dir = "%s/stats"%(sp_dir)
     dedup_dir = "%s/dedup"%(sp_dir)
-    coverage_stats_dir = "%s/coverage_stats"%(sp_dir)
+    stats_coverage_dir = "%s/stats_coverage"%(sp_dir)
     
        
     directory_create(sp_dir)    
     directory_create(logs_dir)
     directory_create(scripts_dir)
-    directory_create(coverage_stats)
+    directory_create(stats_coverage_dir)
 
     
     

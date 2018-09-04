@@ -428,22 +428,27 @@ def main():
         elif os.path.isfile(genome_cov_filename) and os.path.getsize(genome_cov_filename) > 0:
             sample_bedgraph_file_list.append(genome_cov_filename)
     
-    #Create and submit file for union bedgraph job        
-    union_sbatch_file = union_coverage_sbatch(sp_dir,config_info["abbv"],sample_bedgraph_file_list)
-    union_job_id = sbatch_submit(union_sbatch_file,memory=8,timelimit=8)
-    sleep(30)
+    #Checks if union bedgraph file exists - if so, skips creation.
+    if os.path.isfile('%s/stats_coverage/_%s_all_samples_union.bg'%(sp_dir,config_info["abbv"]) and os.path.getsize('%s/stats_coverage/_%s_all_samples_union.bg'%(sp_dir,config_info["abbv"]) > 0):
+        print("Union bedfile already exists, will not recreate")
+   
+    else:    
+        #Create and submit file for union bedgraph job        
+        union_sbatch_file = union_coverage_sbatch(sp_dir,config_info["abbv"],sample_bedgraph_file_list)
+        union_job_id = sbatch_submit(union_sbatch_file,memory=8,timelimit=8)
+        sleep(30)
 
-    #Only check on union job if actually submitted. 
-    if union_job_id is not None: 
-        dones = ['COMPLETED','CANCELLED','FAILED','TIMEOUT','PREEMPTED','NODE_FAIL']
-        #Check job id status of union job. If not in one of the 'done' job status categories, wait 30 seconds and check again.
-        while jobid_status(union_job_id,start_date) not in dones:
-            sleep(30)
+        #Only check on union job if actually submitted. 
+        if union_job_id is not None: 
+            dones = ['COMPLETED','CANCELLED','FAILED','TIMEOUT','PREEMPTED','NODE_FAIL']
+            #Check job id status of union job. If not in one of the 'done' job status categories, wait 30 seconds and check again.
+            while jobid_status(union_job_id,start_date) not in dones:
+                sleep(30)
     
-        #Check to make sure job completed, and that all necessary files are present. If not, exit and give information.
-        union_job_completion_status = jobid_status(union_job_id,start_date)
-        if union_job_completion_status != 'COMPLETED':
-            sys.exit("There was a problem creating the union bedgraph file. The job exited with status %s. Please diagnose and fix before moving on"%union_job_completion_status)
+            #Check to make sure job completed, and that all necessary files are present. If not, exit and give information.
+            union_job_completion_status = jobid_status(union_job_id,start_date)
+            if union_job_completion_status != 'COMPLETED':
+                sys.exit("There was a problem creating the union bedgraph file. The job exited with status %s. Please diagnose and fix before moving on"%union_job_completion_status)
             
             
     #Read through resulting bedgraph file, create new bedgraph from sum across all sample coverages, and compute median

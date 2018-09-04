@@ -465,7 +465,7 @@ def main():
             #Returns [chrom,start,end,interval_length,summed_coverage]
 
             #Write to new summary bedgraph
-            summary_bedgraph.write('%s/t%s/t%s/t%d\n'%(summed_cov[0],summed_cov[1],summed_cov[2],summed_cov[4]))
+            summary_bedgraph.write('%s\t%s\t%s\t%d\n'%(summed_cov[0],summed_cov[1],summed_cov[2],summed_cov[4]))
             #Add coverage to histogram dictionary
             if summed_cov[4] not in coverage_histogram:
                 coverage_histogram[summed_cov[4]] = summed_cov[3]

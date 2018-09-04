@@ -62,7 +62,10 @@
 --TIME_HC 72
 
 #Starting time (hours) for running GenotypeGVCF
---TIME_GG 168
+--TIME_GG 72
 
 #Starting memory for running GenotypeGVCF
 --MEMORY_GG 16
+
+#Program for running GenotypeGVCF
+--COMBINE_GVCF_PROGRAM CombineGVCFs

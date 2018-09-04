@@ -455,19 +455,20 @@ def main():
     
     union_cov_file = open(union_cov_filename,'r')
     for line in union_cov_file:
-        summed_cov = compute_coverage_sum(line)
-        #Returns [chrom,start,end,interval_length,summed_coverage]
+        if line[0:5] != 'chrom':
+            summed_cov = compute_coverage_sum(line)
+            #Returns [chrom,start,end,interval_length,summed_coverage]
 
-        #Write to new summary bedgraph
-        summary_bedgraph.write('%s/t%s/t%s/t%d\n'%(summed_cov[0],summed_cov[1],summed_cov[2],summed_cov[4]))
-        #Add coverage to histogram dictionary
-        if summed_cov[4] not in coverage_histogram:
-            coverage_histogram[summed_cov[4]] = summed_cov[3]
-        else:
-            coverage_histogram[summed_cov[4]] = coverage_histogram[summed_cov[4]] + summed_cov[3]
+            #Write to new summary bedgraph
+            summary_bedgraph.write('%s/t%s/t%s/t%d\n'%(summed_cov[0],summed_cov[1],summed_cov[2],summed_cov[4]))
+            #Add coverage to histogram dictionary
+            if summed_cov[4] not in coverage_histogram:
+                coverage_histogram[summed_cov[4]] = summed_cov[3]
+            else:
+                coverage_histogram[summed_cov[4]] = coverage_histogram[summed_cov[4]] + summed_cov[3]
         
-        #Add interval length to total sites
-        total_sites += summed_cov[3]
+            #Add interval length to total sites
+            total_sites += summed_cov[3]
  
     union_cov_file.close()
     summary_bedgraph.close()

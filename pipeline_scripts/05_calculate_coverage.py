@@ -345,7 +345,7 @@ def compute_coverage_sum(union_cov_line):
 def main():
     #Get config file from arguments
     parser = argparse.ArgumentParser()
-    parser.add_argument("--config", help="config file specifying samples and genome for mapping")
+    parser.add_argument("--config", help="config file specifying samples and genome for mapping",  required=True)
     args = parser.parse_args()
     config_filename = args.config
     
@@ -481,7 +481,7 @@ def main():
     #Order and write histogram to file
     #Calculate median value
     ordered_hist_bins = sorted(coverage_histogram.keys())
-    summed_hist_file = open('%s/stats_coverage/_%s_all_samples_summed_cov_histogram.txt','w')
+    summed_hist_file = open('%s/stats_coverage/_%s_all_samples_summed_cov_histogram.txt'%(sp_dir,config_info["abbv"]),'w')
     summed_hist_file.write('SUMMED_COVERAGE\tN_SITES\n')
     median_cov = None
     median_cov_cutoff = (total_sites+1)/2

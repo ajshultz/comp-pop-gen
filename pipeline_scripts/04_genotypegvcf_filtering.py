@@ -16,7 +16,7 @@ plt.switch_backend('agg') #Added to get working on the cluster
 from matplotlib.backends.backend_pdf import PdfPages
 
 #Extract Sample, SRA and genome info from config file. Sample data will be stored as a dictionary with sample ID as keys and a list of SRA accessions as values. Returns a dictionary of this info.
-def extract_config(config_filename):
+def extract_config(config_filename, heterozygosity_arg, combine_gvcf_program_arg, bypass_interval_arg, memory_gg_arg, time_gg_arg):
     print("Opening %s"%config_filename)
     config_file = open(config_filename,"r")
     config_info = {}
@@ -77,7 +77,10 @@ def extract_config(config_filename):
             elif line[0] == "--OUT_DIR":
                 config_info["out_dir"] = line[1]
             elif line[0] == "--HETEROZYGOSITY":
-                config_info["het"] = line[1]
+                if heterozygosity_arg is None:
+                    config_info["het"] = line[1]
+                else:
+                    config_info["het"] = heterozygosity_arg
             elif line[0] == "--PIPELINE":
                 config_info["pipeline"] = line[1]
             elif line[0] == "--NINTERVALS":
@@ -87,13 +90,25 @@ def extract_config(config_filename):
             elif line[0] == "--TIME_HC":
                 config_info["time_hc"] = line[1]
             elif line[0] == "--MEMORY_GG":
-                config_info["memory_gg"] = line[1]
+                if memory_gg_arg is None:
+                    config_info["memory_gg"] = line[1]
+                else:
+                    config_info["memory_gg"] = memory_gg_arg
             elif line[0] == "--TIME_GG":
-                config_info["time_gg"] = line[1]
+                if time_gg_arg is None:
+                    config_info["time_gg"] = line[1]
+                else:
+                    config_info["time_gg"] = time_gg_arg
             elif line[0] == "--COMBINE_GVCF_PROGRAM":
-                config_info["combine_gvcf_program"] = line[1]
+                if combine_gvcf_program_arg is None:
+                    config_info["combine_gvcf_program"] = line[1]
+                else:
+                    config_info["combine_gvcf_program"] = combine_gvcf_program_arg
             elif line[0] == "--BYPASS_INTERVAL":
-                config_info["bypass_interval"] = line[1]
+                if bypass_interval_arg is None:
+                    config_info["bypass_interval"] = line[1]
+                else:
+                    config_info["bypass_interval"] = bypass_interval_arg
                 
     config_file.close()
     
@@ -115,8 +130,11 @@ def extract_config(config_filename):
         sys.exit("Oops, you forgot to specify samples!")
         
     if "het" not in config_info:
-        config_info["het"] = "0.001"
-        print("No heterozygosity specified, using default human value (0.001)")
+        if heterozygosity_arg is None:
+            config_info["het"] = "0.001"
+            print("No heterozygosity specified, using default human value (0.001)")
+        else:
+            config_info["het"] = heterozygosity_arg
     
     if "pipeline" not in config_info:
         config_info["pipeline"] = "lowcoverage"
@@ -138,20 +156,32 @@ def extract_config(config_filename):
         #print("No specification of how much time to use for HaplotypeCaller, using 12 hours by default")
     
     if "memory_gg" not in config_info:
-        config_info["memory_gg"] = "16"
-        print("No specification of how much memory to use for GenotypeGVCF, using 16 GB by default")
+        if memory_gg_arg is None:
+            config_info["memory_gg"] = "16"
+            print("No specification of how much memory to use for GenotypeGVCF, using 16 GB by default")
+        else:
+            config_info["memory_gg"] = memory_gg_arg
     
     if "time_gg" not in config_info:
-        config_info["time_gg"] = "24"
-        print("No specification of how much time to use for GenotypeGVCF, using 24 hours by default")
+        if time_gg_arg is None:
+            config_info["time_gg"] = "24"
+            print("No specification of how much time to use for GenotypeGVCF, using 24 hours by default")
+        else:
+            config_info["time_gg"]= time_gg_arg
         
     if "combine_gvcf_program" not in config_info:
-        config_info["combine_gvcf_program"] = "GenomicsDBImport"
-        print("No specification of which program to use to combine gvcf files, using GenomicsDBImport by default")
+        if combine_gvcf_program is None:
+            config_info["combine_gvcf_program"] = "GenomicsDBImport"
+            print("No specification of which program to use to combine gvcf files, using GenomicsDBImport by default")
+        else:
+            config_info["combine_gvcf_program"] = combine_gvcf_program_arg
         
     if "bypass_interval" not in config_info:
-        config_info["bypass_interval"] = "FALSE"
-        print("BYPASS_INTERVAL set to FALSE, will require gvcfs from all samples for all intervals to proceed")
+        if bypass_interval_arg is None:
+            config_info["bypass_interval"] = "FALSE"
+            print("BYPASS_INTERVAL set to FALSE, will require gvcfs from all samples for all intervals to proceed")
+        else:
+            config_info["bypass_interval"] = bypass_interval_arg
     
     
     #Return objects    
@@ -330,15 +360,42 @@ def main():
     #Get config file from arguments
     parser = argparse.ArgumentParser()
     parser.add_argument("--config", help="config file specifying samples and genome for mapping")
+    parser.add_argument("--HETEROZYGOSITY", help="heterozygosity to use with GenotypeGVCF, default 0.001. Setting value here will overwrite any values set in config file.", required=False)
+    parser.add_argument("--COMBINE_GVCF_PROGRAM", help="use GenomicsDBImport or CombineGVCFs to combine gvcfs prior to genotyping, default GenomicsDBImport. Setting value here will overwrite any values set in config file", required=False)
+    parser.add_argument("--BYPASS_INTERVAL", help="should missing gvcfs be allowed to continue with GenotypeGVCF? If TRUE will continue despite missing data, if FALSE will print a statement and exit the program (Default FALSE). Setting value here will overwrite any values set in config file", required=False)
+    parser.add_argument("--MEMORY_GG", help="memory in GB (e.g. 8 = 8GB) to use for GenotypeGVCFs sbatch script, default 16. Setting value here will overwrite any values set in config file", required=False)
+    parser.add_argument("--TIME_GG", help="time in hours (e.g. 12 = 12 hours) to use for GenotypeGVCFs sbatch script, default 24. Setting value here will overwrite any values set in config file", required=False)
+    
     args = parser.parse_args()
     config_filename = args.config
     
+    if args.HETEROZYGOSITY:
+        heterozygosity_arg = args.HETEROZYGOSITY
+    else:
+        heterozygosity_arg = None
+    if args.COMBINE_GVCF_PROGRAM:
+        combine_gvcf_program_arg = args.COMBINE_GVCF_PROGRAM
+    else:
+        combine_gvcf_program_arg = None
+    if args.BYPASS_INTERVAL:
+        bypass_interval_arg = args.BYPASS_INTERVAL
+    else:
+        bypass_interval_arg = None
+    if args.MEMORY_GG:
+        memory_gg_arg = args.MEMORY_GG
+    else:
+        memory_gg_arg = None
+    if args.TIME_GG:
+        time_gg_arg = args.TIME_GG
+    else:
+        time_gg_arg = None
+            
     now = datetime.datetime.now()
     print('Staring work on script 04: %s'%now)
     start_date = now.strftime("%Y-%m-%d")
     
     #Open config file and get attributes
-    config_info = extract_config(config_filename)
+    config_info = extract_config(config_filename, heterozygosity_arg, combine_gvcf_program_arg, bypass_interval_arg, memory_gg_arg, time_gg_arg)
 
     #####Check if working directories exist, if not creates them
     sp_dir = "%s/%s"%(config_info["out_dir"],config_info["abbv"])

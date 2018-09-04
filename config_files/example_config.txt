@@ -46,14 +46,14 @@
 #Starting time (hours) for running HaplotypeCaller (Default 12)
 --TIME_HC 72
 
-#Starting time (hours) for running GenotypeGVCF (Default 12)
+#Starting time (hours) for running GenotypeGVCF (Default 24)
 --TIME_GG 8
 
-#Starting memory (GB) for running GenotypeGVCF (Default 8)
+#Starting memory (GB) for running GenotypeGVCF (Default 16)
 --MEMORY_GG 8
 
 #Program to combine gvcfs (GenomicsDBImport or CombineGVCFs) (Default GenomicsDBImport)
---COMBINE_GVCF_Program GenomicsDBImport
+--COMBINE_GVCF_PROGRAM GenomicsDBImport
 
 #Should missing gvcfs be allowed to continue with GenotypeGVCF? If TRUE will continue despite missing data, if FALSE will print a statement and exit the program (Default FALSE)
 --BYPASS_INTERVAL FALSE

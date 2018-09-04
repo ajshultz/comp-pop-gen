@@ -371,7 +371,6 @@ def main():
     parser.add_argument("--TIME_HC", help="Time in hours (e.g. 12 = 12 hours) to use for HaplotypeCaller sbatch script, default 12. Setting value here will overwrite any values set in config file", required=False)
     args = parser.parse_args()
     config_filename = args.config
-    print(args.HETEROZYGOSITY)
     if args.HETEROZYGOSITY:
         heterozygosity_arg = args.HETEROZYGOSITY
     else:

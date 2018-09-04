@@ -429,7 +429,7 @@ def main():
             sample_bedgraph_file_list.append(genome_cov_filename)
     
     #Checks if union bedgraph file exists - if so, skips creation.
-    if os.path.isfile('%s/stats_coverage/_%s_all_samples_union.bg'%(sp_dir,config_info["abbv"]) and os.path.getsize('%s/stats_coverage/_%s_all_samples_union.bg'%(sp_dir,config_info["abbv"]) > 0):
+    if os.path.isfile('%s/stats_coverage/_%s_all_samples_union.bg'%(sp_dir,config_info["abbv"])) and os.path.getsize('%s/stats_coverage/_%s_all_samples_union.bg'%(sp_dir,config_info["abbv"])) > 0:
         print("Union bedfile already exists, will not recreate")
    
     else:    

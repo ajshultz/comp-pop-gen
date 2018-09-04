@@ -417,7 +417,7 @@ def main():
     elif finished_files < int(nintervalfiles):
         #Check each interval, see if it has both a .vcf.gz and .tbi file
         
-        missing = check_missing_vcfs(arraystart=1,arrayend=nintervalfiles,vcf_files=vcf_files,sp_abbr=config_info["abbv"])
+        missing = check_missing_vcfs(arraystart=1,arrayend=int(nintervalfiles),vcf_files=vcf_files,sp_abbr=config_info["abbv"])
         missing_vec = ",".join(missing)
         
          #Submit job, get base jobid for array

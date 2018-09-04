@@ -373,18 +373,22 @@ def main():
     config_filename = args.config
     if args.HETEROZYGOSITY:
         heterozygosity_arg = args.HETEROZYGOSITY
+        print("Using command line specified heterozygosity of %s"%heterozygosity_arg)
     else:
         heterozygosity_arg = None
     if args.PIPELINE:
         pipeline_arg = args.PIPELINE
+        print("Using command line specified pipeline of %s"%pipeline_arg)
     else:
         pipeline_arg = None
     if args.MEMORY_HC:
         memory_hc_arg = args.MEMORY_HC
+        print("Using command line specified memory of %s GB for HaplotypeCaller sbatch script"%memory_hc_arg)
     else:
         memory_hc_arg = None
     if args.TIME_HC:
         time_hc_arg = args.TIME_HC
+        print("Using command line specified time of %s hours for HaplotypeCaller sbatch script"%time_hc_arg)
     else:
         time_hc_arg = None
     

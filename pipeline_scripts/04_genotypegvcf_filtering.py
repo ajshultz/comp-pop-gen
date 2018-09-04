@@ -371,22 +371,27 @@ def main():
     
     if args.HETEROZYGOSITY:
         heterozygosity_arg = args.HETEROZYGOSITY
+        print("Using command line specified heterozygosity of %s"%heterozygosity_arg)
     else:
         heterozygosity_arg = None
     if args.COMBINE_GVCF_PROGRAM:
         combine_gvcf_program_arg = args.COMBINE_GVCF_PROGRAM
+        print("Using command line specified COMBINE_GVCF_PROGRAM of %s"%combine_gvcf_program_arg)
     else:
         combine_gvcf_program_arg = None
     if args.BYPASS_INTERVAL:
         bypass_interval_arg = args.BYPASS_INTERVAL
+        print("Using command line specified BYPASS_INTERVAL argument of %s"%(bypass_interval_arg))
     else:
         bypass_interval_arg = None
     if args.MEMORY_GG:
         memory_gg_arg = args.MEMORY_GG
+        print("Using command line specified memory of %s GB for GenotypeGVCFs sbatch script"%memory_gg_arg)
     else:
         memory_gg_arg = None
     if args.TIME_GG:
         time_gg_arg = args.TIME_GG
+        print("Using command line specified time of %s hours for GenotypeGVCFs sbatch script"%time_gg_arg)
     else:
         time_gg_arg = None
             

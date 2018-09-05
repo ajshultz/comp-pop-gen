@@ -170,7 +170,7 @@ def extract_config(config_filename, heterozygosity_arg, combine_gvcf_program_arg
             config_info["time_gg"]= time_gg_arg
         
     if "combine_gvcf_program" not in config_info:
-        if combine_gvcf_program is None:
+        if combine_gvcf_program_arg is None:
             config_info["combine_gvcf_program"] = "GenomicsDBImport"
             print("No specification of which program to use to combine gvcf files, using GenomicsDBImport by default")
         else:

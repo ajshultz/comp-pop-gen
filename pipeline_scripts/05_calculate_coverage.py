@@ -490,9 +490,10 @@ def main():
         for line in cov_hist_file:
             line = line.strip()
             split_line = line.split()
-            coverage_histogram[int(split_line[0])] = int(split_line[1])
-            if int(split_line[0]) != 0:
-                total_sites += int(split_line[1])
+            if split_line[0] != "N_SITES":
+                coverage_histogram[int(split_line[0])] = int(split_line[1])
+                if int(split_line[0]) != 0:
+                    total_sites += int(split_line[1])
     
     else:
         #Order and write histogram to file

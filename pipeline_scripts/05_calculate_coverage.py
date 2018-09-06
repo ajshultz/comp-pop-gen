@@ -525,9 +525,9 @@ def main():
 
     #Create new bedfile of sites < 2X median and > 0.5X median
     summary_bedgraph = open('%s/stats_coverage/_%s_all_samples_summed_cov.bg'%(sp_dir,config_info["abbv"]), 'r')
-    clean_cov_bedfile = open('%s/stats_coverage/_%s_clean_coverage_sites.bed','w')
-    low_cov_bedfile = open('%s/stats_coverage/_%s_too_low_coverage_sites.bed','w')
-    high_cov_bedfile = open('%s/stats_coverage/_%s_too_high_coverage_sites.bed','w')
+    clean_cov_bedfile = open('%s/stats_coverage/_%s_clean_coverage_sites.bed'%(sp_dir,config_info["abbv"]),'w')
+    low_cov_bedfile = open('%s/stats_coverage/_%s_too_low_coverage_sites.bed'%(sp_dir,config_info["abbv"]),'w')
+    high_cov_bedfile = open('%s/stats_coverage/_%s_too_high_coverage_sites.bed'%(sp_dir,config_info["abbv"]),'w')
     for line in summary_bedgraph:
         line = line.strip()
         split_line = line.split()

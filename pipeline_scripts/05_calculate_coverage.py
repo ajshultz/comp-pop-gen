@@ -490,7 +490,7 @@ def main():
         for line in cov_hist_file:
             line = line.strip()
             split_line = line.split()
-            if split_line[0] != "N_SITES":
+            if split_line[0] != "SUMMED_COVERAGE":
                 coverage_histogram[int(split_line[0])] = int(split_line[1])
                 if int(split_line[0]) != 0:
                     total_sites += int(split_line[1])

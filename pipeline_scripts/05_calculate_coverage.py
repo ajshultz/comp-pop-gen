@@ -512,7 +512,7 @@ def main():
     cumulative_sites = 0    
     
     for bin in ordered_hist_bins:
-        if cumulative_sites < median_cov_cutoff:
+        if cumulative_sites < median_cov_cutoff and bin != 0:
             cumulative_sites += coverage_histogram[bin]
             median_cov = bin
         else:

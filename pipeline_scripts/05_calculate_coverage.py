@@ -509,9 +509,11 @@ def main():
 
     median_cov = None
     median_cov_cutoff = (total_sites+1)/2
+    cumulative_sites = 0    
     
     for bin in ordered_hist_bins:
-        while median_cov is None and coverage_histogram[bin] > median_cov_cutoff:
+        while median_cov is None and cumulative_sites < median_cov_cutoff:
+            cumulative_sites += coverage_histogram[bin]
             median_cov = bin
         else:
             pass

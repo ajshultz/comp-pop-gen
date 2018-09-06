@@ -512,7 +512,7 @@ def main():
     cumulative_sites = 0    
     
     for bin in ordered_hist_bins:
-        while median_cov is None and cumulative_sites < median_cov_cutoff:
+        if median_cov is None and cumulative_sites < median_cov_cutoff:
             cumulative_sites += coverage_histogram[bin]
             median_cov = bin
         else:
@@ -520,8 +520,8 @@ def main():
     
     print(total_sites)
     print(median_cov_cutoff)
-    print(median_cov
-    )
+    print(median_cov)
+    print(cumulative_sites)
     #Calculate upper and lower limits of coverage and print to log file
     upper_lim_cov = median_cov * 2
     lower_lim_cov = median_cov * 0.5

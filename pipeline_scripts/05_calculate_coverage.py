@@ -486,8 +486,8 @@ def main():
     
     #If coverage histogram dictionary is empty, open coverage histogram file and read to dictionary, also capture total sites
     if len(coverage_histogram) == 0:
-        cov_hist_file = open('%s/stats_coverage/_%s_all_samples_summed_cov_histogram.txt'%(sp_dir,config_info["abbv"]),'r')
-        for line in cov_hist_file:
+        summed_hist_file = open('%s/stats_coverage/_%s_all_samples_summed_cov_histogram.txt'%(sp_dir,config_info["abbv"]),'r')
+        for line in summed_hist_file:
             line = line.strip()
             split_line = line.split()
             if split_line[0] != "SUMMED_COVERAGE":

@@ -341,7 +341,7 @@ def genotypegvcf_sbatch(sp_dir,sp_abbr,sample_list,het,nintervals,memory_gg,comb
     
     cmd_8 = 'rm %s/vcf/%s.${SLURM_ARRAY_TASK_ID}.vcf.gz'%(sp_dir,sp_abbr)
         
-    cmd_list = [cmd_1,cmd_2,cmd_3,cmd_4,cmd_5,cmd_6,cmd_7]
+    cmd_list = [cmd_1,cmd_2,cmd_3,cmd_4,cmd_5,cmd_6,cmd_7,cmd_8]
 
     final_cmd = "\n\n".join(cmd_list)
 

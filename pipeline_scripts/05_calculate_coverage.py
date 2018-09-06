@@ -531,11 +531,11 @@ def main():
     for line in summary_bedgraph:
         line = line.strip()
         split_line = line.split()
-        if split_line[3] > lower_lim_cov and split_line[3] < upper_lim_cov:
+        if int(split_line[3]) > lower_lim_cov and int(split_line[3]) < upper_lim_cov:
             clean_cov_bedfile.write('%s\t%s\t%s\n'%(split_line[0],split_line[1],split_line[2]))
-        elif split_line[3] < lower_lim_cov:
+        elif int(split_line[3]) < lower_lim_cov:
             low_cov_bedfile.write('%s\t%s\t%s\t%d\n'%(split_line[0],split_line[1],split_line[2],split_line[3]))
-        elif split_line[3] > upper_lim_cov:
+        elif int(split_line[3]) > upper_lim_cov:
             high_cov_bedfile.write('%s\t%s\t%s\t%d\n'%(split_line[0],split_line[1],split_line[2],split_line[3]))
         else:
             print("Something wrong with coverage calculation")

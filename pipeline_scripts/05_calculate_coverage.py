@@ -526,7 +526,7 @@ def main():
     upper_lim_cov = median_cov * 2
     lower_lim_cov = median_cov * 0.5
     print('\nMedian coverage of all samples is %d, will exclude all sites > %d and < %d'%(median_cov,upper_lim_cov,lower_lim_cov))
-    
+    '''
     #Create new bedfile of sites < 2X median and > 0.5X median
     summary_bedgraph = open('%s/stats_coverage/_%s_all_samples_summed_cov.bg'%(sp_dir,config_info["abbv"]), 'r')
     clean_cov_bedfile = open('%s/stats_coverage/_%s_clean_coverage_sites.bed','w')
@@ -550,7 +550,7 @@ def main():
     clean_cov_bedfile.close()
     low_cov_bedfile.close()
     high_cov_bedfile.close()
-    
+    '''
     now = datetime.datetime.now()
     print('Finished script 05: %s'%now)
 

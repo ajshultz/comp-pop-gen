@@ -432,7 +432,7 @@ def main():
     if os.path.isfile('%s/stats_coverage/_%s_all_samples_union.bg'%(sp_dir,config_info["abbv"])) and os.path.getsize('%s/stats_coverage/_%s_all_samples_union.bg'%(sp_dir,config_info["abbv"])) > 0:
         print("Union bedfile already exists, will not recreate")
    
-    else:    
+    else:
         #Create and submit file for union bedgraph job        
         union_sbatch_file = union_coverage_sbatch(sp_dir,config_info["abbv"],sample_bedgraph_file_list)
         union_job_id = sbatch_submit(union_sbatch_file,memory=8,timelimit=8)
@@ -453,46 +453,72 @@ def main():
             
     #Read through resulting bedgraph file, create new bedgraph from sum across all sample coverages, and compute median
     #Dictionary to create histogram as we iterate each line
-    coverage_histogram = {}
+    coverage_histogram = {}    
     total_sites = 0
-    union_cov_filename = '%s/stats_coverage/_%s_all_samples_union.bg'%(sp_dir, config_info["abbv"])
-    summary_bedgraph = open('%s/stats_coverage/_%s_all_samples_summed_cov.bg'%(sp_dir,config_info["abbv"]), 'w')
-    
-    union_cov_file = open(union_cov_filename,'r')
-    for line in union_cov_file:
-        if line[0:5] != 'chrom':
-            summed_cov = compute_coverage_sum(line)
-            #Returns [chrom,start,end,interval_length,summed_coverage]
+    if os.path.isfile('%s/stats_coverage/_%s_all_samples_summed_cov.bg'%(sp_dir,config_info["abbv"])) and os.path.getsize('%s/stats_coverage/_%s_all_samples_summed_cov.bg'%(sp_dir,config_info["abbv"])) > 0:
+        print("Summary bedgraph and histogram already exists, will not recreate")
+   
+    else:    
 
-            #Write to new summary bedgraph
-            summary_bedgraph.write('%s\t%s\t%s\t%d\n'%(summed_cov[0],summed_cov[1],summed_cov[2],summed_cov[4]))
-            #Add coverage to histogram dictionary
-            if summed_cov[4] not in coverage_histogram:
-                coverage_histogram[summed_cov[4]] = summed_cov[3]
-            else:
-                coverage_histogram[summed_cov[4]] = coverage_histogram[summed_cov[4]] + summed_cov[3]
+        union_cov_filename = '%s/stats_coverage/_%s_all_samples_union.bg'%(sp_dir, config_info["abbv"])
+        summary_bedgraph = open('%s/stats_coverage/_%s_all_samples_summed_cov.bg'%(sp_dir,config_info["abbv"]), 'w')
+    
+        union_cov_file = open(union_cov_filename,'r')
+        for line in union_cov_file:
+            if line[0:5] != 'chrom':
+                summed_cov = compute_coverage_sum(line)
+                #Returns [chrom,start,end,interval_length,summed_coverage]
+
+                #Write to new summary bedgraph
+                summary_bedgraph.write('%s\t%s\t%s\t%d\n'%(summed_cov[0],summed_cov[1],summed_cov[2],summed_cov[4]))
+                #Add coverage to histogram dictionary
+                if summed_cov[4] not in coverage_histogram:
+                    coverage_histogram[summed_cov[4]] = summed_cov[3]
+                else:
+                    coverage_histogram[summed_cov[4]] = coverage_histogram[summed_cov[4]] + summed_cov[3]
         
-            #Add interval length to total sites
-            total_sites += summed_cov[3]
+                #Add interval length to total sites if coverage is > 0
+                if summed_cov[4] > 0:
+                    total_sites += summed_cov[3]
  
-    union_cov_file.close()
-    summary_bedgraph.close()
-       
-    #Order and write histogram to file
-    #Calculate median value
+        union_cov_file.close()
+        summary_bedgraph.close()
+    
+    #If coverage histogram dictionary is empty, open coverage histogram file and read to dictionary, also capture total sites
+    if len(coverage_histogram) == 0:
+        cov_hist_file = open('%s/stats_coverage/_%s_all_samples_summed_cov_histogram.txt'%(sp_dir,config_info["abbv"]),'r')
+        for line in cov_hist_file:
+            line = line.strip()
+            split_line = line.split()
+            coverage_histogram[int(split_line[0])] = int(split_line[1])
+            if int(split_line[0]) != 0:
+                total_sites += int(split_line[1])
+    
+    else:
+        #Order and write histogram to file
+        ordered_hist_bins = sorted(coverage_histogram.keys())
+        summed_hist_file = open('%s/stats_coverage/_%s_all_samples_summed_cov_histogram.txt'%(sp_dir,config_info["abbv"]),'w')
+        summed_hist_file.write('SUMMED_COVERAGE\tN_SITES\n')
+        for bin in ordered_hist_bins:
+            summed_hist_file.write('%d\t%d\n'%(bin,coverage_histogram[bin]))        
+            
+
+    #Calculate median value, calculate what the median value is in number of sites, and iterate through bins until that is passed
     ordered_hist_bins = sorted(coverage_histogram.keys())
-    summed_hist_file = open('%s/stats_coverage/_%s_all_samples_summed_cov_histogram.txt'%(sp_dir,config_info["abbv"]),'w')
-    summed_hist_file.write('SUMMED_COVERAGE\tN_SITES\n')
+
     median_cov = None
     median_cov_cutoff = (total_sites+1)/2
     
     for bin in ordered_hist_bins:
-        summed_hist_file.write('%d\t%d\n'%(bin,coverage_histogram[bin]))
-        if median_cov is None and coverage_histogram[bin] > median_cov_cutoff:
+        while median_cov is None and coverage_histogram[bin] > median_cov_cutoff:
             median_cov = bin
         else:
             pass
     
+    print(total_sites)
+    print(median_cov_cutoff)
+    print(median_cov
+    )
     #Calculate upper and lower limits of coverage and print to log file
     upper_lim_cov = median_cov * 2
     lower_lim_cov = median_cov * 0.5

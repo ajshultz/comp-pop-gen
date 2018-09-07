@@ -560,7 +560,8 @@ def main():
     
         #After all jobs have finished, report intervals failed twice
         failed_intervals = ",".join(failed_intervals)
-        print("Failed for intervals: %s"%(failed_intervals))
+        if len(failed_intervals) > 0:
+            print("Jobs failed for intervals: %s"%(failed_intervals))
     
     #Concatenate all missingness information into single file, adding additional column for easy manipulation in R, and additional file with mean and SD missingness per individual
     all_missing_file = open('%s/stats/_%s_all_all_missingness_info.txt'%(sp_dir,config_info["abbv"]),'w')
@@ -607,7 +608,22 @@ def main():
         proc = Popen('cp %s/stats/_%s_all_mean_missingness_info.txt %s/%s_all_mean_missingness_info.txt'%(sp_dir,config_info["abbv"],general_dir,config_info["abbv"]),shell=True)
     except:
         print("There was an error copying summary missingness file")
-               
+        
+    #For each interval, check to make sure vcf .tbi file exists, and if so, delete either combined gvcf (if program is CombineGVCFs) or the GenomicsDB (if GenomicsDBImport was used). If no .tbi file exists, prints statement to log file.    
+    for interval in range(1,int(nintervalfiles)+1):
+        if os.path.isfile("%s/vcf/%s.%d.vcf.gz.tbi"%(sp_dir,config_info["abbv"],interval)):
+            if 
+               config_info["combine_gvcf_program"] == "CombineGVCFs":
+                if os.path.isfile("%s/gvcf/%s.%d.gvcf.gz.tbi"%(sp_dir,config_info["abbv"],interval)) and os.path.isfile("%s/gvcf/%s.%d.gvcf.gz"%(sp_dir,config_info["abbv"],interval)):
+                    proc = Popen("%s/gvcf/%s.%d.gvcf.gz.tbi"%(sp_dir,config_info["abbv"],interval),shell=True)
+                    proc = Popen("%s/gvcf/%s.%d.gvcf.gz"%(sp_dir,config_info["abbv"],interval),shell=True)
+            elif config_info["combine_gvcf_program"] == "GenomicsDBImport":
+                if os.path.isdir('%s/genomics_db/interval_%d'%(sp_dir,interval)):
+                    shutil.rmtree(path = '%s/genomics_db/interval_%d'%(sp_dir,interval))
+        else:
+            print("No vcf .tbi file for interval %d, check"%(interval))
+            
+                
     now = datetime.datetime.now()
     print('Finished script 04: %s'%now)
 

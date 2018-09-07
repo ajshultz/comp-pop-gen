@@ -339,7 +339,7 @@ def genotypegvcf_sbatch(sp_dir,sp_abbr,sample_list,het,nintervals,memory_gg,comb
     #Calculate missingness per individual
     cmd_7 = 'vcftools --gzvcf %s/vcf/%s_hardfilters.${SLURM_ARRAY_TASK_ID}.vcf.gz --missing-indv --out %s/stats/%s_ind_missingness.${SLURM_ARRAY_TASK_ID}'%(sp_dir,sp_abbr,sp_dir,sp_abbr)
     
-    cmd_8 = 'rm %s/vcf/%s.${SLURM_ARRAY_TASK_ID}.vcf.gz'%(sp_dir,sp_abbr)
+    cmd_8 = 'rm %s/vcf/%s.${SLURM_ARRAY_TASK_ID}.vcf.gz\nrm %s/vcf/%s.${SLURM_ARRAY_TASK_ID}.vcf.gz.tbi'%(sp_dir,sp_abbr,sp_dir,sp_abbr)
         
     cmd_list = [cmd_1,cmd_2,cmd_3,cmd_4,cmd_5,cmd_6,cmd_7,cmd_8]
 

@@ -17,6 +17,7 @@ def extract_config(config_filename):
     config_info = {}
     sample_ncbi_dict = {}
     sample_ena_dict = {}
+    sample_local_dict = {}
     sample_dict = {}
     
     for line in config_file:
@@ -51,6 +52,17 @@ def extract_config(config_filename):
                     sample_dict[line[1]].append(line[2])
                 config_info["sample_ena_dict"] = sample_ena_dict
                 config_info["sample_dict"] = sample_dict
+            elif line[0] == "--SAMPLE_LOCAL":
+                if line[1] not in sample_local_dict:
+                    sample_local_dict[line[1]] = [line[2]]
+                elif line[1] in sample_local_dict:
+                    sample_local_dict[line[1]].append(line[2])
+                if line[1] not in sample_dict:
+                    sample_dict[line[1]] = [line[2]]
+                elif line[1] in sample_dict:
+                    sample_dict[line[1]].append(line[2])
+                config_info["sample_local_dict"] = sample_local_dict
+                config_info["sample_dict"] = sample_dict
 
             elif line[0] == "--GENOME_NCBI":
                 config_info["genome_ncbi"] = line[1]
@@ -68,6 +80,9 @@ def extract_config(config_filename):
     
     if "sample_ena_dict" not in config_info:
         config_info["sample_ena_dict"] = {}
+    
+    if "sample_local_dict" not in config_info:
+        config_info["sample_local_dict"] = {}
     
     #Make sure all necessary inputs are present
     try:
@@ -154,6 +169,99 @@ def num_pend_run(job_id_list,date):
             count += 1
     return(count)
 
+####Create SBATCH files
+#Use FTP to download species genome fasta file. Will obtain FTP location by first downloading the current genbank assembly summary report. Returns name of sbatch script created.
+def get_ncbi_genome(sp_dir,fasta_ftp,sp_abbr):
+
+    #Recreate genome directory
+    genome_dir = "%s/genome"%(sp_dir)
+    
+    print("Downloading genome from %s and building relevant indexes"%fasta_ftp)
+    
+    #Get relevant directories and create filenames for other desired files
+    fasta_ftp_split = fasta_ftp.split("/")
+
+    ftp_dir = "/".join(fasta_ftp_split[:-1])
+    genome_filename = fasta_ftp_split[-1]
+    file_base = fasta_ftp_split[-2]
+    
+    slurm_script = script_create()
+    
+    #Load modules, also print samtools and bwa versions
+    cmd_1 = 'module load samtools/1.5-fasrc02\nmodule load bwa/0.7.15-fasrc02'
+    
+    cmd_2 = 'wget -P %s %s'%(genome_dir,fasta_ftp)
+    cmd_3 = 'gunzip %s/%s'%(genome_dir,genome_filename)
+    cmd_4 = 'mv %s/%s %s/%s.fa'%(genome_dir,genome_filename[:-3],genome_dir,sp_abbr)
+    cmd_5 = 'samtools faidx %s/%s.fa'%(genome_dir,sp_abbr)
+    cmd_6 = 'bwa index %s/%s.fa'%(genome_dir,sp_abbr)
+    cmd_7 = 'samtools dict -o %s/%s.dict %s/%s.fa'%(genome_dir,sp_abbr,genome_dir,sp_abbr)
+    cmd_8 = 'wget -P %s %s/%s_assembly_stats.txt'%(genome_dir,ftp_dir,file_base)
+    cmd_9 = 'wget -P %s %s/%s_assembly_report.txt'%(genome_dir,ftp_dir,file_base)
+    cmd_10 = 'wget -P %s %s/%s_genomic.gff.gz'%(genome_dir,ftp_dir,file_base)
+    cmd_11 = 'wget -P %s %s/md5checksums.txt'%(genome_dir,ftp_dir)
+    
+    cmd_list = [cmd_1,cmd_2,cmd_3,cmd_4,cmd_5,cmd_6,cmd_7,cmd_8,cmd_9,cmd_10,cmd_11]
+    
+    final_cmd = "\n\n".join(cmd_list)   
+    
+    #Format sbatch script
+    genome_script = slurm_script.format(partition="shared",time="0-8:00",mem="8000",cores="1",nodes="1",jobid="Genome_DL_Index",sp_dir=sp_dir,cmd=final_cmd)
+
+    out_filename = "%s/scripts/01_genome_download_index_%s.sbatch"%(sp_dir,sp_abbr)
+    out_file = open(out_filename,"w")
+    out_file.write(genome_script)
+    out_file.close
+    
+    return(out_filename)
+
+
+#Make sure that genome and genome indexes are set up in genome directory for mapping. Returns name of sbatch script created.
+def process_local_genome(sp_dir,genome_local,sp_abbr,genome_present,bwa_index_present,faidx_index_present,dict_index_present):
+    genome_dir = "%s/genome"%(sp_dir)
+    
+    #Load modules, also print samtools and bwa versions
+    cmd_1 = 'module load samtools/1.5-fasrc02\nmodule load bwa/0.7.15-fasrc02'
+    
+    #Copy genome if necessary
+    if genome_present == False:
+        print("\nCopying %s to %s/%s.fa"%(genome_local,genome_dir,sp_abbr))
+        cmd_2 = 'cp %s %s/%s.fa'%(genome_local,genome_dir,sp_abbr)
+    else:
+        cmd_2 = ''
+    
+    #Index with samtools faidx if necessary
+    if faidx_index_present == False:
+        print("\nIndexing %s/%s.fa with Samtools faidx"%(genome_dir,sp_abbr))
+        cmd_3 = 'samtools faidx %s/%s.fa'%(genome_dir,sp_abbr)
+    else:
+        cmd_3 = ''
+        
+    #Index with BWA if necessary
+    if bwa_index_present == False:
+        print("\nIndexing %s/%s.fa with bwa index"%(genome_dir,sp_abbr))
+        cmd_4 = 'bwa index %s/%s.fa'%(genome_dir,sp_abbr)
+    else:
+        cmd_4 = ''
+        
+    if dict_index_present == False:
+        print("\nCreating sequence dictionary file for %s/%s.fa"%(genome_dir,sp_abbr))
+        cmd_5 = 'samtools dict -o %s/%s.dict %s/%s.fa'%(genome_dir,sp_abbr,genome_dir,sp_abbr)
+    else:
+        cmd_5 = ''
+        
+    final_cmd = "%s\n\n%s\n\n%s\n\n%s\n\n%s"%(cmd_1,cmd_2,cmd_3,cmd_4,cmd_5)
+    
+    #Format sbatch script and write file
+    slurm_script = script_create()
+    genome_script = slurm_script.format(partition="shared",time="0-8:00",mem="8000",cores="1",nodes="1",jobid="Genome_CP_Index",sp_dir=sp_dir,cmd=final_cmd)
+
+    out_filename = "%s/scripts/02_genome_cp_index_%s.sbatch"%(sp_dir,sp_abbr)
+    out_file = open(out_filename,"w")
+    out_file.write(genome_script)
+    out_file.close
+
+    return(out_filename)
 
 #Create an sbatch file for a given set of SRAs and split into fastq files. Returns a list of new sbatch filenames
 def ncbi_sra_download_sbatch(sp_dir,sample_ncbi_dict):
@@ -287,100 +395,40 @@ def ena_sra_download_sbatch(sp_dir,sample_ena_dict):
     
     return(sra_dl_sbatch_filenames)
 
-
-
-#Use FTP to download species genome fasta file. Will obtain FTP location by first downloading the current genbank assembly summary report. Returns name of sbatch script created.
-def get_ncbi_genome(sp_dir,fasta_ftp,sp_abbr):
-
-    #Recreate genome directory
-    genome_dir = "%s/genome"%(sp_dir)
-    
-    print("Downloading genome from %s and building relevant indexes"%fasta_ftp)
-    
-    #Get relevant directories and create filenames for other desired files
-    fasta_ftp_split = fasta_ftp.split("/")
-
-    ftp_dir = "/".join(fasta_ftp_split[:-1])
-    genome_filename = fasta_ftp_split[-1]
-    file_base = fasta_ftp_split[-2]
-    
+def process_local_fastq_sbatch(sp_dir,sample_local_dict):
     slurm_script = script_create()
+    sra_dl_sbatch_filenames = []
     
-    #Load modules, also print samtools and bwa versions
-    cmd_1 = 'module load samtools/1.5-fasrc02\nmodule load bwa/0.7.15-fasrc02'
-    
-    cmd_2 = 'wget -P %s %s'%(genome_dir,fasta_ftp)
-    cmd_3 = 'gunzip %s/%s'%(genome_dir,genome_filename)
-    cmd_4 = 'mv %s/%s %s/%s.fa'%(genome_dir,genome_filename[:-3],genome_dir,sp_abbr)
-    cmd_5 = 'samtools faidx %s/%s.fa'%(genome_dir,sp_abbr)
-    cmd_6 = 'bwa index %s/%s.fa'%(genome_dir,sp_abbr)
-    cmd_7 = 'samtools dict -o %s/%s.dict %s/%s.fa'%(genome_dir,sp_abbr,genome_dir,sp_abbr)
-    cmd_8 = 'wget -P %s %s/%s_assembly_stats.txt'%(genome_dir,ftp_dir,file_base)
-    cmd_9 = 'wget -P %s %s/%s_assembly_report.txt'%(genome_dir,ftp_dir,file_base)
-    cmd_10 = 'wget -P %s %s/%s_genomic.gff.gz'%(genome_dir,ftp_dir,file_base)
-    cmd_11 = 'wget -P %s %s/md5checksums.txt'%(genome_dir,ftp_dir)
-    
-    cmd_list = [cmd_1,cmd_2,cmd_3,cmd_4,cmd_5,cmd_6,cmd_7,cmd_8,cmd_9,cmd_10,cmd_11]
-    
-    final_cmd = "\n\n".join(cmd_list)   
-    
-    #Format sbatch script
-    genome_script = slurm_script.format(partition="shared",time="0-8:00",mem="8000",cores="1",nodes="1",jobid="Genome_DL_Index",sp_dir=sp_dir,cmd=final_cmd)
-
-    out_filename = "%s/scripts/01_genome_download_index_%s.sbatch"%(sp_dir,sp_abbr)
-    out_file = open(out_filename,"w")
-    out_file.write(genome_script)
-    out_file.close
-    
-    return(out_filename)
-
-
-#Make sure that genome and genome indexes are set up in genome directory for mapping. Returns name of sbatch script created.
-def process_local_genome(sp_dir,genome_local,sp_abbr,genome_present,bwa_index_present,faidx_index_present,dict_index_present):
-    genome_dir = "%s/genome"%(sp_dir)
-    
-    #Load modules, also print samtools and bwa versions
-    cmd_1 = 'module load samtools/1.5-fasrc02\nmodule load bwa/0.7.15-fasrc02'
-    
-    #Copy genome if necessary
-    if genome_present == False:
-        print("\nCopying %s to %s/%s.fa"%(genome_local,genome_dir,sp_abbr))
-        cmd_2 = 'cp %s %s/%s.fa'%(genome_local,genome_dir,sp_abbr)
-    else:
-        cmd_2 = ''
-    
-    #Index with samtools faidx if necessary
-    if faidx_index_present == False:
-        print("\nIndexing %s/%s.fa with Samtools faidx"%(genome_dir,sp_abbr))
-        cmd_3 = 'samtools faidx %s/%s.fa'%(genome_dir,sp_abbr)
-    else:
-        cmd_3 = ''
         
-    #Index with BWA if necessary
-    if bwa_index_present == False:
-        print("\nIndexing %s/%s.fa with bwa index"%(genome_dir,sp_abbr))
-        cmd_4 = 'bwa index %s/%s.fa'%(genome_dir,sp_abbr)
-    else:
-        cmd_4 = ''
-        
-    if dict_index_present == False:
-        print("\nCreating sequence dictionary file for %s/%s.fa"%(genome_dir,sp_abbr))
-        cmd_5 = 'samtools dict -o %s/%s.dict %s/%s.fa'%(genome_dir,sp_abbr,genome_dir,sp_abbr)
-    else:
-        cmd_5 = ''
-        
-    final_cmd = "%s\n\n%s\n\n%s\n\n%s\n\n%s"%(cmd_1,cmd_2,cmd_3,cmd_4,cmd_5)
+    for sample in sample_local_dict.keys():
+        for sra in sample_local_dict[sample]:
+            #First check if fastq file is already present (already downloaded), or final BAM file already present. If it has, print statment and continue with next sample. 
+            fastq_1_filename = '%s/fastq/%s_1.fastq.gz'%(sp_dir,sra)
+            bam_filename = '%s/alignment/%s.sorted.bam'%(sp_dir,sra)
+            dedup_filename = '%s/dedup/%s.dedup.sorted.bam'%(sp_dir,sample)
+            if os.path.isfile(fastq_1_filename) or os.path.isfile(bam_filename) or os.path.isfile(dedup_filename):
+                print('%s_1.fastq.gz or %s.sorted.bam or %s.dedup.sorted.bam already present, skipping'%(sra,sra,sample))
+            else:
+                print('Will run %s for sample %s through fastqc'%(sra,sample))
     
-    #Format sbatch script and write file
-    slurm_script = script_create()
-    genome_script = slurm_script.format(partition="shared",time="0-8:00",mem="8000",cores="1",nodes="1",jobid="Genome_CP_Index",sp_dir=sp_dir,cmd=final_cmd)
-
-    out_filename = "%s/scripts/02_genome_cp_index_%s.sbatch"%(sp_dir,sp_abbr)
-    out_file = open(out_filename,"w")
-    out_file.write(genome_script)
-    out_file.close
-
-    return(out_filename)
+                #Load modules and get versions for all programs used
+                cmd_1 = 'module load fastqc/0.11.5-fasrc01'
+                
+                #ENA uses different directory tree if SRA #s >=0 integers or < 7 integers, so have to take both of those into account.
+                cmd_2 = 'fastqc -o %s/fastqc %s/fastq/%s_1.fastq.gz %s/fastq/%s_2.fastq.gz'%(sp_dir,sp_dir,sra,sp_dir,sra) 
+            
+                final_cmd = "%s\n\n%s"%(cmd_1,cmd_2)
+    
+    
+        #Format sbatch script
+                sra_script = slurm_script.format(partition="shared",time="3-0:00",mem="4000",cores="1",nodes="1",jobid="SRA",sp_dir=sp_dir,cmd=final_cmd)
+                out_filename = "%s/scripts/02_process_local_fastq_%s.sbatch"%(sp_dir,sra)
+                out_file = open(out_filename,"w")
+                out_file.write(sra_script)
+                out_file.close
+                sra_dl_sbatch_filenames.append(out_filename)
+    
+    return(sra_dl_sbatch_filenames)
 
 
 #Create sbatch files for trimming, mapping, sorting, indexing and alignment stat creation for each set of paired SRA fastq files.
@@ -439,8 +487,11 @@ def main():
 #     Example config file format (separate by spaces), only include one genome option: 
 #     --ABBV <Species_Abbr>
 #     --OUT_DIR <output directory>
-#     --SAMPLE_NCBI <SAMPLE_1> <SRA_ID,SRA_ID,SRA_ID>
-#     --SAMPLE_NCBI <SAMPLE_2> <SRA_ID,SRA_ID>
+#     --SAMPLE_NCBI <SAMPLE_1> <SRA_ID1>
+#     --SAMPLE_NCBI <SAMPLE_1> <SRA_ID2>
+#     --SAMPLE_NCBI <SAMPLE_2> <SRA_ID1>
+#     --SAMPLE_ENA <SAMPLE_1> <SRA_ID1>
+#     --SAMPLE_LOCAL <SAMPLE_1> <SRA_ID> (any equivalent ID where the fastq is named SRA_ID_1.fastq.gz and SRA_ID_2.fastq.gz
 #     --GENOME_NCBI <NCBI Genome Accession>
 #     --GENOME_LOCAL <Local genome fasta file>
 #     '''
@@ -542,6 +593,7 @@ def main():
     #Create sbatch files
     ncbi_sra_dl_sbatch_filenames = []
     ena_sra_dl_sbatch_filenames = []
+    local_fastq_process_sbatch_filenames = []
     
     #Create sbatch files for ncbi
     if len(config_info["sample_ncbi_dict"]) > 0:
@@ -549,9 +601,12 @@ def main():
     #Create sbatch files for ena
     if len(config_info["sample_ena_dict"]) > 0:
         ena_sra_dl_sbatch_filenames = ena_sra_download_sbatch(sp_dir,config_info["sample_ena_dict"])
+    #Create sbatch files for local fastqs
+    if len(config_info["sample_local_dict"]) > 0:
+        local_fastq_process_sbatch_filenames = process_local_fastq_sbatch(sp_dir,config_info["sample_local_dict"])
     
     #Combine sbatch filenames into single object:
-    sra_dl_sbatch_filenames = ncbi_sra_dl_sbatch_filenames + ena_sra_dl_sbatch_filenames
+    sra_dl_sbatch_filenames = ncbi_sra_dl_sbatch_filenames + ena_sra_dl_sbatch_filenames + local_fastq_process_sbatch_filenames
      
     #Submit SRA read sbatch files, only allow 20 SRA jobs to run (or pend) at a time (set max_jobs)  
     max_jobs = 20
@@ -593,7 +648,7 @@ def main():
     #After all jobs have finished, report which jobs failed
     for job in completed_jobids:
         if completed_jobids[job] != "COMPLETED":
-            print("SRA download and parse job %s failed with code: %s"%(job,completed_jobids[job]))
+            print("SRA download and parse job or local fastq process job %s failed with code: %s"%(job,completed_jobids[job]))
     
     #####Final processing and mapping   
     #Trim fastq files with NGmerge
@@ -611,7 +666,7 @@ def main():
             if os.path.isfile('%s/%s_1.fastq.gz'%(fastq_dir,sra)):
                 if os.path.isfile('%s/%s_2.fastq.gz'%(fastq_dir,sra)):
                     if  os.path.isfile('%s/alignment/%s.sorted.bai'%(sp_dir,sra)) is False:
-                        if os.path.isfile("%s/dedup/%s.dedup.sorted.bai"%(sp_dir,sample)):
+                        if os.path.isfile("%s/dedup/%s.dedup.sorted.bai"%(sp_dir,sample)) is False:
                             sra_map_sbatchfile = fastq_trim_align_stats(sp_dir,sra,config_info["abbv"],sample)
                             sra_map_jobid = sbatch_submit(sra_map_sbatchfile)
                             mapping_jobids.append(sra_map_jobid)
@@ -639,17 +694,8 @@ def main():
     for job in mapping_completed_jobids:
         if mapping_completed_jobids[job] != "COMPLETED":
             print("SRA trimming, mapping, sorting, and stats job %s failed with code: %s"%(job,mapping_completed_jobids[job]))
-            
-    #Check that the final sorted bam and index is available, if so, remove intermediate files (SRA, fastq,unsorted BAM)
-    for sample in config_info["sample_dict"]:
-        for sra in config_info["sample_dict"][sample]:
-            if os.path.isfile('%s/%s.sorted.bam'%(alignment_dir,sra)) and os.path.isfile('%s/%s.sorted.bai'%(alignment_dir,sra)):
-                if os.path.isfile('%s/%s_1.fastq.gz'%(fastq_dir,sra)):
-                    proc = Popen('rm %s/%s*'%(fastq_dir,sra),shell=True)
-                if os.path.isfile('%s/%s.sra'%(sra_dir,sra)):
-                    proc = Popen('rm %s/%s.sra'%(sra_dir,sra),shell=True)
-            else:
-                print("Something happened with SRA: %s for sample: %s"%(sra,sample))   
+    
+
     
     now = datetime.datetime.now()
     print('Scripted finished: %s'%now)     

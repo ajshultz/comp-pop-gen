@@ -4,50 +4,30 @@
 --OUT_DIR .
 
 #Species abbreviation for use in file headers (e.g. CCornix for hooded crow)
---ABBV Cfrugilegus
+--ABBV Platipinna
 
 #Enter sample IDs and information, must include SRA accession numbers for download from NCBI: --SAMPLE <SAMPLE_ID> <SRA,SRA,SRA>
-#From Bioproject:PRJNA192205
---SAMPLE_NCBI SAMN02843222 SRR1368293
---SAMPLE_NCBI SAMN02843223 SRR1368309
---SAMPLE_NCBI SAMN02843223 SRR1368322
---SAMPLE_NCBI SAMN02843223 SRR1368329
---SAMPLE_NCBI SAMN02843223 SRR1368330
---SAMPLE_NCBI SAMN02843223 SRR1368331
-
-#From Bioproject PRJEB9057
---SAMPLE_NCBI SAMEA3334576 ERR849952
---SAMPLE_NCBI SAMEA3334577 ERR849963
---SAMPLE_NCBI SAMEA3334578 ERR849972
---SAMPLE_NCBI SAMEA3334579 ERR849983
---SAMPLE_NCBI SAMEA3334580 ERR850016
---SAMPLE_NCBI SAMEA3334581 ERR850017
---SAMPLE_NCBI SAMEA3334582 ERR850052
---SAMPLE_NCBI SAMEA3334583 ERR850053
---SAMPLE_NCBI SAMEA3334584 ERR850066
---SAMPLE_NCBI SAMEA3334585 ERR850072
-
-
-#At this time, using local fastq files is not supported. We will add this feature in the future.
-#--SAMPLE_LOCAL Ind_1
+#From Bioproject:PRJNA196862
+--SAMPLE_NCBI SAMN02048973 SRR830772
+--SAMPLE_NCBI SAMN02048973 SRR830773
 
 #A genome must be supplied, either hosted on NCBI (use --GENOME_NCBI flag) or locally (use --GENOME_LOCAL flag). See examples below.
 
 #Enter name of species with genome assembly for mapping if genome hosted on Genbank. Must correspond to name of organism on NCBI if download is necessary (e.g. for Corvus cornix: Corvus_cornix_cornix)
---GENOME_NCBI ftp://ftp.ncbi.nlm.nih.gov/genomes/all/GCF/000/738/735/GCF_000738735.2_ASM73873v2/GCF_000738735.2_ASM73873v2_genomic.fna.gz
+--GENOME_NCBI ftp://ftp.ncbi.nlm.nih.gov/genomes/all/GCF/000/633/615/GCF_000633615.1_Guppy_female_1.0_MT/GCF_000633615.1_Guppy_female_1.0_MT_genomic.fna.gz
 
 #If genome available locally, input path to fasta filename. If local fasta path is supplied, file will be copied into genome directory and renamed ABBV.fa for downstream use.
 #For example:
-#--GENOME_LOCAL 
+#--GENOME_LOCAL ./Platipinna/genome/Platipinna.fa
 
 #Heterozygosity for running haplotypecaller and genotypegvcf
 --HETEROZYGOSITY 0.005
 
 #Which version of pipeline to run (lowcoverage or highcoverage)
---PIPELINE lowcoverage
+--PIPELINE highcoverage
 
 #Number of intervals to run at a time?
---NINTERVALS 10
+--NINTERVALS CHROMOSOME
 
 #Starting memory (GB) for running HaplotypeCaller
 --MEMORY_HC 16
@@ -56,7 +36,4 @@
 --TIME_HC 72
 
 #Starting time (hours) for running GenotypeGVCF
---TIME_GG 24
-
-#Program for running GenotypeGVCF
---COMBINE_GVCF_PROGRAM CombineGVCFs
+--TIME_GG 8

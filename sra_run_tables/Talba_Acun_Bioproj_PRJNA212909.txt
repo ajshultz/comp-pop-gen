@@ -1,0 +1,3 @@
+Experiment	InsertSize	Library_Name	MBases	MBytes	Run	Assay_Type	AvgSpotLen	BioProject	BioSample	Center_Name	Consent	DATASTORE_filetype	DATASTORE_provider	Instrument	LibraryLayout	LibrarySelection	LibrarySource	LoadDate	Organism	Platform	ReleaseDate	SRA_Sample	SRA_Study	Sample_Name	country	isolate	sex
+SRX341476	500	BIRadyDAMDIAAPE	19272	12344	SRR959575	WGS	200	PRJNA212909	SAMN02339894	BGI	public	sra	ncbi	Illumina HiSeq 2000	PAIRED	PCR	GENOMIC	2015-08-05	Tyto alba	ILLUMINA	2015-07-22	SRS474571	SRP029349	BGI_N341	USA	BGI_N341	female
+SRX341477	800	BIRadyDAMDMAAPE	10832	6787	SRR959576	WGS	200	PRJNA212909	SAMN02339894	BGI	public	sra	ncbi	Illumina HiSeq 2000	PAIRED	PCR	GENOMIC	2015-08-05	Tyto alba	ILLUMINA	2015-07-22	SRS474571	SRP029349	BGI_N341	USA	BGI_N341	female

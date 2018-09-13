@@ -15,12 +15,13 @@ plt.switch_backend('agg') #Added to get working on the cluster
 from matplotlib.backends.backend_pdf import PdfPages
 
 #Extract Sample, SRA and genome info from config file. Sample data will be stored as a dictionary with sample ID as keys and a list of SRA accessions as values. Returns a dictionary of this info.
-def extract_config(config_filename):
+def extract_config(config_filename, heterozygosity_arg, pipeline_arg, memory_hc_arg, time_hc_arg):
     print("Opening %s"%config_filename)
     config_file = open(config_filename,"r")
     config_info = {}
     sample_ncbi_dict = {}
     sample_ena_dict = {}
+    sample_local_dict = {}
     sample_dict = {}
     
     for line in config_file:
@@ -55,25 +56,47 @@ def extract_config(config_filename):
                     sample_dict[line[1]].append(line[2])
                 config_info["sample_ena_dict"] = sample_ena_dict
                 config_info["sample_dict"] = sample_dict
+            elif line[0] == "--SAMPLE_LOCAL":
+                if line[1] not in sample_local_dict:
+                    sample_local_dict[line[1]] = [line[2]]
+                elif line[1] in sample_local_dict:
+                    sample_local_dict[line[1]].append(line[2])
+                if line[1] not in sample_dict:
+                    sample_dict[line[1]] = [line[2]]
+                elif line[1] in sample_dict:
+                    sample_dict[line[1]].append(line[2])
+                config_info["sample_local_dict"] = sample_local_dict
+                config_info["sample_dict"] = sample_dict
+
 
             elif line[0] == "--GENOME_NCBI":
                 config_info["genome_ncbi"] = line[1]
             elif line[0] == "--GENOME_LOCAL":
                 config_info["genome_local"] = line[1]
-            elif line[0] == "--SAMPLE_LOCAL":
-                sys.exit("Local sample files are not supported at this time")
             elif line[0] == "--OUT_DIR":
                 config_info["out_dir"] = line[1]
             elif line[0] == "--HETEROZYGOSITY":
-                config_info["het"] = line[1]
+                if heterozygosity_arg is None:
+                    config_info["het"] = line[1]
+                else:
+                    config_info["het"] = heterozygosity_arg
             elif line[0] == "--PIPELINE":
-                config_info["pipeline"] = line[1]
+                if pipeline_arg is None:
+                    config_info["pipeline"] = line[1]
+                else:
+                    config_info["pipeline"] = pipeline_arg
             elif line[0] == "--NINTERVALS":
                 config_info["nintervals"] = line[1]
             elif line[0] == "--MEMORY_HC":
-                config_info["memory_hc"] = line[1]
+                if memory_hc_arg is None:
+                    config_info["memory_hc"] = line[1]
+                else:
+                    config_info["memory_hc"] = memory_hc_arg
             elif line[0] == "--TIME_HC":
-                config_info["time_hc"] = line[1]
+                if time_hc_arg is None:
+                    config_info["time_hc"] = line[1]
+                else:
+                    config_info["time_hc"] = time_hc_arg
     config_file.close()
     
     #Make sure all necessary inputs are present
@@ -94,27 +117,39 @@ def extract_config(config_filename):
         sys.exit("Oops, you forgot to specify samples!")
         
     if "het" not in config_info:
-        config_info["het"] = "0.001"
-        print("No heterozygosity specified, using default human value (0.001)")
+        if heterozygosity_arg is None:
+            config_info["het"] = "0.001"
+            print("No heterozygosity specified, using default human value (0.001)")
+        else:
+            config_info["het"] = heterozygosity_arg
     
     if "pipeline" not in config_info:
-        config_info["pipeline"] = "lowcoverage"
-        print("No pipeline specified (highcoverage or lowcoverage), using lowcoverage.")
+        if pipeline_arg is None:
+            config_info["pipeline"] = "lowcoverage"
+            print("No pipeline specified (highcoverage or lowcoverage), using lowcoverage.")
+        else:
+            config_info["pipeline"] = pipeline_arg
         
     if config_info["pipeline"] != "highcoverage" and config_info["pipeline"] != "lowcoverage":
-        sys.exit("Pipeline must be set to either 'highcoverage' or 'lowcoverage")
+        sys.exit("Pipeline must be set to either 'highcoverage' or 'lowcoverage'")
     
     if "nintervals" not in config_info:
         config_info["nintervals"] = "10"
         print("No specification for the number of intervals to analyze, using 10")
     
     if "memory_hc" not in config_info:
-        config_info["memory_hc"] = "8"
-        print("No specification of how much memory to use for HaplotypeCaller, using 8GB by default")
+        if memory_hc_arg is None:
+            config_info["memory_hc"] = "8"
+            print("No specification of how much memory to use for HaplotypeCaller, using 8GB by default")
+        else:
+            config_info["memory_hc"] = memory_hc_arg
     
     if "time_hc" not in config_info:
-        config_info["time_hc"] = "12"
-        print("No specification of how much time to use for HaplotypeCaller, using 12 hours by default")
+        if time_hc_arg is None:
+            config_info["time_hc"] = "12"
+            print("No specification of how much time to use for HaplotypeCaller, using 12 hours by default")
+        else:
+            config_info["time_hc"] = time_hc_arg
     
     #Return objects    
     return(config_info)
@@ -207,7 +242,7 @@ def check_missing_gvcfs(arraystart,arrayend,sample_files,sample):
     
     return(missing_ints)
 
-
+##Currently requires NCBI names if you specify chromosome. Add config option to specify regex to identify chromosomes, have default be NCBI.
 def split_genome(sp_dir,sp_abbr,nintervals,outputdir):
 	#Open input		
     fai = open("%s/genome/%s.fa.fai"%(sp_dir,sp_abbr),"r")
@@ -230,6 +265,7 @@ def split_genome(sp_dir,sp_abbr,nintervals,outputdir):
             cumEnd.append(totLen)
 
         #Create interval based on total length of scaffolds, and create list of start and end values
+        #### Would be better to refactor to just compute interval size, and add scaffolds to intervals until the interval exceeds size, then move on to the next interval.
         interval = (totLen/n)+1
         intervalNums = range(1,n+1)
         intervalEnd = [x * interval for x in intervalNums]
@@ -314,7 +350,7 @@ def haplotypecaller_sbatch(sp_dir,sp_abbr,sample,het,memory_hc,nintervals,pipeli
 
 #Format sbatch script
     haplocaller_script = slurm_script.format(partition="shared",cores="2",nodes="1",jobid="hc",sp_dir=sp_dir,cmd=final_cmd)
-    out_filename = "%s/scripts/06_haplotypecaller_%s_array.sbatch"%(sp_dir,sample)
+    out_filename = "%s/scripts/05_haplotypecaller_%s_array.sbatch"%(sp_dir,sample)
     out_file = open(out_filename,"w")
     out_file.write(haplocaller_script)
     out_file.close
@@ -329,15 +365,39 @@ def main():
     #Get config file from arguments
     parser = argparse.ArgumentParser()
     parser.add_argument("--config", help="config file specifying samples and genome for mapping")
+    parser.add_argument("--HETEROZYGOSITY", help="heterozygosity to use with HaplotypeCaller, default 0.001. Setting value here will overwrite any values set in config file.", required=False)
+    parser.add_argument("--PIPELINE", help="highcoverage or lowcoverage set of HaplotypeCaller arguments, default lowcoverage. Setting value here will overwrite any values set in config file", required=False)
+    parser.add_argument("--MEMORY_HC", help="Memory in GB (e.g. 8 = 8GB) to use for HaplotypeCaller sbatch script, default 16. Setting value here will overwrite any values set in config file", required=False)
+    parser.add_argument("--TIME_HC", help="Time in hours (e.g. 12 = 12 hours) to use for HaplotypeCaller sbatch script, default 12. Setting value here will overwrite any values set in config file", required=False)
     args = parser.parse_args()
     config_filename = args.config
+    if args.HETEROZYGOSITY:
+        heterozygosity_arg = args.HETEROZYGOSITY
+        print("Using command line specified heterozygosity of %s"%heterozygosity_arg)
+    else:
+        heterozygosity_arg = None
+    if args.PIPELINE:
+        pipeline_arg = args.PIPELINE
+        print("Using command line specified pipeline of %s"%pipeline_arg)
+    else:
+        pipeline_arg = None
+    if args.MEMORY_HC:
+        memory_hc_arg = args.MEMORY_HC
+        print("Using command line specified memory of %s GB for HaplotypeCaller sbatch script"%memory_hc_arg)
+    else:
+        memory_hc_arg = None
+    if args.TIME_HC:
+        time_hc_arg = args.TIME_HC
+        print("Using command line specified time of %s hours for HaplotypeCaller sbatch script"%time_hc_arg)
+    else:
+        time_hc_arg = None
     
     now = datetime.datetime.now()
     print('Staring work on script 03: %s'%now)
     start_date = now.strftime("%Y-%m-%d")
     
     #Open config file and get attributes
-    config_info = extract_config(config_filename)
+    config_info = extract_config(config_filename, heterozygosity_arg, pipeline_arg, memory_hc_arg, time_hc_arg)
 
     #####Check if working directories exist, if not creates them
     sp_dir = "%s/%s"%(config_info["out_dir"],config_info["abbv"])
@@ -386,9 +446,12 @@ def main():
         if finished_files == 0:
 
             #Create sbatch file, add to filename dictionary with sample as key and filename as value
-            hc_filename = haplotypecaller_sbatch(sp_dir,sp_abbr=config_info["abbv"],sample=sample,het=config_info["het"],memory_hc=config_info["memory_hc"],nintervals=config_info["nintervals"],pipeline=config_info["pipeline"])
-            hc_filenames[sample] = hc_filename
-        
+            if os.path.isfile('%s/dedup/%s.dedup.sorted.bai'%(sp_dir,sample)) and os.path.isfile('%s/dedup/%s.dedup.sorted.bam'%(sp_dir,sample)):
+                hc_filename = haplotypecaller_sbatch(sp_dir,sp_abbr=config_info["abbv"],sample=sample,het=config_info["het"],memory_hc=config_info["memory_hc"],nintervals=config_info["nintervals"],pipeline=config_info["pipeline"])
+                hc_filenames[sample] = hc_filename
+            else:
+                print('Deduped bam or bai file missing for sample %s, will not run HaplotypeCaller for that sample.'%(sample))
+            
             #Submit job, get base jobid for array
             base_jobid = sbatch_submit_array(hc_filename,memory=config_info["memory_hc"],timelimit=config_info["time_hc"], array_nums="1-%d"%nintervalfiles)
             sleep(1)
@@ -398,7 +461,7 @@ def main():
                 all_jobids["%s_%d"%(base_jobid,i)] = sample
         
         #If the number of sample files is less than the the number of interval files x2 (because of vcf and index), that means some intervals are missing. Only submit those intervals that don't have .tbi (index) files.
-        elif finished_files < nintervalfiles:
+        elif finished_files < int(nintervalfiles):
             #Check each interval, see if it has both a .vcf.gz and .tbi file
             hc_filename = haplotypecaller_sbatch(sp_dir,sp_abbr=config_info["abbv"],sample=sample,het=config_info["het"],memory_hc=config_info["memory_hc"],nintervals=config_info["nintervals"],pipeline=config_info["pipeline"])
             hc_filenames[sample] = hc_filename
@@ -406,7 +469,8 @@ def main():
             missing = check_missing_gvcfs(arraystart=1,arrayend=nintervalfiles,sample_files=sample_files,sample=sample)
             
             missing_vec = ",".join(missing)
-            
+
+        
              #Submit job, get base jobid for array
             base_jobid = sbatch_submit_array(hc_filename,memory=config_info["memory_hc"],timelimit=config_info["time_hc"], array_nums=missing_vec)
             sleep(1)
@@ -415,7 +479,7 @@ def main():
             for i in missing:
                 all_jobids["%s_%s"%(base_jobid,i)] = sample
             
-        elif finished_files == nintervalfiles:
+        elif finished_files == int(nintervalfiles):
             print("Sample %s has all gvcf files, skipping HaplotypeCaller"%sample)
         
         else:
@@ -486,7 +550,7 @@ def main():
     for sample in failed_samples:
         failed_intervals = ",".join(failed_samples[sample])
         print("Sample %s, failed for intervals: %s"%(sample,failed_intervals))
-     
+
                
     now = datetime.datetime.now()
     print('Finished script 03: %s'%now)

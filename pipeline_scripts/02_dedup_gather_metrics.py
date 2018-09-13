@@ -8,11 +8,15 @@ import os
 import argparse
 from subprocess import Popen,PIPE
 from time import sleep
+import shutil
 import datetime
 import numpy as np
 import matplotlib.pyplot as plt
 plt.switch_backend('agg') #Added to get working on the cluster
 from matplotlib.backends.backend_pdf import PdfPages
+
+
+#####May wish to run scripts 01 and 02 on regal until final deduplicated BAM is produced. After that, copy to "permanent" directory on holylfs. Create script 2.5 to just set up working dir on holylfs, mv dedup dir, logs, scripts, stats over and end.
 
 #Extract Sample, SRA and genome info from config file. Sample data will be stored as a dictionary with sample ID as keys and a list of SRA accessions as values. Returns a dictionary of this info.
 def extract_config(config_filename):
@@ -21,6 +25,7 @@ def extract_config(config_filename):
     config_info = {}
     sample_ncbi_dict = {}
     sample_ena_dict = {}
+    sample_local_dict = {}
     sample_dict = {}
     
     for line in config_file:
@@ -55,13 +60,24 @@ def extract_config(config_filename):
                     sample_dict[line[1]].append(line[2])
                 config_info["sample_ena_dict"] = sample_ena_dict
                 config_info["sample_dict"] = sample_dict
+            elif line[0] == "--SAMPLE_LOCAL":
+                if line[1] not in sample_local_dict:
+                    sample_local_dict[line[1]] = [line[2]]
+                elif line[1] in sample_local_dict:
+                    sample_local_dict[line[1]].append(line[2])
+                if line[1] not in sample_dict:
+                    sample_dict[line[1]] = [line[2]]
+                elif line[1] in sample_dict:
+                    sample_dict[line[1]].append(line[2])
+                config_info["sample_local_dict"] = sample_local_dict
+                config_info["sample_dict"] = sample_dict
+
 
             elif line[0] == "--GENOME_NCBI":
                 config_info["genome_ncbi"] = line[1]
             elif line[0] == "--GENOME_LOCAL":
                 config_info["genome_local"] = line[1]
-            elif line[0] == "--SAMPLE_LOCAL":
-                sys.exit("Local sample files are not supported at this time")
+
             elif line[0] == "--OUT_DIR":
                 config_info["out_dir"] = line[1]
     config_file.close()
@@ -539,6 +555,9 @@ def main():
     
     #Check that the final sorted bam and index is available, if so, remove intermediate files (unsorted dedup, all aligned bams)
     ###Only delete if validate says no errors found.
+        ####Move this to script 2 after validation has occurred.         
+    #Check that the final sorted bam and index is available, if so, remove intermediate files (SRA, fastq,unsorted BAM)
+
     for sample in config_info["sample_dict"]:
         if os.path.isfile('%s/dedup/%s.dedup.sorted.bam'%(sp_dir,sample)) and os.path.isfile('%s/dedup/%s.dedup.sorted.bai'%(sp_dir,sample)) and all_validation_stats[sample] == "ok":
             if os.path.isfile('%s/dedup/%s.dedup.bam'%(sp_dir,sample)):
@@ -546,6 +565,10 @@ def main():
             for sra in config_info["sample_dict"][sample]:
                 if os.path.isfile('%s/alignment/%s.sorted.rg.bam'%(sp_dir,sra)):
                     proc = Popen('rm %s/alignment/%s.sorted*'%(sp_dir,sra),shell=True)
+                if os.path.isfile('%s/fastq/%s_1.fastq.gz'%(sp_dir,sra)):
+                    proc = Popen('rm %s/fastq/%s*'%(sp_dir,sra),shell=True)
+                if os.path.isfile('%s/sra/%s.sra'%(sp_dir,sra)):
+                    proc = Popen('rm %s/sra/%s.sra'%(sp_dir,sra),shell=True)
         else:
             print("Something happened with sample deduping: %s"%(sample))     
                

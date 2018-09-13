@@ -31,11 +31,11 @@
 #A genome must be supplied, either hosted on NCBI (use --GENOME_NCBI flag) or locally (use --GENOME_LOCAL flag). See examples below.
 
 #Enter name of species with genome assembly for mapping if genome hosted on Genbank. Must correspond to name of organism on NCBI if download is necessary (e.g. for Corvus cornix: Corvus_cornix_cornix)
-#--GENOME_NCBI ftp://ftp.ncbi.nlm.nih.gov/genomes/all/GCF/000/738/735/GCF_000738735.2_ASM73873v2/GCF_000738735.2_ASM73873v2_genomic.fna.gz
+--GENOME_NCBI ftp://ftp.ncbi.nlm.nih.gov/genomes/all/GCF/000/738/735/GCF_000738735.2_ASM73873v2/GCF_000738735.2_ASM73873v2_genomic.fna.gz
 
 #If genome available locally, input path to fasta filename. If local fasta path is supplied, file will be copied into genome directory and renamed ABBV.fa for downstream use.
 #For example:
---GENOME_LOCAL ./Cdauuricus/genome/Cdauuricus
+#--GENOME_LOCAL ./Cdauuricus/genome/Cdauuricus
 
 #Heterozygosity for running haplotypecaller and genotypegvcf
 --HETEROZYGOSITY 0.005
@@ -53,4 +53,7 @@
 --TIME_HC 72
 
 #Starting time (hours) for running GenotypeGVCF
---TIME_GG 8
+--TIME_GG 24
+
+#Program for running GenotypeGVCF
+--COMBINE_GVCF_PROGRAM CombineGVCFs

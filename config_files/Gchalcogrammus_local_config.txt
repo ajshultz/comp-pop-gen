@@ -1,0 +1,4 @@
+/n/holylfs/LABS/informatics/earnason/gadmor2/rotifer_fourfish/rawdata/150612_D00365_0515_BH55VCBCXX/Lane1.indexlength_6/Fastq/152043_Gch_GGCTAC.R1.fastq.gz 1 152043_Gch 152043_Gch_Lane1
+/n/holylfs/LABS/informatics/earnason/gadmor2/rotifer_fourfish/rawdata/150612_D00365_0515_BH55VCBCXX/Lane1.indexlength_6/Fastq/152043_Gch_GGCTAC.R2.fastq.gz 2 152043_Gch 152043_Gch_Lane1
+/n/holylfs/LABS/informatics/earnason/gadmor2/rotifer_fourfish/rawdata/150612_D00365_0515_BH55VCBCXX/Lane2.indexlength_6/Fastq/152043_Gch_GGCTAC.R1.fastq.gz 1 152043_Gch 152043_Gch_Lane2
+/n/holylfs/LABS/informatics/earnason/gadmor2/rotifer_fourfish/rawdata/150612_D00365_0515_BH55VCBCXX/Lane2.indexlength_6/Fastq/152043_Gch_GGCTAC.R2.fastq.gz 2 152043_Gch 152043_Gch_Lane2

@@ -1,0 +1,35 @@
+#Example config file:
+
+#Path to desired output directory (directory for each species will be created within this directory). If not specified will be current working directory
+--OUT_DIR .
+
+#Species abbreviation for use in file headers (e.g. CCornix for hooded crow)
+--ABBV Pnoveboracensis
+
+#Sample from: Allison Shultz
+#Species binomial: Parkesia noveboracensis
+#Sample information
+--SAMPLE_LOCAL Pnoveboracensis_Bauer Pnoveboracensis_BC9DJ6ANXX
+--SAMPLE_LOCAL Pnoveboracensis_Bauer Pnoveboracensis_AC9J4EANXX
+
+#Enter name of species with genome assembly for mapping if genome hosted on Genbank. Must correspond to name of organism on NCBI if download is necessary (e.g. for Corvus cornix: Corvus_cornix_cornix)
+--GENOME_NCBI ftp://ftp.ncbi.nlm.nih.gov/genomes/all/GCA/001/746/935/GCA_001746935.1_mywagenomev1.1/GCA_001746935.1_mywagenomev1.1_genomic.fna.gz
+
+#If genome available locally, input path to fasta filename. If local fasta path is supplied, file will be copied into genome directory and renamed ABBV.fa for downstream use.
+#For example:
+#--GENOME_LOCAL ./Scoronata/genome/Scoronata.fa
+
+#Heterozygosity for running haplotypecaller and genotypegvcf
+--HETEROZYGOSITY 0.005
+
+#Which version of pipeline to run (lowcoverage or highcoverage)
+--PIPELINE highcoverage
+
+#Number of intervals to run at a time?
+--NINTERVALS 15
+
+#Starting memory (GB) for running HaplotypeCaller
+--MEMORY_HC 16
+
+#Starting time (hours) for running HaplotypeCaller
+--TIME_HC 72

@@ -35,26 +35,32 @@ def write_main_config(config_local, config_out, abbv):
         
         #now do each sample_local line
         for line in config_local:
-            line=line.split("\t")
+            line=line.split()
             #path = line[0], read = line[1], sample ID = line[2], accession = line[3]
-            if line[1] == 1:
+            if line[1] == '1':
                 print("--SAMPLE_LOCAL", line[2], line[3], sep=" ", file=f)
     
 #Copy and rename fastqs
 def cp_rename_fastq(config_local, sp_dir):
-    #takes the local config dict and the species dir 
+    #takes the local config dict and the species dir
+    #checks if desired fastq.gz files already exist, and if not:
     #generates commands to copy the local fastq to species_dir/ACCESSION_1.fastq.gz
     #checks to make sure that the input is actually gzipped only by checking for extension
+    #will gzip fastqs if not already, otherwise, just copies them
     for line in config_local:
-        line = line.split("\t")
+        line = line.split()
         #path = line[0], read = line[1], sample ID = line[2], accession = line[3]
         #if path ends with .gz, use gzip -cd
         #else use cp
-        if line[0].endswith(".gz"):
-            command = "gzip -cd %s > %s/fastq/%s_%s.fastq"%(line[0],sp_dir,line[3],line[1])
+        if os.path.isfile("%s/fastq/%s_%s.fastq.gz"%(sp_dir,line[3],line[1])) is False:
+            if line[0].endswith(".gz"):
+                command = "cp %s %s/fastq/%s_%s.fastq.gz"%(line[0],sp_dir,line[3],line[1])
+            else:
+                command = "gzip -c %s > %s/fastq/%s_%s.fastq.gz"%(line[0],sp_dir,line[3],line[1])
+            result=os.system(command)
         else:
-            command = "cp %s %s/fastq/%s_%s.fastq"%(line[0],sp_dir,line[3],line[1])
-        result=os.system(command)
+            pass
+
 
 def main():
     #Get config file from arguments

@@ -4,7 +4,7 @@
 --OUT_DIR .
 
 #Species abbreviation for use in file headers (e.g. CCornix for hooded crow)
---ABBV Nnippon
+--ABBV Nnippon_Egar
 
 #Enter sample IDs and information, must include SRA accession numbers for download from NCBI: --SAMPLE <SAMPLE_ID> <SRA,SRA,SRA>
 #From Bioproject:PRJNA308878
@@ -40,11 +40,11 @@
 #A genome must be supplied, either hosted on NCBI (use --GENOME_NCBI flag) or locally (use --GENOME_LOCAL flag). See examples below.
 
 #Enter name of species with genome assembly for mapping if genome hosted on Genbank. Must correspond to name of organism on NCBI if download is necessary (e.g. for Corvus cornix: Corvus_cornix_cornix)
---GENOME_NCBI ftp://ftp.ncbi.nlm.nih.gov/genomes/all/GCF/000/708/225/GCF_000708225.1_ASM70822v1/GCF_000708225.1_ASM70822v1_genomic.fna.gz
+--GENOME_NCBI ftp://ftp.ncbi.nlm.nih.gov/genomes/all/GCF/000/687/185/GCF_000687185.1_ASM68718v1/GCF_000687185.1_ASM68718v1_genomic.fna.gz
 
 #If genome available locally, input path to fasta filename. If local fasta path is supplied, file will be copied into genome directory and renamed ABBV.fa for downstream use.
 #For example:
-#--GENOME_LOCAL ./Nnippon/genome/Nnippon.fa
+#--GENOME_LOCAL ./Nnippon_Egar/genome/Nnippon_Egar.fa
 
 #Heterozygosity for running haplotypecaller and genotypegvcf
 --HETEROZYGOSITY 0.005
@@ -62,10 +62,4 @@
 --TIME_HC 72
 
 #Starting time (hours) for running GenotypeGVCF
---TIME_GG 72
-
-#Starting memory for running GenotypeGVCF
---MEMORY_GG 16
-
-#Program for running GenotypeGVCF
---COMBINE_GVCF_PROGRAM CombineGVCFs
+--TIME_GG 8

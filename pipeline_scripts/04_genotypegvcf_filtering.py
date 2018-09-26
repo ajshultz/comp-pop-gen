@@ -611,7 +611,7 @@ def main():
         
     #For each interval, check to make sure vcf .tbi file exists, and if so, delete either combined gvcf (if program is CombineGVCFs) or the GenomicsDB (if GenomicsDBImport was used). If no .tbi file exists, prints statement to log file.    
     for interval in range(1,int(nintervalfiles)+1):
-        if os.path.isfile("%s/vcf/%s.%d.vcf.gz.tbi"%(sp_dir,config_info["abbv"],interval)):
+        if os.path.isfile("%s/vcf/%s_hardfilters.%d.vcf.gz.tbi"%(sp_dir,config_info["abbv"],interval)):
             if config_info["combine_gvcf_program"] == "CombineGVCFs":
                 if os.path.isfile("%s/gvcf/%s.%d.gvcf.gz.tbi"%(sp_dir,config_info["abbv"],interval)) and os.path.isfile("%s/gvcf/%s.%d.gvcf.gz"%(sp_dir,config_info["abbv"],interval)):
                     proc = Popen("%s/gvcf/%s.%d.gvcf.gz.tbi"%(sp_dir,config_info["abbv"],interval),shell=True)

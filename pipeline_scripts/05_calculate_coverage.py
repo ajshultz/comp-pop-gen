@@ -300,19 +300,21 @@ def sample_coverage_sbatch(sp_dir,sp_abbr,sample):
         
 #Create an sbatch file for a given set of samples to create genome coverage graphs with bedtools - will use deduplicated BAM file and will write results to stats_coverage
 
-def union_coverage_sbatch(sp_dir,sp_abbr,sample_bedgraph_file_list):
+def union_coverage_sbatch(sp_dir,sp_abbr,sample_bedgraph_file_list,sample_names_bedgraph_file_list):
     slurm_script = script_create()
     
     sample_bedgraph_files = " ".join(sample_bedgraph_file_list)
+    sample_names_bedgraph_files = " ".join(sample_names_bedgraph_file_list)
     #First check if dedup file is present, if it is, continue and if not print statement.
             #Load modules and get versions for all programs used
     cmd_1 = 'module load bedtools2/2.26.0-fasrc01'
 
     #Create bedgraph with bedtools of coverage (include regions with 0 coverage)
-    cmd_2 = 'bedtools unionbedg -header -empty -g %s/genome/%s.fa.fai -i %s > %s/stats_coverage/_%s_all_samples_union.bg'%(sp_dir,sp_abbr,sample_bedgraph_files,sp_dir,sp_abbr)
+    cmd_2 = 'bedtools unionbedg -header -empty -g %s/genome/%s.fa.fai -i %s -names %s > %s/stats_coverage/_%s_all_samples_union.bg'%(sp_dir,sp_abbr,sample_bedgraph_files,sample_names_bedgraph_files,sp_dir,sp_abbr)
+    
+    cmd_3 = 'gzip %s/stats_coverage/_%s_all_samples_union.bg'%(sp_dir,sp_abbr)
 
-
-    cmd_list = [cmd_1,cmd_2]
+    cmd_list = [cmd_1,cmd_2,cmd_3]
 
     final_cmd = "\n\n".join(cmd_list)
 
@@ -421,12 +423,14 @@ def main():
     ########## Create union bedgraph with all sample coverages included
     #Make a list of all sample bedgraphs to include in genome coverage calculations. Iterates through samples names, makes sure coverage bedgraph files exist (if not, skips sample), and that sample completed above command successfully.
     sample_bedgraph_file_list = []
+    sample_names_bedgraph_files = []
     for sample in config_info["sample_dict"]:
         genome_cov_filename = '%s/stats_coverage/%s.bg'%(sp_dir,sample)
         if sample in failed_samples:
             print("Will not include sample %s in genome coverage calculation, job failed")
         elif os.path.isfile(genome_cov_filename) and os.path.getsize(genome_cov_filename) > 0:
             sample_bedgraph_file_list.append(genome_cov_filename)
+            sample_names_bedgraph_files.append(sample)
     
     #Checks if union bedgraph file exists - if so, skips creation.
     if os.path.isfile('%s/stats_coverage/_%s_all_samples_union.bg'%(sp_dir,config_info["abbv"])) and os.path.getsize('%s/stats_coverage/_%s_all_samples_union.bg'%(sp_dir,config_info["abbv"])) > 0:
@@ -434,7 +438,7 @@ def main():
    
     else:
         #Create and submit file for union bedgraph job        
-        union_sbatch_file = union_coverage_sbatch(sp_dir,config_info["abbv"],sample_bedgraph_file_list)
+        union_sbatch_file = union_coverage_sbatch(sp_dir,config_info["abbv"],sample_bedgraph_file_list,sample_names_bedgraph_files)
         union_job_id = sbatch_submit(union_sbatch_file,memory=8,timelimit=8)
         sleep(30)
 

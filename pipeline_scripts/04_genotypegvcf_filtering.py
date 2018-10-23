@@ -614,8 +614,8 @@ def main():
         if os.path.isfile("%s/vcf/%s_hardfilters.%d.vcf.gz.tbi"%(sp_dir,config_info["abbv"],interval)):
             if config_info["combine_gvcf_program"] == "CombineGVCFs":
                 if os.path.isfile("%s/gvcf/%s.%d.gvcf.gz.tbi"%(sp_dir,config_info["abbv"],interval)) and os.path.isfile("%s/gvcf/%s.%d.gvcf.gz"%(sp_dir,config_info["abbv"],interval)):
-                    proc = Popen("%s/gvcf/%s.%d.gvcf.gz.tbi"%(sp_dir,config_info["abbv"],interval),shell=True)
-                    proc = Popen("%s/gvcf/%s.%d.gvcf.gz"%(sp_dir,config_info["abbv"],interval),shell=True)
+                    proc = Popen("rm %s/gvcf/%s.%d.gvcf.gz.tbi"%(sp_dir,config_info["abbv"],interval),shell=True)
+                    proc = Popen("rm %s/gvcf/%s.%d.gvcf.gz"%(sp_dir,config_info["abbv"],interval),shell=True)
             elif config_info["combine_gvcf_program"] == "GenomicsDBImport":
                 if os.path.isdir('%s/genomics_db/interval_%d'%(sp_dir,interval)):
                     shutil.rmtree(path = '%s/genomics_db/interval_%d'%(sp_dir,interval))

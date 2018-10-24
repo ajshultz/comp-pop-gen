@@ -6,6 +6,7 @@ import re
 import sys
 import os
 import argparse
+import gzip
 from subprocess import Popen,PIPE
 from time import sleep
 import datetime
@@ -423,22 +424,22 @@ def main():
     ########## Create union bedgraph with all sample coverages included
     #Make a list of all sample bedgraphs to include in genome coverage calculations. Iterates through samples names, makes sure coverage bedgraph files exist (if not, skips sample), and that sample completed above command successfully.
     sample_bedgraph_file_list = []
-    sample_names_bedgraph_files = []
+    sample_names_bedgraph_file_list = []
     for sample in config_info["sample_dict"]:
         genome_cov_filename = '%s/stats_coverage/%s.bg'%(sp_dir,sample)
         if sample in failed_samples:
             print("Will not include sample %s in genome coverage calculation, job failed")
         elif os.path.isfile(genome_cov_filename) and os.path.getsize(genome_cov_filename) > 0:
             sample_bedgraph_file_list.append(genome_cov_filename)
-            sample_names_bedgraph_files.append(sample)
+            sample_names_bedgraph_file_list.append(sample)
     
     #Checks if union bedgraph file exists - if so, skips creation.
-    if os.path.isfile('%s/stats_coverage/_%s_all_samples_union.bg'%(sp_dir,config_info["abbv"])) and os.path.getsize('%s/stats_coverage/_%s_all_samples_union.bg'%(sp_dir,config_info["abbv"])) > 0:
+    if os.path.isfile('%s/stats_coverage/_%s_all_samples_union.bg.gz'%(sp_dir,config_info["abbv"])) and os.path.getsize('%s/stats_coverage/_%s_all_samples_union.bg.gz'%(sp_dir,config_info["abbv"])) > 0:
         print("Union bedfile already exists, will not recreate")
    
     else:
         #Create and submit file for union bedgraph job        
-        union_sbatch_file = union_coverage_sbatch(sp_dir,config_info["abbv"],sample_bedgraph_file_list,sample_names_bedgraph_files)
+        union_sbatch_file = union_coverage_sbatch(sp_dir,config_info["abbv"],sample_bedgraph_file_list,sample_names_bedgraph_file_list)
         union_job_id = sbatch_submit(union_sbatch_file,memory=8,timelimit=8)
         sleep(30)
 
@@ -464,11 +465,12 @@ def main():
    
     else:    
 
-        union_cov_filename = '%s/stats_coverage/_%s_all_samples_union.bg'%(sp_dir, config_info["abbv"])
+        union_cov_filename = '%s/stats_coverage/_%s_all_samples_union.bg.gz'%(sp_dir, config_info["abbv"])
         summary_bedgraph = open('%s/stats_coverage/_%s_all_samples_summed_cov.bg'%(sp_dir,config_info["abbv"]), 'w')
     
-        union_cov_file = open(union_cov_filename,'r')
+        union_cov_file = gzip.open(union_cov_filename,'r')
         for line in union_cov_file:
+            line = line.decode()
             if line[0:5] != 'chrom':
                 summed_cov = compute_coverage_sum(line)
                 #Returns [chrom,start,end,interval_length,summed_coverage]

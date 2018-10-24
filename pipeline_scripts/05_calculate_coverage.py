@@ -552,6 +552,19 @@ def main():
     clean_cov_bedfile.close()
     low_cov_bedfile.close()
     high_cov_bedfile.close()
+    
+    proc = Popen('bedtools merge -i %s/stats_coverage/_%s_clean_coverage_sites.bed > %s/stats_coverage/_%s_clean_coverage_sites_merged.bed'%(sp_dir,config_info["abbv"]), shell=True,stdout=PIPE,stderr=PIPE)
+    stdout,stderr=proc.communicate()
+    if proc.returncode != 0:
+        raise Exception('Error running bedtools clean merge: %s'%stderr)
+    proc = Popen('bedtools merge -i %s/stats_coverage/_%s_too_low__coverage_sites.bed > %s/stats_coverage/_%s_too_low_coverage_sites_merged.bed'%(sp_dir,config_info["abbv"]), shell=True,stdout=PIPE,stderr=PIPE)
+    stdout,stderr=proc.communicate()
+    if proc.returncode != 0:
+        raise Exception('Error running bedtools too low merge: %s'%stderr))
+    proc = Popen('bedtools merge -i %s/stats_coverage/_%s_too_high_coverage_sites.bed > %s/stats_coverage/_%s_too_high_coverage_sites_merged.bed'%(sp_dir,config_info["abbv"]), shell=True,stdout=PIPE,stderr=PIPE)
+    stdout,stderr=proc.communicate()
+    if proc.returncode != 0:
+        raise Exception('Error running bedtools too high merge: %s'%stderr)
 
     now = datetime.datetime.now()
     print('Finished script 05: %s'%now)

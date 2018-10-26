@@ -320,7 +320,7 @@ def union_coverage_sbatch(sp_dir,sp_abbr,sample_bedgraph_file_list,sample_names_
     final_cmd = "\n\n".join(cmd_list)
 
 #Format sbatch script
-    sample_coverage_script = slurm_script.format(partition="shared",time="0-12:00",mem="8000",cores="1",nodes="1",jobid="genomecov",sp_dir=sp_dir,cmd=final_cmd)
+    sample_coverage_script = slurm_script.format(partition="shared",time="3-00:00",mem="8000",cores="1",nodes="1",jobid="genomecov",sp_dir=sp_dir,cmd=final_cmd)
     out_filename = "%s/scripts/08_union_coverage_bedgraph_all_samples.sbatch"%(sp_dir)
     out_file = open(out_filename,"w")
     out_file.write(sample_coverage_script)
@@ -338,8 +338,8 @@ def compute_coverage_sum(union_cov_line):
     end = union_cov_list[2]
     interval_length = int(end) - int(start)
     
-    #Turn coverage into integers, sum
-    cov_list = [int(i) for i in union_cov_list[3:]]
+    #Turn coverage into floats (integers gave problems with e6, etc), sum
+    cov_list = [float(i) for i in union_cov_list[3:]]
     summed_coverage = sum(cov_list)
     
     return([chrom,start,end,interval_length,summed_coverage])

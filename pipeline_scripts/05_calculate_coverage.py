@@ -440,7 +440,7 @@ def main():
     else:
         #Create and submit file for union bedgraph job        
         union_sbatch_file = union_coverage_sbatch(sp_dir,config_info["abbv"],sample_bedgraph_file_list,sample_names_bedgraph_file_list)
-        union_job_id = sbatch_submit(union_sbatch_file,memory=8,timelimit=8)
+        union_job_id = sbatch_submit(union_sbatch_file,memory=8,timelimit=72)
         sleep(30)
 
         #Only check on union job if actually submitted. 
@@ -537,11 +537,11 @@ def main():
     for line in summary_bedgraph:
         line = line.strip()
         split_line = line.split()
-        if int(split_line[3]) > lower_lim_cov and int(split_line[3]) < upper_lim_cov:
+        if float(split_line[3]) > lower_lim_cov and float(split_line[3]) < upper_lim_cov:
             clean_cov_bedfile.write('%s\t%s\t%s\n'%(split_line[0],split_line[1],split_line[2]))
-        elif int(split_line[3]) < lower_lim_cov:
+        elif float(split_line[3]) < lower_lim_cov:
             low_cov_bedfile.write('%s\t%s\t%s\t%s\n'%(split_line[0],split_line[1],split_line[2],split_line[3]))
-        elif int(split_line[3]) > upper_lim_cov:
+        elif float(split_line[3]) > upper_lim_cov:
             high_cov_bedfile.write('%s\t%s\t%s\t%s\n'%(split_line[0],split_line[1],split_line[2],split_line[3]))
         else:
             print("Something wrong with coverage calculation")
@@ -553,15 +553,15 @@ def main():
     low_cov_bedfile.close()
     high_cov_bedfile.close()
     
-    proc = Popen('bedtools merge -i %s/stats_coverage/_%s_clean_coverage_sites.bed > %s/stats_coverage/_%s_clean_coverage_sites_merged.bed'%(sp_dir,config_info["abbv"]), shell=True,stdout=PIPE,stderr=PIPE)
+    proc = Popen('bedtools merge -i %s/stats_coverage/_%s_clean_coverage_sites.bed > %s/stats_coverage/_%s_clean_coverage_sites_merged.bed'%(sp_dir,config_info["abbv"],sp_dir,config_info["abbv"]), shell=True,stdout=PIPE,stderr=PIPE)
     stdout,stderr=proc.communicate()
     if proc.returncode != 0:
         print('Error running bedtools clean merge: %s'%stderr)
-    proc = Popen('bedtools merge -i %s/stats_coverage/_%s_too_low__coverage_sites.bed > %s/stats_coverage/_%s_too_low_coverage_sites_merged.bed'%(sp_dir,config_info["abbv"]), shell=True,stdout=PIPE,stderr=PIPE)
+    proc = Popen('bedtools merge -i %s/stats_coverage/_%s_too_low__coverage_sites.bed > %s/stats_coverage/_%s_too_low_coverage_sites_merged.bed'%(sp_dir,config_info["abbv"],sp_dir,config_info["abbv"]), shell=True,stdout=PIPE,stderr=PIPE)
     stdout,stderr=proc.communicate()
     if proc.returncode != 0:
         print('Error running bedtools too low merge: %s'%stderr)
-    proc = Popen('bedtools merge -i %s/stats_coverage/_%s_too_high_coverage_sites.bed > %s/stats_coverage/_%s_too_high_coverage_sites_merged.bed'%(sp_dir,config_info["abbv"]), shell=True,stdout=PIPE,stderr=PIPE)
+    proc = Popen('bedtools merge -i %s/stats_coverage/_%s_too_high_coverage_sites.bed > %s/stats_coverage/_%s_too_high_coverage_sites_merged.bed'%(sp_dir,config_info["abbv"],sp_dir,config_info["abbv"]), shell=True,stdout=PIPE,stderr=PIPE)
     stdout,stderr=proc.communicate()
     if proc.returncode != 0:
         print('Error running bedtools too high merge: %s'%stderr)

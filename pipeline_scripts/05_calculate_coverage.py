@@ -538,7 +538,7 @@ def main():
     for line in summary_bedgraph:
         line = line.strip()
         split_line = line.split()
-        if float(split_line[3]) > lower_lim_cov and float(split_line[3]) < upper_lim_cov:
+        if float(split_line[3]) >= lower_lim_cov and float(split_line[3]) <= upper_lim_cov:
             clean_cov_bedfile.write('%s\t%s\t%s\n'%(split_line[0],split_line[1],split_line[2]))
         elif float(split_line[3]) < lower_lim_cov:
             low_cov_bedfile.write('%s\t%s\t%s\t%s\n'%(split_line[0],split_line[1],split_line[2],split_line[3]))

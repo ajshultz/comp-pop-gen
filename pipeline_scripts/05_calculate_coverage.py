@@ -534,6 +534,7 @@ def main():
     clean_cov_bedfile = open('%s/stats_coverage/_%s_clean_coverage_sites.bed'%(sp_dir,config_info["abbv"]),'w')
     low_cov_bedfile = open('%s/stats_coverage/_%s_too_low_coverage_sites.bed'%(sp_dir,config_info["abbv"]),'w')
     high_cov_bedfile = open('%s/stats_coverage/_%s_too_high_coverage_sites.bed'%(sp_dir,config_info["abbv"]),'w')
+    problem_bedfile = open('%s/stats_coverage/_%s_error_coverage_sites.bed'%(sp_dir,config_info["abbv"]),'w')
     for line in summary_bedgraph:
         line = line.strip()
         split_line = line.split()
@@ -544,7 +545,7 @@ def main():
         elif float(split_line[3]) > upper_lim_cov:
             high_cov_bedfile.write('%s\t%s\t%s\t%s\n'%(split_line[0],split_line[1],split_line[2],split_line[3]))
         else:
-            print("Something wrong with coverage calculation")
+            problem_bedfile.write('%s\t%s\t%s\t%s\n'%(split_line[0],split_line[1],split_line[2],split_line[3]))
 
 
     summary_bedgraph.close()
@@ -552,12 +553,13 @@ def main():
     clean_cov_bedfile.close()
     low_cov_bedfile.close()
     high_cov_bedfile.close()
+    problem_bedfile.close()
     
     proc = Popen('bedtools merge -i %s/stats_coverage/_%s_clean_coverage_sites.bed > %s/stats_coverage/_%s_clean_coverage_sites_merged.bed'%(sp_dir,config_info["abbv"],sp_dir,config_info["abbv"]), shell=True,stdout=PIPE,stderr=PIPE)
     stdout,stderr=proc.communicate()
     if proc.returncode != 0:
         print('Error running bedtools clean merge: %s'%stderr)
-    proc = Popen('bedtools merge -i %s/stats_coverage/_%s_too_low__coverage_sites.bed > %s/stats_coverage/_%s_too_low_coverage_sites_merged.bed'%(sp_dir,config_info["abbv"],sp_dir,config_info["abbv"]), shell=True,stdout=PIPE,stderr=PIPE)
+    proc = Popen('bedtools merge -i %s/stats_coverage/_%s_too_low_coverage_sites.bed > %s/stats_coverage/_%s_too_low_coverage_sites_merged.bed'%(sp_dir,config_info["abbv"],sp_dir,config_info["abbv"]), shell=True,stdout=PIPE,stderr=PIPE)
     stdout,stderr=proc.communicate()
     if proc.returncode != 0:
         print('Error running bedtools too low merge: %s'%stderr)

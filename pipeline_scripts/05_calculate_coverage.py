@@ -339,16 +339,14 @@ def sum_coverage_sbatch(sp_dir,sp_abbr):
     #run python script to sum, create histogram if missing, and create clean sites, too high sites, and too low sites bedfiles
     cmd_2 = 'python ../comp-pop-gen/pipeline_scripts/05_01_sum_coverage_subscript.py --sp_dir %s --sp_abbr %s'%(sp_dir,sp_abbr)
     
-    #merge all bedgraphs
-    cmd_3 = 'bedtools merge -i %s/stats_coverage/_%s_clean_coverage_sites.bed > %s/stats_coverage/_%s_clean_coverage_sites_merged.bed'%(sp_dir,sp_abbr,sp_dir,sp_abbr)
+    #sort and merge all bedgraphs
+    cmd_3 = 'sort -k 1,1 -k2,2n %s/stats_coverage/_%s_clean_coverage_sites.bed | bedtools merge -i stdin > %s/stats_coverage/_%s_clean_coverage_sites_merged.bed'%(sp_dir,sp_abbr,sp_dir,sp_abbr)
     
-    cmd_4 = 'bedtools merge -i %s/stats_coverage/_%s_too_low_coverage_sites.bed > %s/stats_coverage/_%s_too_low_coverage_sites_merged.bed'%(sp_dir,sp_abbr,sp_dir,sp_abbr)
+    cmd_4 = 'sort -k 1,1 -k2,2n %s/stats_coverage/_%s_too_low_coverage_sites.bed | bedtools merge -i stdin > %s/stats_coverage/_%s_too_low_coverage_sites_merged.bed'%(sp_dir,sp_abbr,sp_dir,sp_abbr)
     
-    cmd_5 = 'bedtools merge -i %s/stats_coverage/_%s_too_high_coverage_sites.bed > %s/stats_coverage/_%s_too_high_coverage_sites_merged.bed'%(sp_dir,sp_abbr,sp_dir,sp_abbr)
-    
-    cmd_6 = 'pwd'
+    cmd_5 = 'sort -k 1,1 -k2,2n %s/stats_coverage/_%s_too_high_coverage_sites.bed | bedtools merge -i stdin > %s/stats_coverage/_%s_too_high_coverage_sites_merged.bed'%(sp_dir,sp_abbr,sp_dir,sp_abbr)
 
-    cmd_list = [cmd_1,cmd_2,cmd_3,cmd_4,cmd_5,cmd_6]
+    cmd_list = [cmd_1,cmd_2,cmd_3,cmd_4,cmd_5]
 
     final_cmd = "\n\n".join(cmd_list)
 
@@ -435,7 +433,7 @@ def main():
                 failed_samples.append(all_jobids[job])
 
 
-    print("Now computing whole-genome coverage bedgraph")
+    print("Now computing whole-genome coverage bedgraph\n")
     
     ########## Create union bedgraph with all sample coverages included
     #Make a list of all sample bedgraphs to include in genome coverage calculations. Iterates through samples names, makes sure coverage bedgraph files exist (if not, skips sample), and that sample completed above command successfully.
@@ -470,6 +468,14 @@ def main():
             union_job_completion_status = jobid_status(union_job_id,start_date)
             if union_job_completion_status != 'COMPLETED':
                 sys.exit("There was a problem creating the union bedgraph file. The job exited with status %s. Please diagnose and fix before moving on"%union_job_completion_status)
+            
+            #If job successfully completed, union gzipped file exists and has a size > 0, remove all sample bedgraphs if they are still present
+            else:
+                if os.path.isfile('%s/stats_coverage/_%s_all_samples_union.bg.gz'%(sp_dir,config_info["abbv"])) and os.path.getsize('%s/stats_coverage/_%s_all_samples_union.bg.gz'%(sp_dir,config_info["abbv"])) > 0:
+                    for sample in config_info["sample_dict"]:
+                        genome_cov_filename = '%s/stats_coverage/%s.bg'%(sp_dir,sample)
+                        if os.path.isfile(genome_cov_filename):
+                            proc = Popen('rm %s'%genome_cov_filename,shell=True)
    
    #Create and submit job to create bedgraph from sum across all sample coverages, compute median, then create clean sites bedgraph, too high sites bedgraph, and too low sites bedgraph
    
@@ -487,7 +493,22 @@ def main():
         sum_job_completion_status = jobid_status(sum_job_id,start_date)
         if sum_job_completion_status != 'COMPLETED':
             sys.exit("There was a problem creating the summed coverage bedgraph file. The job exited with status %s. Please diagnose and fix before moving on"%sum_job_completion_status)
+        
+        else:
+            #If job err file is empty, and all merged bedfiles exist, removed unmerged bedfiles and summed bedgraph
+            if os.path.isfile('%s/stats_coverage/_%s_clean_coverage_sites_merged.bed'%(sp_dir, config_info["abbv"])) and os.path.isfile('%s/stats_coverage/_%s_too_high_coverage_sites_merged.bed'%(sp_dir, config_info["abbv"])) and os.path.isfile('%s/stats_coverage/_%s_too_low_coverage_sites_merged.bed'%(sp_dir, config_info["abbv"])) and os.path.getsize('%s/logs/sumcov_%d.err'%(sp_dir,sum_job_id)) < 1:
+                proc = Popen('%s/stats_coverage/_%s_clean_coverage_sites.bed'%(sp_dir, config_info["abbv"]),shell=True,stdout=PIPE,stderr=PIPE)
+                stdout,stderr = proc.communicate()
+                proc = Popen('%s/stats_coverage/_%s_too_high_coverage_sites.bed'%(sp_dir, config_info["abbv"]),shell=True,stdout=PIPE,stderr=PIPE)
+                stdout,stderr = proc.communicate()
+                proc = Popen('%s/stats_coverage/_%s_too_low_coverage_sites.bed'%(sp_dir, config_info["abbv"]),shell=True,stdout=PIPE,stderr=PIPE)
+                stdout,stderr = proc.communicate()
+                proc = Popen('%s/stats_coverage/_%s_all_samples_summed_cov.bg'%(sp_dir, config_info["abbv"]),shell=True,stdout=PIPE,stderr=PIPE)
+                stdout,stderr = proc.communicate()
    
+    #Remove unnecessary files:
+    
+    
                 
     now = datetime.datetime.now()
     print('Finished script 05: %s'%now)

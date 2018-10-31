@@ -321,7 +321,7 @@ def union_coverage_sbatch(sp_dir,sp_abbr,sample_bedgraph_file_list,sample_names_
     final_cmd = "\n\n".join(cmd_list)
 
 #Format sbatch script
-    sample_coverage_script = slurm_script.format(partition="shared",time="3-00:00",mem="8000",cores="1",nodes="1",jobid="genomecov",sp_dir=sp_dir,cmd=final_cmd)
+    sample_coverage_script = slurm_script.format(partition="shared",cores="1",nodes="1",jobid="genomecov",sp_dir=sp_dir,cmd=final_cmd)
     out_filename = "%s/scripts/08_union_coverage_bedgraph_all_samples.sbatch"%(sp_dir)
     out_file = open(out_filename,"w")
     out_file.write(sample_coverage_script)
@@ -334,7 +334,7 @@ def sum_coverage_sbatch(sp_dir,sp_abbr):
     slurm_script = script_create()
      
     #Load modules and get versions for all programs used
-    cmd_1 = 'module load bedtools2/2.26.0-fasrc01\nmodule load module load Anaconda/5.0.1-fasrc01\nsource activate pipeline'
+    cmd_1 = 'module load bedtools2/2.26.0-fasrc01\nmodule load Anaconda/5.0.1-fasrc01\nsource activate pipeline'
     
     #run python script to sum, create histogram if missing, and create clean sites, too high sites, and too low sites bedfiles
     cmd_2 = 'python ../comp_pop_gen/pipeline_scripts/05_01_sum_coverage_subscript.py --sp_dir %s --sp_abbr %s'%(sp_dir,sp_abbr)
@@ -345,13 +345,15 @@ def sum_coverage_sbatch(sp_dir,sp_abbr):
     cmd_4 = 'bedtools merge -i %s/stats_coverage/_%s_too_low_coverage_sites.bed > %s/stats_coverage/_%s_too_low_coverage_sites_merged.bed'%(sp_dir,sp_abbr,sp_dir,sp_abbr)
     
     cmd_5 = 'bedtools merge -i %s/stats_coverage/_%s_too_high_coverage_sites.bed > %s/stats_coverage/_%s_too_high_coverage_sites_merged.bed'%(sp_dir,sp_abbr,sp_dir,sp_abbr)
+    
+    cmd_6 = 'pwd'
 
-    cmd_list = [cmd_1,cmd_2,cmd_3,cmd_4,cmd_5]
+    cmd_list = [cmd_1,cmd_2,cmd_3,cmd_4,cmd_5,cmd_6]
 
     final_cmd = "\n\n".join(cmd_list)
 
 #Format sbatch script
-    sample_coverage_script = slurm_script.format(partition="shared",time="0-24:00",mem="8000",cores="1",nodes="1",jobid="sumcov",sp_dir=sp_dir,cmd=final_cmd)
+    sample_coverage_script = slurm_script.format(partition="shared",cores="1",nodes="1",jobid="sumcov",sp_dir=sp_dir,cmd=final_cmd)
     out_filename = "%s/scripts/08_sum_coverage_clean_bedgraph.sbatch"%(sp_dir)
     out_file = open(out_filename,"w")
     out_file.write(sample_coverage_script)

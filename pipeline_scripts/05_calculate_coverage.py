@@ -489,10 +489,10 @@ def main():
    
    #Create and submit job to create bedgraph from sum across all sample coverages, compute median, then create clean sites bedgraph, too high sites bedgraph, and too low sites bedgraph
    
-   sum_coverage_sbatch_file = sum_coverage_sbatch(sp_dir,config_info["abbv"])
-   sum_job_id = sbatch_submit(sum_coverage_sbatch_file,memory=8,timelimit=72)
-   sleep(30)
-   
+    sum_coverage_sbatch_file = sum_coverage_sbatch(sp_dir,config_info["abbv"])
+    sum_job_id = sbatch_submit(sum_coverage_sbatch_file,memory=8,timelimit=72)
+    sleep(30)
+    
         if sum_job_id is not None: 
             dones = ['COMPLETED','CANCELLED','FAILED','TIMEOUT','PREEMPTED','NODE_FAIL']
             #Check job id status of sum_job_id job. If not in one of the 'done' job status categories, wait 30 seconds and check again.

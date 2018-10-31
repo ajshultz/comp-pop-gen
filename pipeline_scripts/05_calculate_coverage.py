@@ -493,16 +493,16 @@ def main():
     sum_job_id = sbatch_submit(sum_coverage_sbatch_file,memory=8,timelimit=72)
     sleep(30)
     
-        if sum_job_id is not None: 
-            dones = ['COMPLETED','CANCELLED','FAILED','TIMEOUT','PREEMPTED','NODE_FAIL']
-            #Check job id status of sum_job_id job. If not in one of the 'done' job status categories, wait 30 seconds and check again.
-            while jobid_status(sum_job_id,start_date) not in dones:
-                sleep(30)
-    
-            #Check to make sure job completed, and that all necessary files are present. If not, exit and give information.
-            sum_job_completion_status = jobid_status(sum_job_id,start_date)
-            if sum_job_completion_status != 'COMPLETED':
-                sys.exit("There was a problem creating the summed coverage bedgraph file. The job exited with status %s. Please diagnose and fix before moving on"%sum_job_completion_status)
+    if sum_job_id is not None: 
+        dones = ['COMPLETED','CANCELLED','FAILED','TIMEOUT','PREEMPTED','NODE_FAIL']
+        #Check job id status of sum_job_id job. If not in one of the 'done' job status categories, wait 30 seconds and check again.
+        while jobid_status(sum_job_id,start_date) not in dones:
+            sleep(30)
+
+        #Check to make sure job completed, and that all necessary files are present. If not, exit and give information.
+        sum_job_completion_status = jobid_status(sum_job_id,start_date)
+        if sum_job_completion_status != 'COMPLETED':
+            sys.exit("There was a problem creating the summed coverage bedgraph file. The job exited with status %s. Please diagnose and fix before moving on"%sum_job_completion_status)
    
             
    '''         

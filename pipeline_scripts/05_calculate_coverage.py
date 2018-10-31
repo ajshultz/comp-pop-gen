@@ -337,7 +337,7 @@ def sum_coverage_sbatch(sp_dir,sp_abbr):
     cmd_1 = 'module load bedtools2/2.26.0-fasrc01\nmodule load Anaconda/5.0.1-fasrc01\nsource activate pipeline'
     
     #run python script to sum, create histogram if missing, and create clean sites, too high sites, and too low sites bedfiles
-    cmd_2 = 'python ../comp_pop_gen/pipeline_scripts/05_01_sum_coverage_subscript.py --sp_dir %s --sp_abbr %s'%(sp_dir,sp_abbr)
+    cmd_2 = 'python ../comp-pop-gen/pipeline_scripts/05_01_sum_coverage_subscript.py --sp_dir %s --sp_abbr %s'%(sp_dir,sp_abbr)
     
     #merge all bedgraphs
     cmd_3 = 'bedtools merge -i %s/stats_coverage/_%s_clean_coverage_sites.bed > %s/stats_coverage/_%s_clean_coverage_sites_merged.bed'%(sp_dir,sp_abbr,sp_dir,sp_abbr)

@@ -505,7 +505,7 @@ def main():
             sys.exit("There was a problem creating the summed coverage bedgraph file. The job exited with status %s. Please diagnose and fix before moving on"%sum_job_completion_status)
    
             
-   '''         
+    '''         
     #Read through resulting bedgraph file, create new bedgraph from sum across all sample coverages, and compute median
     #Dictionary to create histogram as we iterate each line
     coverage_histogram = {}    

@@ -297,7 +297,8 @@ def sample_coverage_sbatch(sp_dir,sp_abbr,sample):
 
     else:
         print('No sorted dedup file for %s, cannot compute coverage bedgraph.'%(sample))
-        
+
+
         
 #Create an sbatch file for a given set of samples to create genome coverage graphs with bedtools - will use deduplicated BAM file and will write results to stats_coverage
 
@@ -326,6 +327,37 @@ def union_coverage_sbatch(sp_dir,sp_abbr,sample_bedgraph_file_list,sample_names_
     out_file.write(sample_coverage_script)
     out_file.close
     return(out_filename)
+
+
+#Takes in species directory and abbreviation, calls supplemental python script that will be run on cluster  ######Note that this is using my own python environment, might want to make universal for others in future.
+def sum_coverage_sbatch(sp_dir,sp_abbr):
+    slurm_script = script_create()
+     
+    #Load modules and get versions for all programs used
+    cmd_1 = 'module load bedtools2/2.26.0-fasrc01\nmodule load module load Anaconda/5.0.1-fasrc01\nsource activate pipeline'
+    
+    #run python script to sum, create histogram if missing, and create clean sites, too high sites, and too low sites bedfiles
+    cmd_2 = 'python ../comp_pop_gen/pipeline_scripts/05_01_sum_coverage_subscript.py --sp_dir %s --sp_abbr %s'%(sp_dir,sp_abbr)
+    
+    #merge all bedgraphs
+    cmd_3 = 'bedtools merge -i %s/stats_coverage/_%s_clean_coverage_sites.bed > %s/stats_coverage/_%s_clean_coverage_sites_merged.bed'%(sp_dir,sp_abbr,sp_dir,sp_abbr)
+    
+    cmd_4 = 'bedtools merge -i %s/stats_coverage/_%s_too_low_coverage_sites.bed > %s/stats_coverage/_%s_too_low_coverage_sites_merged.bed'%(sp_dir,sp_abbr,sp_dir,sp_abbr)
+    
+    cmd_5 = 'bedtools merge -i %s/stats_coverage/_%s_too_high_coverage_sites.bed > %s/stats_coverage/_%s_too_high_coverage_sites_merged.bed'%(sp_dir,sp_abbr,sp_dir,sp_abbr)
+
+    cmd_list = [cmd_1,cmd_2,cmd_3,cmd_4,cmd_5]
+
+    final_cmd = "\n\n".join(cmd_list)
+
+#Format sbatch script
+    sample_coverage_script = slurm_script.format(partition="shared",time="0-24:00",mem="8000",cores="1",nodes="1",jobid="sumcov",sp_dir=sp_dir,cmd=final_cmd)
+    out_filename = "%s/scripts/08_sum_coverage_clean_bedgraph.sbatch"%(sp_dir)
+    out_file = open(out_filename,"w")
+    out_file.write(sample_coverage_script)
+    out_file.close
+    return(out_filename)
+             
     
 #Takes in one line from a union coverage file, and returns a list with the [chromosome,start,end,interval_length,summed_coverage].
 def compute_coverage_sum(union_cov_line):
@@ -454,8 +486,26 @@ def main():
             union_job_completion_status = jobid_status(union_job_id,start_date)
             if union_job_completion_status != 'COMPLETED':
                 sys.exit("There was a problem creating the union bedgraph file. The job exited with status %s. Please diagnose and fix before moving on"%union_job_completion_status)
+   
+   #Create and submit job to create bedgraph from sum across all sample coverages, compute median, then create clean sites bedgraph, too high sites bedgraph, and too low sites bedgraph
+   
+   sum_coverage_sbatch_file = sum_coverage_sbatch(sp_dir,config_info["abbv"])
+   sum_job_id = sbatch_submit(sum_coverage_sbatch_file,memory=8,timelimit=72)
+   sleep(30)
+   
+        if sum_job_id is not None: 
+            dones = ['COMPLETED','CANCELLED','FAILED','TIMEOUT','PREEMPTED','NODE_FAIL']
+            #Check job id status of sum_job_id job. If not in one of the 'done' job status categories, wait 30 seconds and check again.
+            while jobid_status(sum_job_id,start_date) not in dones:
+                sleep(30)
+    
+            #Check to make sure job completed, and that all necessary files are present. If not, exit and give information.
+            sum_job_completion_status = jobid_status(sum_job_id,start_date)
+            if sum_job_completion_status != 'COMPLETED':
+                sys.exit("There was a problem creating the summed coverage bedgraph file. The job exited with status %s. Please diagnose and fix before moving on"%sum_job_completion_status)
+   
             
-            
+   '''         
     #Read through resulting bedgraph file, create new bedgraph from sum across all sample coverages, and compute median
     #Dictionary to create histogram as we iterate each line
     coverage_histogram = {}    
@@ -568,6 +618,8 @@ def main():
     if proc.returncode != 0:
         print('Error running bedtools too high merge: %s'%stderr)
 
+    '''
+    
     now = datetime.datetime.now()
     print('Finished script 05: %s'%now)
 

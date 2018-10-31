@@ -18,6 +18,25 @@ import numpy as np
 #sp_abbr - make abbreviation
 
 
+#Takes in one line from a union coverage file, and returns a list with the [chromosome,start,end,interval_length,summed_coverage].
+def compute_coverage_sum(union_cov_line):
+    union_cov_line = union_cov_line.strip()
+    union_cov_list = union_cov_line.split()
+    
+    #Grab positional info, calculate length of interval
+    chrom = union_cov_list[0]
+    start = union_cov_list[1]
+    end = union_cov_list[2]
+    interval_length = int(end) - int(start)
+    
+    #Turn coverage into floats (integers gave problems with e6, etc), sum
+    cov_list = [float(i) for i in union_cov_list[3:]]
+    summed_coverage = sum(cov_list)
+    
+    return([chrom,start,end,interval_length,summed_coverage])
+
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--sp_dir", help="directory for that species")

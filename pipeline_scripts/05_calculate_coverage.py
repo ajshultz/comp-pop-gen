@@ -360,7 +360,7 @@ def sum_coverage_sbatch(sp_dir,sp_abbr):
     out_file.close
     return(out_filename)
              
-    
+    '''
 #Takes in one line from a union coverage file, and returns a list with the [chromosome,start,end,interval_length,summed_coverage].
 def compute_coverage_sum(union_cov_line):
     union_cov_line = union_cov_line.strip()
@@ -377,8 +377,8 @@ def compute_coverage_sum(union_cov_line):
     summed_coverage = sum(cov_list)
     
     return([chrom,start,end,interval_length,summed_coverage])
-
-
+    '''
+    
 def main():
     #Get config file from arguments
     parser = argparse.ArgumentParser()

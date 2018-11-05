@@ -495,8 +495,16 @@ def main():
             sys.exit("There was a problem creating the summed coverage bedgraph file. The job exited with status %s. Please diagnose and fix before moving on"%sum_job_completion_status)
         
         else:
+            print('%s/logs/sumcov_%s.err'%(sp_dir,sum_job_id))
+            print(sum_job_completion_status)
+            print('%s/stats_coverage/_%s_clean_coverage_sites_merged.bed'%(sp_dir, config_info["abbv"]))
+            print('%s/stats_coverage/_%s_too_high_coverage_sites_merged.bed'%(sp_dir, config_info["abbv"]))
+            print('%s/stats_coverage/_%s_too_low_coverage_sites_merged.bed'%(sp_dir, config_info["abbv"]))
+            print('%s/logs/sumcov_%s.err'%(sp_dir,sum_job_id))
+            print(os.path.getsize('%s/logs/sumcov_%s.err'%(sp_dir,sum_job_id)))
             #If job err file is empty, and all merged bedfiles exist, removed unmerged bedfiles and summed bedgraph
             if os.path.isfile('%s/stats_coverage/_%s_clean_coverage_sites_merged.bed'%(sp_dir, config_info["abbv"])) and os.path.isfile('%s/stats_coverage/_%s_too_high_coverage_sites_merged.bed'%(sp_dir, config_info["abbv"])) and os.path.isfile('%s/stats_coverage/_%s_too_low_coverage_sites_merged.bed'%(sp_dir, config_info["abbv"])) and os.path.getsize('%s/logs/sumcov_%s.err'%(sp_dir,sum_job_id)) < 1:
+                print("Passed all tests")
                 proc = Popen('%s/stats_coverage/_%s_clean_coverage_sites.bed'%(sp_dir, config_info["abbv"]),shell=True,stdout=PIPE,stderr=PIPE)
                 stdout,stderr = proc.communicate()
                 proc = Popen('%s/stats_coverage/_%s_too_high_coverage_sites.bed'%(sp_dir, config_info["abbv"]),shell=True,stdout=PIPE,stderr=PIPE)

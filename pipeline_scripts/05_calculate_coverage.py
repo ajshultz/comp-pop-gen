@@ -452,32 +452,48 @@ def main():
         print("Union bedfile already exists, will not recreate")
    
     else:
-        #Create and submit file for union bedgraph job        
-        union_sbatch_file = union_coverage_sbatch(sp_dir,config_info["abbv"],sample_bedgraph_file_list,sample_names_bedgraph_file_list)
-        union_job_id = sbatch_submit(union_sbatch_file,memory=8,timelimit=72)
-        sleep(30)
+        #if there is more than one sample, create and submit bedgraph job
+        if len(sample_bedgraph_file_list) > 1:
+            #Create and submit file for union bedgraph job        
+            union_sbatch_file = union_coverage_sbatch(sp_dir,config_info["abbv"],sample_bedgraph_file_list,sample_names_bedgraph_file_list)
+            union_job_id = sbatch_submit(union_sbatch_file,memory=8,timelimit=72)
+            sleep(30)
 
-        #Only check on union job if actually submitted. 
-        if union_job_id is not None: 
-            dones = ['COMPLETED','CANCELLED','FAILED','TIMEOUT','PREEMPTED','NODE_FAIL']
-            #Check job id status of union job. If not in one of the 'done' job status categories, wait 30 seconds and check again.
-            while jobid_status(union_job_id,start_date) not in dones:
-                sleep(30)
+            #Only check on union job if actually submitted. 
+            if union_job_id is not None: 
+                dones = ['COMPLETED','CANCELLED','FAILED','TIMEOUT','PREEMPTED','NODE_FAIL']
+                #Check job id status of union job. If not in one of the 'done' job status categories, wait 30 seconds and check again.
+                while jobid_status(union_job_id,start_date) not in dones:
+                    sleep(30)
     
-            #Check to make sure job completed, and that all necessary files are present. If not, exit and give information.
-            union_job_completion_status = jobid_status(union_job_id,start_date)
-            if union_job_completion_status != 'COMPLETED':
-                sys.exit("There was a problem creating the union bedgraph file. The job exited with status %s. Please diagnose and fix before moving on"%union_job_completion_status)
+                #Check to make sure job completed, and that all necessary files are present. If not, exit and give information.
+                union_job_completion_status = jobid_status(union_job_id,start_date)
+                if union_job_completion_status != 'COMPLETED':
+                    sys.exit("There was a problem creating the union bedgraph file. The job exited with status %s. Please diagnose and fix before moving on"%union_job_completion_status)
             
-            #If job successfully completed, union gzipped file exists and has a size > 0, remove all sample bedgraphs if they are still present
-            else:
-                if os.path.isfile('%s/stats_coverage/_%s_all_samples_union.bg.gz'%(sp_dir,config_info["abbv"])) and os.path.getsize('%s/stats_coverage/_%s_all_samples_union.bg.gz'%(sp_dir,config_info["abbv"])) > 0:
-                    for sample in config_info["sample_dict"]:
-                        genome_cov_filename = '%s/stats_coverage/%s.bg'%(sp_dir,sample)
-                        if os.path.isfile(genome_cov_filename):
-                            proc = Popen('rm %s'%genome_cov_filename,shell=True)
+                #If job successfully completed, union gzipped file exists and has a size > 0, remove all sample bedgraphs if they are still present
+                else:
+                    if os.path.isfile('%s/stats_coverage/_%s_all_samples_union.bg.gz'%(sp_dir,config_info["abbv"])) and os.path.getsize('%s/stats_coverage/_%s_all_samples_union.bg.gz'%(sp_dir,config_info["abbv"])) > 0:
+                        for sample in config_info["sample_dict"]:
+                            genome_cov_filename = '%s/stats_coverage/%s.bg'%(sp_dir,sample)
+                            if os.path.isfile(genome_cov_filename):
+                                proc = Popen('rm %s'%genome_cov_filename,shell=True)
+        else:
+            #If only one sample, create file with header, then just cat the bedgraph from that one sample.
+            #Create union header file for one sample
+            union_header_file = open('%s/stats_coverage/_%s_all_samples_union_header.bg'%(sp_dir,config_info["abbv"]), "w")
+            union_header_file.write('chrom\tstart\tend\t%s\n'%config_info["sample_dict"][0])
+            union_header_file.close()
+            
+            #Cat header file with bedgraph of that sample
+            proc = Popen('cat %s/stats_coverage/_%s_all_samples_union_header.bg %s/stats_coverage/%s.bg > %s/stats_coverage/_%s_all_samples_union.bg'%(sp_dir,config_info["abbv"],sp_dir,config_info["sample_dict"][0],sp_dir,config_info["abbv"]),shell=True,stdout=PIPE,stderr=PIPE)
+            stdout,stderr = proc.communicate()
+            proc = Popen('gzip %s/stats_coverage/_%s_all_samples_union.bg'%(sp_dir,config_info["abbv"]),shell=True,stdout=PIPE,stderr=PIPE)
+            stdout,stderr = proc.communicate()
+            
    
-   #Create and submit job to create bedgraph from sum across all sample coverages, compute median, then create clean sites bedgraph, too high sites bedgraph, and too low sites bedgraph
+   
+    #Create and submit job to create bedgraph from sum across all sample coverages, compute median, then create clean sites bedgraph, too high sites bedgraph, and too low sites bedgraph
    
     sum_coverage_sbatch_file = sum_coverage_sbatch(sp_dir,config_info["abbv"])
     sum_job_id = sbatch_submit(sum_coverage_sbatch_file,memory=8,timelimit=72)
@@ -495,6 +511,7 @@ def main():
             sys.exit("There was a problem creating the summed coverage bedgraph file. The job exited with status %s. Please diagnose and fix before moving on"%sum_job_completion_status)
         
         else:
+        #Remove unnecessary files:
             if os.path.isfile('%s/stats_coverage/_%s_clean_coverage_sites_merged.bed'%(sp_dir, config_info["abbv"])) and os.path.isfile('%s/stats_coverage/_%s_too_high_coverage_sites_merged.bed'%(sp_dir, config_info["abbv"])) and os.path.isfile('%s/stats_coverage/_%s_too_low_coverage_sites_merged.bed'%(sp_dir, config_info["abbv"])) and os.path.getsize('%s/logs/sumcov_%s.err'%(sp_dir,sum_job_id)) < 1:
                 print("Passed all tests")
                 proc = Popen('rm %s/stats_coverage/_%s_clean_coverage_sites.bed'%(sp_dir, config_info["abbv"]),shell=True,stdout=PIPE,stderr=PIPE)
@@ -508,7 +525,7 @@ def main():
             else:
                 print('Did not pass all tests to delete files, check if merged bed files exist, and whether %s/logs/sumcov_%s.err is empty'%(sp_dir,sum_job_id))
    
-    #Remove unnecessary files:
+   
     
     
                 

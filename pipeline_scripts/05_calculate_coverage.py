@@ -24,7 +24,7 @@ def extract_config(config_filename):
     sample_ena_dict = {}
     sample_local_dict = {}
     sample_dict = {}
-    
+
     for line in config_file:
         if line[0] == "#":
             pass
@@ -94,67 +94,67 @@ def extract_config(config_filename):
                 config_info["combine_gvcf_program"] = line[1]
             elif line[0] == "--BYPASS_INTERVAL":
                 config_info["bypass_interval"] = line[1]
-                
+
     config_file.close()
-    
+
     #Make sure all necessary inputs are present
     try:
         config_info["abbv"]
     except NameError:
         sys.exit("Oops, you forgot to specify a species abbreviation with --ABBV")
-    
+
     try:
         config_info["out_dir"]
     except NameError:
         config_info["out_dir"] = "."
-        
+
     if "genome_ncbi" not in config_info and "genome_local" not in config_info:
         sys.exit("Oops, you forgot to specify a reference genome!")
-        
+
     if len(config_info["sample_dict"]) == 0:
         sys.exit("Oops, you forgot to specify samples!")
-        
+
     if "het" not in config_info:
         config_info["het"] = "0.001"
         #print("No heterozygosity specified, using default human value (0.001)")
-    
+
     if "pipeline" not in config_info:
         config_info["pipeline"] = "lowcoverage"
         #print("No pipeline specified (highcoverage or lowcoverage), using lowcoverage.")
-        
+
     #if config_info["pipeline"] != "highcoverage" and config_info["pipeline"] != "lowcoverage":
         #sys.exit("Pipeline must be set to either 'highcoverage' or 'lowcoverage")
-    
+
     if "nintervals" not in config_info:
         config_info["nintervals"] = "10"
         #print("No specification for the number of intervals to analyze, using 10")
-    
+
     if "memory_hc" not in config_info:
         config_info["memory_hc"] = "8"
         #print("No specification of how much memory to use for HaplotypeCaller, using 8GB by default")
-    
+
     if "time_hc" not in config_info:
         config_info["time_hc"] = "12"
         #print("No specification of how much time to use for HaplotypeCaller, using 12 hours by default")
-    
+
     if "memory_gg" not in config_info:
         config_info["memory_gg"] = "8"
         #print("No specification of how much memory to use for GenotypeGVCF, using 8 GB by default")
-    
+
     if "time_gg" not in config_info:
         config_info["time_gg"] = "12"
         #print("No specification of how much time to use for GenotypeGVCF, using 12 hours by default")
-        
+
     if "combine_gvcf_program" not in config_info:
         config_info["combine_gvcf_program"] = "GenomicsDBImport"
         #print("No specification of which program to use to combine gvcf files, using GenomicsDBImport by default")
-        
+
     if "bypass_interval" not in config_info:
         config_info["bypass_interval"] = "FALSE"
         #print("BYPASS_INTERVAL set to FALSE, will require gvcfs from all samples for all intervals to proceed")
-    
-    
-    #Return objects    
+
+
+    #Return objects
     return(config_info)
 
 
@@ -170,7 +170,7 @@ def script_create():
     slurm_script = '''#!/bin/bash\n#SBATCH -p {partition}\n#SBATCH -n {cores}\n#SBATCH -N {nodes}\n#SBATCH -J {jobid}\n#SBATCH -o {sp_dir}/logs/{jobid}_%j.out\n#SBATCH -e {sp_dir}/logs/{jobid}_%j.err\n\n{cmd}
     '''
     return(slurm_script)
-    
+
 #Create generic slurm script for arrays (-o and -e for arrays)
 def array_script_create():
     slurm_script = '''#!/bin/bash\n#SBATCH -p {partition}\n#SBATCH -n {cores}\n#SBATCH -N {nodes}\n#SBATCH -J {jobid}\n#SBATCH -o {sp_dir}/logs/{jobid}_%A_%a.out\n#SBATCH -e {sp_dir}/logs/{jobid}_%A_%a.err\n\n{cmd}
@@ -205,8 +205,8 @@ def jobid_status(jobid,date):
         return("No Status")
     lines = stdout.split()
     return(lines[0].decode("utf-8","ignore"))
-    
-    
+
+
 #Check the status of all jobs, returns dictionary of jobid:status. Ignores jobs with ".ba+" and ".ex+" file extensions.
 def all_jobs_status(date):
     proc = Popen('sacct --format jobid,state --noheader -S %s'%(date),shell=True,stdout=PIPE,stderr=PIPE)
@@ -225,7 +225,7 @@ def all_jobs_status(date):
             if not re.search('.ba+',line[0]) and not re.search('.ex+',line[0]):
                 status_dict[line[0]]=line[1]
     return(status_dict)
-    
+
 #Count the number of pending jobs
 def num_pend_run(job_id_list,date):
     count = 0
@@ -241,17 +241,17 @@ def check_missing_gvcfs(arraystart,arrayend,sample_files,sample):
     #Check if file_ext is a string, if so, just test that one type
     for i in range(arraystart,arrayend+1):
         if "%s.%s.g.vcf.gz"%(sample,str(i)) not in sample_files or "%s.%s.g.vcf.gz.tbi"%(sample,str(i)) not in sample_files:
-            missing_ints.append(str(i))            
-    
+            missing_ints.append(str(i))
+
     return(missing_ints)
-    
+
 #Check for missing vcf interval files for a given sample in list of files. Will return a list of the missing intervals
 def check_missing_vcfs(arraystart,arrayend,vcf_files,sp_abbr):
     missing_ints = []
     #Check if file_ext is a string, if so, just test that one type
     for i in range(arraystart,arrayend+1):
         if "%s.%s.vcf.gz"%(sp_abbr,str(i)) not in vcf_files or "%s.%s.vcf.gz.tbi"%(sp_abbr,str(i)) not in vcf_files:
-            missing_ints.append(str(i))            
+            missing_ints.append(str(i))
     return(missing_ints)
 
 #Count number of intervals in split genome file
@@ -269,7 +269,7 @@ def count_intervals(nintervals,outputdir):
 
 def sample_coverage_sbatch(sp_dir,sp_abbr,sample):
     slurm_script = script_create()
-     
+
     #First check if dedup file is present, if it is, continue and if not print statement.
     dedup_sorted_filename = '%s/dedup/%s.dedup.sorted.bam'%(sp_dir,sample)
     genome_cov_filename = '%s/stats_coverage/%s.bg'%(sp_dir,sample)
@@ -277,7 +277,7 @@ def sample_coverage_sbatch(sp_dir,sp_abbr,sample):
 
         #Load modules and get versions for all programs used
         cmd_1 = 'module load bedtools2/2.26.0-fasrc01'
-    
+
         #Create bedgraph with bedtools of coverage (include regions with 0 coverage)
         cmd_2 = 'bedtools genomecov -bga -ibam %s/dedup/%s.dedup.sorted.bam -g %s/genome/%s.fa > %s/stats_coverage/%s.bg'%(sp_dir,sample,sp_dir,sp_abbr,sp_dir,sample)
 
@@ -299,12 +299,12 @@ def sample_coverage_sbatch(sp_dir,sp_abbr,sample):
         print('No sorted dedup file for %s, cannot compute coverage bedgraph.'%(sample))
 
 
-        
+
 #Create an sbatch file for a given set of samples to create genome coverage graphs with bedtools - will use deduplicated BAM file and will write results to stats_coverage
 
 def union_coverage_sbatch(sp_dir,sp_abbr,sample_bedgraph_file_list,sample_names_bedgraph_file_list):
     slurm_script = script_create()
-    
+
     sample_bedgraph_files = " ".join(sample_bedgraph_file_list)
     sample_names_bedgraph_files = " ".join(sample_names_bedgraph_file_list)
     #First check if dedup file is present, if it is, continue and if not print statement.
@@ -313,7 +313,7 @@ def union_coverage_sbatch(sp_dir,sp_abbr,sample_bedgraph_file_list,sample_names_
 
     #Create bedgraph with bedtools of coverage (include regions with 0 coverage)
     cmd_2 = 'bedtools unionbedg -header -empty -g %s/genome/%s.fa.fai -i %s -names %s > %s/stats_coverage/_%s_all_samples_union.bg'%(sp_dir,sp_abbr,sample_bedgraph_files,sample_names_bedgraph_files,sp_dir,sp_abbr)
-    
+
     cmd_3 = 'gzip %s/stats_coverage/_%s_all_samples_union.bg'%(sp_dir,sp_abbr)
 
     cmd_list = [cmd_1,cmd_2,cmd_3]
@@ -332,18 +332,18 @@ def union_coverage_sbatch(sp_dir,sp_abbr,sample_bedgraph_file_list,sample_names_
 #Takes in species directory and abbreviation, calls supplemental python script that will be run on cluster  ######Note that this is using my own python environment, might want to make universal for others in future.
 def sum_coverage_sbatch(sp_dir,sp_abbr):
     slurm_script = script_create()
-     
+
     #Load modules and get versions for all programs used
     cmd_1 = 'module load bedtools2/2.26.0-fasrc01\nmodule load Anaconda/5.0.1-fasrc01\nsource activate pipeline'
-    
+
     #run python script to sum, create histogram if missing, and create clean sites, too high sites, and too low sites bedfiles
     cmd_2 = 'python ../comp-pop-gen/pipeline_scripts/05_01_sum_coverage_subscript.py --sp_dir %s --sp_abbr %s'%(sp_dir,sp_abbr)
-    
+
     #sort and merge all bedgraphs
     cmd_3 = 'sort -k 1,1 -k2,2n %s/stats_coverage/_%s_clean_coverage_sites.bed | bedtools merge -i stdin > %s/stats_coverage/_%s_clean_coverage_sites_merged.bed'%(sp_dir,sp_abbr,sp_dir,sp_abbr)
-    
+
     cmd_4 = 'sort -k 1,1 -k2,2n %s/stats_coverage/_%s_too_low_coverage_sites.bed | bedtools merge -i stdin > %s/stats_coverage/_%s_too_low_coverage_sites_merged.bed'%(sp_dir,sp_abbr,sp_dir,sp_abbr)
-    
+
     cmd_5 = 'sort -k 1,1 -k2,2n %s/stats_coverage/_%s_too_high_coverage_sites.bed | bedtools merge -i stdin > %s/stats_coverage/_%s_too_high_coverage_sites_merged.bed'%(sp_dir,sp_abbr,sp_dir,sp_abbr)
 
     cmd_list = [cmd_1,cmd_2,cmd_3,cmd_4,cmd_5]
@@ -357,42 +357,42 @@ def sum_coverage_sbatch(sp_dir,sp_abbr):
     out_file.write(sample_coverage_script)
     out_file.close
     return(out_filename)
-             
-    
+
+
 def main():
     #Get config file from arguments
     parser = argparse.ArgumentParser()
     parser.add_argument("--config", help="config file specifying samples and genome for mapping",  required=True)
     args = parser.parse_args()
     config_filename = args.config
-    
+
     now = datetime.datetime.now()
     print('Staring work on script 05: %s'%now)
     start_date = now.strftime("%Y-%m-%d")
-    
+
     #Open config file and get attributes
     config_info = extract_config(config_filename)
 
     #####Check if working directories exist, if not creates them
     sp_dir = "%s/%s"%(config_info["out_dir"],config_info["abbv"])
-    
+
     print("\nOutput will be written to %s\n"%sp_dir)
-    
+
     logs_dir = "%s/logs"%(sp_dir)
     scripts_dir = "%s/scripts"%(sp_dir)
     genome_dir = "%s/genome"%(sp_dir)
     stats_dir = "%s/stats"%(sp_dir)
     dedup_dir = "%s/dedup"%(sp_dir)
     stats_coverage_dir = "%s/stats_coverage"%(sp_dir)
-    
-       
-    directory_create(sp_dir)    
+
+
+    directory_create(sp_dir)
     directory_create(logs_dir)
     directory_create(scripts_dir)
     directory_create(stats_coverage_dir)
 
-    
-    
+
+
     #Submit all jobs
     #Coverage_filenames is a dictionary with the sample as key and filename as value
     coverage_filenames = {}
@@ -425,7 +425,7 @@ def main():
                         completed_jobids[job] = job_statuses[job]
                         print("Job %s completed for sample %s"%(job,all_jobids[job]))
             sleep(30)
-    
+
         #After all jobs have finished, report which jobs failed, also add samples that failed to list to exclude from whole-genome calculations
         for job in completed_jobids:
             if completed_jobids[job] != "COMPLETED":
@@ -434,7 +434,7 @@ def main():
 
 
     print("Now computing whole-genome coverage bedgraph\n")
-    
+
     ########## Create union bedgraph with all sample coverages included
     #Make a list of all sample bedgraphs to include in genome coverage calculations. Iterates through samples names, makes sure coverage bedgraph files exist (if not, skips sample), and that sample completed above command successfully.
     sample_bedgraph_file_list = []
@@ -446,31 +446,31 @@ def main():
         elif os.path.isfile(genome_cov_filename) and os.path.getsize(genome_cov_filename) > 0:
             sample_bedgraph_file_list.append(genome_cov_filename)
             sample_names_bedgraph_file_list.append(sample)
-    
+
     #Checks if union bedgraph file exists - if so, skips creation.
     if os.path.isfile('%s/stats_coverage/_%s_all_samples_union.bg.gz'%(sp_dir,config_info["abbv"])) and os.path.getsize('%s/stats_coverage/_%s_all_samples_union.bg.gz'%(sp_dir,config_info["abbv"])) > 0:
         print("Union bedfile already exists, will not recreate")
-   
+
     else:
         #if there is more than one sample, create and submit bedgraph job
         if len(sample_bedgraph_file_list) > 1:
-            #Create and submit file for union bedgraph job        
+            #Create and submit file for union bedgraph job
             union_sbatch_file = union_coverage_sbatch(sp_dir,config_info["abbv"],sample_bedgraph_file_list,sample_names_bedgraph_file_list)
             union_job_id = sbatch_submit(union_sbatch_file,memory=8,timelimit=72)
             sleep(30)
 
-            #Only check on union job if actually submitted. 
-            if union_job_id is not None: 
+            #Only check on union job if actually submitted.
+            if union_job_id is not None:
                 dones = ['COMPLETED','CANCELLED','FAILED','TIMEOUT','PREEMPTED','NODE_FAIL']
                 #Check job id status of union job. If not in one of the 'done' job status categories, wait 30 seconds and check again.
                 while jobid_status(union_job_id,start_date) not in dones:
                     sleep(30)
-    
+
                 #Check to make sure job completed, and that all necessary files are present. If not, exit and give information.
                 union_job_completion_status = jobid_status(union_job_id,start_date)
                 if union_job_completion_status != 'COMPLETED':
                     sys.exit("There was a problem creating the union bedgraph file. The job exited with status %s. Please diagnose and fix before moving on"%union_job_completion_status)
-            
+
                 #If job successfully completed, union gzipped file exists and has a size > 0, remove all sample bedgraphs if they are still present
                 else:
                     if os.path.isfile('%s/stats_coverage/_%s_all_samples_union.bg.gz'%(sp_dir,config_info["abbv"])) and os.path.getsize('%s/stats_coverage/_%s_all_samples_union.bg.gz'%(sp_dir,config_info["abbv"])) > 0:
@@ -481,25 +481,26 @@ def main():
         else:
             #If only one sample, create file with header, then just cat the bedgraph from that one sample.
             #Create union header file for one sample
+            print(sample_names_bedgraph_file_list[0])
             union_header_file = open('%s/stats_coverage/_%s_all_samples_union_header.bg'%(sp_dir,config_info["abbv"]), "w")
-            union_header_file.write('chrom\tstart\tend\t%s\n'%config_info["sample_dict"][0])
+            union_header_file.write('chrom\tstart\tend\t%s\n'%(sample_names_bedgraph_file_list[0]))
             union_header_file.close()
-            
+
             #Cat header file with bedgraph of that sample
-            proc = Popen('cat %s/stats_coverage/_%s_all_samples_union_header.bg %s/stats_coverage/%s.bg > %s/stats_coverage/_%s_all_samples_union.bg'%(sp_dir,config_info["abbv"],sp_dir,config_info["sample_dict"][0],sp_dir,config_info["abbv"]),shell=True,stdout=PIPE,stderr=PIPE)
+            proc = Popen('cat %s/stats_coverage/_%s_all_samples_union_header.bg %s/stats_coverage/%s.bg > %s/stats_coverage/_%s_all_samples_union.bg'%(sp_dir,config_info["abbv"],sp_dir,sample_names_bedgraph_file_list[0],sp_dir,config_info["abbv"]),shell=True,stdout=PIPE,stderr=PIPE)
             stdout,stderr = proc.communicate()
             proc = Popen('gzip %s/stats_coverage/_%s_all_samples_union.bg'%(sp_dir,config_info["abbv"]),shell=True,stdout=PIPE,stderr=PIPE)
             stdout,stderr = proc.communicate()
-            
-   
-   
+
+
+
     #Create and submit job to create bedgraph from sum across all sample coverages, compute median, then create clean sites bedgraph, too high sites bedgraph, and too low sites bedgraph
-   
+
     sum_coverage_sbatch_file = sum_coverage_sbatch(sp_dir,config_info["abbv"])
     sum_job_id = sbatch_submit(sum_coverage_sbatch_file,memory=8,timelimit=72)
     sleep(30)
-    
-    if sum_job_id is not None: 
+
+    if sum_job_id is not None:
         dones = ['COMPLETED','CANCELLED','FAILED','TIMEOUT','PREEMPTED','NODE_FAIL']
         #Check job id status of sum_job_id job. If not in one of the 'done' job status categories, wait 30 seconds and check again.
         while jobid_status(sum_job_id,start_date) not in dones:
@@ -509,7 +510,7 @@ def main():
         sum_job_completion_status = jobid_status(sum_job_id,start_date)
         if sum_job_completion_status != 'COMPLETED':
             sys.exit("There was a problem creating the summed coverage bedgraph file. The job exited with status %s. Please diagnose and fix before moving on"%sum_job_completion_status)
-        
+
         else:
         #Remove unnecessary files:
             if os.path.isfile('%s/stats_coverage/_%s_clean_coverage_sites_merged.bed'%(sp_dir, config_info["abbv"])) and os.path.isfile('%s/stats_coverage/_%s_too_high_coverage_sites_merged.bed'%(sp_dir, config_info["abbv"])) and os.path.isfile('%s/stats_coverage/_%s_too_low_coverage_sites_merged.bed'%(sp_dir, config_info["abbv"])) and os.path.getsize('%s/logs/sumcov_%s.err'%(sp_dir,sum_job_id)) < 1:
@@ -524,11 +525,11 @@ def main():
                 stdout,stderr = proc.communicate()
             else:
                 print('Did not pass all tests to delete files, check if merged bed files exist, and whether %s/logs/sumcov_%s.err is empty'%(sp_dir,sum_job_id))
-   
-   
-    
-    
-                
+
+
+
+
+
     now = datetime.datetime.now()
     print('Finished script 05: %s'%now)
 

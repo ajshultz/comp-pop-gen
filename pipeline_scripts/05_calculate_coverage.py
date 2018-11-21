@@ -481,7 +481,6 @@ def main():
         else:
             #If only one sample, create file with header, then just cat the bedgraph from that one sample.
             #Create union header file for one sample
-            print(sample_names_bedgraph_file_list[0])
             union_header_file = open('%s/stats_coverage/_%s_all_samples_union_header.bg'%(sp_dir,config_info["abbv"]), "w")
             union_header_file.write('chrom\tstart\tend\t%s\n'%(sample_names_bedgraph_file_list[0]))
             union_header_file.close()
@@ -491,40 +490,56 @@ def main():
             stdout,stderr = proc.communicate()
             proc = Popen('gzip %s/stats_coverage/_%s_all_samples_union.bg'%(sp_dir,config_info["abbv"]),shell=True,stdout=PIPE,stderr=PIPE)
             stdout,stderr = proc.communicate()
+            
+            #Delete sample bedgraph and header file
+            proc = Popen('rm %s/stats_coverage/%s.bg'%(sp_dir,sample_names_bedgraph_file_list[0]),shell=True)
+            proc = Popen('rm _%s_all_samples_union_header.bg'%(sp_dir,config_info["abbv"]),shell=True)
 
 
 
-    #Create and submit job to create bedgraph from sum across all sample coverages, compute median, then create clean sites bedgraph, too high sites bedgraph, and too low sites bedgraph
+    #Create and submit job to create bedgraph from sum across all sample coverages, compute median, then create clean sites bedgraph, too high sites bedgraph, and too low sites bedgraph, but only if merged bed files don't already exist.
 
-    sum_coverage_sbatch_file = sum_coverage_sbatch(sp_dir,config_info["abbv"])
-    sum_job_id = sbatch_submit(sum_coverage_sbatch_file,memory=8,timelimit=72)
-    sleep(30)
+    if os.path.isfile('%s/stats_coverage/_%s_clean_coverage_sites_merged.bed'%(sp_dir, config_info["abbv"])) and os.path.isfile('%s/stats_coverage/_%s_too_high_coverage_sites_merged.bed'%(sp_dir, config_info["abbv"])) and os.path.isfile('%s/stats_coverage/_%s_too_low_coverage_sites_merged.bed'%(sp_dir, config_info["abbv"])) and os.path.getsize('%s/stats_coverage/_%s_clean_coverage_sites_merged.bed'%(sp_dir, config_info["abbv"])) > 10:
+        pass
+        
+    else:
+        sum_coverage_sbatch_file = sum_coverage_sbatch(sp_dir,config_info["abbv"])
+        sum_job_id = sbatch_submit(sum_coverage_sbatch_file,memory=8,timelimit=72)
+        sleep(30)
 
-    if sum_job_id is not None:
-        dones = ['COMPLETED','CANCELLED','FAILED','TIMEOUT','PREEMPTED','NODE_FAIL']
-        #Check job id status of sum_job_id job. If not in one of the 'done' job status categories, wait 30 seconds and check again.
-        while jobid_status(sum_job_id,start_date) not in dones:
-            sleep(30)
+        if sum_job_id is not None:
+            dones = ['COMPLETED','CANCELLED','FAILED','TIMEOUT','PREEMPTED','NODE_FAIL']
+            #Check job id status of sum_job_id job. If not in one of the 'done' job status categories, wait 30 seconds and check again.
+            while jobid_status(sum_job_id,start_date) not in dones:
+                sleep(30)
 
-        #Check to make sure job completed, and that all necessary files are present. If not, exit and give information.
-        sum_job_completion_status = jobid_status(sum_job_id,start_date)
-        if sum_job_completion_status != 'COMPLETED':
-            sys.exit("There was a problem creating the summed coverage bedgraph file. The job exited with status %s. Please diagnose and fix before moving on"%sum_job_completion_status)
-
-        else:
-        #Remove unnecessary files:
-            if os.path.isfile('%s/stats_coverage/_%s_clean_coverage_sites_merged.bed'%(sp_dir, config_info["abbv"])) and os.path.isfile('%s/stats_coverage/_%s_too_high_coverage_sites_merged.bed'%(sp_dir, config_info["abbv"])) and os.path.isfile('%s/stats_coverage/_%s_too_low_coverage_sites_merged.bed'%(sp_dir, config_info["abbv"])) and os.path.getsize('%s/logs/sumcov_%s.err'%(sp_dir,sum_job_id)) < 1:
-                print("Passed all tests")
-                proc = Popen('rm %s/stats_coverage/_%s_clean_coverage_sites.bed'%(sp_dir, config_info["abbv"]),shell=True,stdout=PIPE,stderr=PIPE)
-                stdout,stderr = proc.communicate()
-                proc = Popen('rm %s/stats_coverage/_%s_too_high_coverage_sites.bed'%(sp_dir, config_info["abbv"]),shell=True,stdout=PIPE,stderr=PIPE)
-                stdout,stderr = proc.communicate()
-                proc = Popen('rm %s/stats_coverage/_%s_too_low_coverage_sites.bed'%(sp_dir, config_info["abbv"]),shell=True,stdout=PIPE,stderr=PIPE)
-                stdout,stderr = proc.communicate()
-                proc = Popen('rm %s/stats_coverage/_%s_all_samples_summed_cov.bg'%(sp_dir, config_info["abbv"]),shell=True,stdout=PIPE,stderr=PIPE)
-                stdout,stderr = proc.communicate()
+            #Check to make sure job completed, and that all necessary files are present. If not, exit and give information.
+            sum_job_completion_status = jobid_status(sum_job_id,start_date)
+            if sum_job_completion_status != 'COMPLETED':
+                sys.exit("There was a problem creating the summed coverage bedgraph file. The job exited with status %s. Please diagnose and fix before moving on"%sum_job_completion_status)
+            
             else:
-                print('Did not pass all tests to delete files, check if merged bed files exist, and whether %s/logs/sumcov_%s.err is empty'%(sp_dir,sum_job_id))
+                if os.path.getsize('%s/logs/sumcov_%s.err'%(sp_dir,sum_job_id)) < 1:
+                    done_file = open('%s/stats_coverage/summed_job_complete_no_errors'%(sp_dir),"w")
+                    done_file.close()
+                else:
+                    sys.exit('Check whether %s/logs/sumcov_%s.err is empty'%(sp_dir,sum_job_id))
+
+
+
+    #Remove unnecessary files if all merged files exist and clean merged file has a filesize > 10 bytes
+    if os.path.isfile('%s/stats_coverage/_%s_clean_coverage_sites_merged.bed'%(sp_dir, config_info["abbv"])) and os.path.isfile('%s/stats_coverage/_%s_too_high_coverage_sites_merged.bed'%(sp_dir, config_info["abbv"])) and os.path.isfile('%s/stats_coverage/_%s_too_low_coverage_sites_merged.bed'%(sp_dir, config_info["abbv"])) and os.path.getsize('%s/stats_coverage/_%s_clean_coverage_sites_merged.bed'%(sp_dir, config_info["abbv"])) > 10:
+        print("All merged bed files exist")
+        proc = Popen('rm %s/stats_coverage/_%s_clean_coverage_sites.bed'%(sp_dir, config_info["abbv"]),shell=True,stdout=PIPE,stderr=PIPE)
+        stdout,stderr = proc.communicate()
+        proc = Popen('rm %s/stats_coverage/_%s_too_high_coverage_sites.bed'%(sp_dir, config_info["abbv"]),shell=True,stdout=PIPE,stderr=PIPE)
+        stdout,stderr = proc.communicate()
+        proc = Popen('rm %s/stats_coverage/_%s_too_low_coverage_sites.bed'%(sp_dir, config_info["abbv"]),shell=True,stdout=PIPE,stderr=PIPE)
+        stdout,stderr = proc.communicate()
+        proc = Popen('rm %s/stats_coverage/_%s_all_samples_summed_cov.bg'%(sp_dir, config_info["abbv"]),shell=True,stdout=PIPE,stderr=PIPE)
+        stdout,stderr = proc.communicate()
+    else:
+        print('Did not pass all tests to delete files, check if merged bed files exist')
 
 
 

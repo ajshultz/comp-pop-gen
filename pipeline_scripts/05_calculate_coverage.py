@@ -493,7 +493,7 @@ def main():
             
             #Delete sample bedgraph and header file
             proc = Popen('rm %s/stats_coverage/%s.bg'%(sp_dir,sample_names_bedgraph_file_list[0]),shell=True)
-            proc = Popen('rm _%s_all_samples_union_header.bg'%(sp_dir,config_info["abbv"]),shell=True)
+            proc = Popen('rm %s/stats_coverage/_%s_all_samples_union_header.bg'%(sp_dir,config_info["abbv"]),shell=True)
 
 
 

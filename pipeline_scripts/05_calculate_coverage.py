@@ -499,7 +499,7 @@ def main():
 
     #Create and submit job to create bedgraph from sum across all sample coverages, compute median, then create clean sites bedgraph, too high sites bedgraph, and too low sites bedgraph, but only if merged bed files don't already exist.
 
-    if os.path.isfile('%s/stats_coverage/_%s_clean_coverage_sites_merged.bed'%(sp_dir, config_info["abbv"])) and os.path.isfile('%s/stats_coverage/_%s_too_high_coverage_sites_merged.bed'%(sp_dir, config_info["abbv"])) and os.path.isfile('%s/stats_coverage/_%s_too_low_coverage_sites_merged.bed'%(sp_dir, config_info["abbv"])) and os.path.getsize('%s/stats_coverage/_%s_clean_coverage_sites_merged.bed'%(sp_dir, config_info["abbv"])) > 10:
+    if os.path.isfile('%s/stats_coverage/_%s_clean_coverage_sites_merged.bed'%(sp_dir, config_info["abbv"])) and os.path.isfile('%s/stats_coverage/_%s_too_high_coverage_sites_merged.bed'%(sp_dir, config_info["abbv"])) and os.path.isfile('%s/stats_coverage/_%s_too_low_coverage_sites_merged.bed'%(sp_dir, config_info["abbv"])) and os.path.getsize('%s/stats_coverage/_%s_clean_coverage_sites_merged.bed'%(sp_dir, config_info["abbv"])) > 10 and os.path.isfile('%s/stats_coverage/summed_job_complete_no_errors'%sp_dir):
         pass
         
     else:

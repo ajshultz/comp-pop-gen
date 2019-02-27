@@ -1,0 +1,27 @@
+#!/bin/bash
+#SBATCH -J gff
+#SBATCH -o out
+#SBATCH -e err
+#SBATCH -p test
+#SBATCH -n 1
+#SBATCH -t 400
+#SBATCH --mem=3750
+
+#python3 ./VcfBed_2_AlleleTable_ByChrom.py ./testVcf/Acunicularia_hardfilters.2.First5kLines.vcf.gz /n/holylfs/LABS/informatics/ashultz/CompPopGen/SPECIES_DATASETS/Acunicularia/stats_coverage/_Acunicularia_clean_coverage_sites_merged.bed QEEU01000004.1
+#python3 ./VcfBed_2_AlleleTable_ByChrom.py ./testVcf/Acunicularia_hardfilters.2.First5kLast10k.vcf.gz /n/holylfs/LABS/informatics/ashultz/CompPopGen/SPECIES_DATASETS/Acunicularia/stats_coverage/_Acunicularia_clean_coverage_sites_merged.bed QEEU01000004.1
+#python3 ./VcfBed_2_AlleleTable_ByChrom_Crappy.py ./testVcf/Acunicularia_hardfilters.2.First5kLast10k.vcf.gz /n/holylfs/LABS/informatics/ashultz/CompPopGen/SPECIES_DATASETS/Acunicularia/stats_coverage/_Acunicularia_clean_coverage_sites_merged.bed QEEU01000004.1
+
+#python3 ./VcfBed_2_AlleleTable_ByChrom_PyVCF.py ./testVcf/Acunicularia_hardfilters.2.vcf.gz /n/holylfs/LABS/informatics/ashultz/CompPopGen/SPECIES_DATASETS/Acunicularia/stats_coverage/_Acunicularia_clean_coverage_sites_merged.bed QEEU01000004.1
+
+
+
+python3 ./gff.py test.db /n/holylfs/LABS/informatics/ashultz/CompPopGen/SPECIES_DATASETS/Acunicularia/genome/Acunicularia.fa
+
+
+#python3 ./VcfBed_2_AlleleTable_Wrapper2.py /n/holylfs/LABS/informatics/ashultz/CompPopGen/SPECIES_DATASETS Acunicularia,Soccidentalis_Acun,Talba_Acun
+
+
+
+#python3 ./VcfBed_2_AlleleTable_ByChrom_LowerMem2.py /n/holylfs/LABS/informatics/ashultz/CompPopGen/SPECIES_DATASETS/Acunicularia/vcf/Acunicularia_hardfilters.2.vcf.gz,/n/holylfs/LABS/informatics/ashultz/CompPopGen/SPECIES_DATASETS/Soccidentalis_Acun/vcf/Soccidentalis_Acun_hardfilters.2.vcf.gz,/n/holylfs/LABS/informatics/ashultz/CompPopGen/SPECIES_DATASETS/Talba_Acun/vcf/Talba_Acun_hardfilters.2.vcf.gz /n/holylfs/LABS/informatics/ashultz/CompPopGen/SPECIES_DATASETS/Acunicularia/stats_coverage/_Acunicularia_clean_coverage_sites_merged.bed,/n/holylfs/LABS/informatics/ashultz/CompPopGen/SPECIES_DATASETS/Soccidentalis_Acun/stats_coverage/_Soccidentalis_Acun_clean_coverage_sites_merged.bed,/n/holylfs/LABS/informatics/ashultz/CompPopGen/SPECIES_DATASETS/Talba_Acun/stats_coverage/_Talba_Acun_clean_coverage_sites_merged.bed QEEU01000004.1
+
+#ls -ltr -R /n/holylfs/LABS/informatics/ashultz/CompPopGen/SPECIES_DATASETS | grep 'interval_lists'

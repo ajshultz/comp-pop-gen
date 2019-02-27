@@ -1,3 +1,4 @@
+SBATCH*
 # subdirs in script dir
 scripts/testVcf/*
 scripts/oldScripts/*

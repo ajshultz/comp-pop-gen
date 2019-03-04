@@ -1,0 +1,26 @@
+# Config file, used to pass arguments to scripts
+
+# Directory containing scripts to calculate MK tables
+--SCRIPT_DIR /n/holylfs/LABS/informatics/bjarnold/MKtables/scripts
+
+# Directory to output files, also location of intermediate files
+--OUT_DIR /n/holylfs/LABS/informatics/bjarnold/MKtables/Tguttata
+
+# Path to GFF file
+--GFF /n/holylfs/LABS/informatics/ashultz/CompPopGen/SPECIES_DATASETS/Tguttata/genome/GCF_000151805.1_Taeniopygia_guttata-3.2.4_genomic.gff.gz
+
+# Path to reference sequence
+--REF /n/holylfs/LABS/informatics/ashultz/CompPopGen/SPECIES_DATASETS/Tguttata/genome/Tguttata.fa
+
+# Path to Bed files and VCF files, the correct files are found according to the species names provided, which were used
+# to make subdirectories
+--BED_VCF_DIR /n/holylfs/LABS/informatics/ashultz/CompPopGen/SPECIES_DATASETS
+
+# List of species, MK table calculated for 1st species in list
+# Needs to be comma separated!
+--SPECIES Tguttata,Pacticauda,Tbichenovii
+
+# These analyses are done by scaffold/chromosome, but one may analyze several scaffolds (in serial) per job
+# See numScaffsInRef.txt to see how many jobs will get submitted
+--SCAFF_PER_JOB 10
+

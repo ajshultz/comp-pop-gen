@@ -131,44 +131,44 @@ def main():
 	currentCoreMemAllocDict = {}
 	currentMemAllocDict = {}
 	for chrom in sorted(ChromList):
-		if tmpCount <=50:
-			tmpCount +=1
-			chromTotal += 1
-			chromCount += 1
-			vcfList = []
-			alleleTableFile = outDir_alleleTable + "/InfoForMKtable_" + chrom + ".txt" # this gets fed into MK table script, below
-			# get appropriate vcfs, for first script that computes allele tables
-			for species in configInfo["speciesList"]:
-				#use Chrom2IntervalMap Dict to see which VCF to use for this chrom for this species
-				vcf = configInfo["bedVcfDir"] + "/" + species + "/vcf/" + species + "_hardfilters." + Chrom2IntervalMap[species][chrom] + ".vcf.gz"
-				vcfList.append(vcf)
-				existsVcf = os.path.isfile(vcf)
-				if not existsVcf: 
-					print("one of your vcf or bed files doesn't exist")
-					sys.exit()
-			vcfCommaSep = ','.join(vcfList)
+		#if tmpCount <=50:
+		#tmpCount +=1
+		chromTotal += 1
+		chromCount += 1
+		vcfList = []
+		alleleTableFile = outDir_alleleTable + "/InfoForMKtable_" + chrom + ".txt" # this gets fed into MK table script, below
+		# get appropriate vcfs, for first script that computes allele tables
+		for species in configInfo["speciesList"]:
+			#use Chrom2IntervalMap Dict to see which VCF to use for this chrom for this species
+			vcf = configInfo["bedVcfDir"] + "/" + species + "/vcf/" + species + "_hardfilters." + Chrom2IntervalMap[species][chrom] + ".vcf.gz"
+			vcfList.append(vcf)
+			existsVcf = os.path.isfile(vcf)
+			if not existsVcf: 
+				print("one of your vcf or bed files doesn't exist")
+				sys.exit()
+		vcfCommaSep = ','.join(vcfList)
 
-			if chromCount <= chromPerJob:	# add another chromosome to current job
-				# First calculate allele table, then MK table
-				command += "cd " + outDir_alleleTable + "\n"
-				command += "python3 " + script1 + " " + vcfCommaSep + " " + bedCommaSep + " " + gffDB + " " + configInfo["refFile"] + " " + chrom + "\n"
-				command += "cd " + outDir_mkTable + "\n" 
-				command += "python3 " + script2 + " " + gffDB + " " + configInfo["refFile"] + " " + alleleTableFile + " " + chrom + "\n"
-			if chromCount > chromPerJob or chromTotal == len(ChromList):
-				# create SBATCH script and submit
-				#print(command)
-				#sys.exit()
-				jobNum += 1
-				jobId = shFn.create_job_script(jobNum, outDir_sbatchScript, queue, nCores, time, mem, command)
-				jobIdCommandDict[jobId] = command
-				currentCoreMemAllocDict[jobId] = nCores
-				currentMemAllocDict[jobId] = mem
-				# reset command to submit, chromCount
-				command = "cd " + outDir_alleleTable + "\n"
-				command += "python3 " + script1 + " " + vcfCommaSep + " " + bedCommaSep + " " + gffDB + " " + configInfo["refFile"] + " " + chrom + "\n"
-				command += "cd " + outDir_mkTable + "\n" 
-				command += "python3 " + script2 + " " + gffDB + " " + configInfo["refFile"] + " " + alleleTableFile + " " + chrom + "\n"
-				chromCount = 1
+		if chromCount <= chromPerJob:	# add another chromosome to current job
+			# First calculate allele table, then MK table
+			command += "cd " + outDir_alleleTable + "\n"
+			command += "python3 " + script1 + " " + vcfCommaSep + " " + bedCommaSep + " " + gffDB + " " + configInfo["refFile"] + " " + chrom + "\n"
+			command += "cd " + outDir_mkTable + "\n" 
+			command += "python3 " + script2 + " " + gffDB + " " + configInfo["refFile"] + " " + alleleTableFile + " " + chrom + "\n"
+		if chromCount > chromPerJob or chromTotal == len(ChromList):
+			# create SBATCH script and submit
+			#print(command)
+			#sys.exit()
+			jobNum += 1
+			jobId = shFn.create_job_script(jobNum, outDir_sbatchScript, queue, nCores, time, mem, command)
+			jobIdCommandDict[jobId] = command
+			currentCoreMemAllocDict[jobId] = nCores
+			currentMemAllocDict[jobId] = mem
+			# reset command to submit, chromCount
+			command = "cd " + outDir_alleleTable + "\n"
+			command += "python3 " + script1 + " " + vcfCommaSep + " " + bedCommaSep + " " + gffDB + " " + configInfo["refFile"] + " " + chrom + "\n"
+			command += "cd " + outDir_mkTable + "\n" 
+			command += "python3 " + script2 + " " + gffDB + " " + configInfo["refFile"] + " " + alleleTableFile + " " + chrom + "\n"
+			chromCount = 1
 	ongoingJobs = ['RUNNING', 'PENDING']
 	failedJobs = ['CANCELLED','FAILED','TIMEOUT','PREEMPTED','NODE_FAIL','OUT_OF_ME+']	
 	sleep(300)	# allow time for jobs to submit, otherwise they have no status and program exits

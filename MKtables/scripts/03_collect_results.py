@@ -1,10 +1,10 @@
 #!/usr/bin/python -tt
 
-""" 
+"""
 This wrapper takes in a parent directory and comma-separated list of species, and invokes VcfBed_2_AlleleTable_ByChrom.py script
 by locating the correct vcf files to use for a particular chromosome, and locating the bed files to see which sites had sufficient
-coverage 
-IMPORTANT: This code assumes that the set of species supplied to the wrapper function were all aligned to the same reference genome, 
+coverage
+IMPORTANT: This code assumes that the set of species supplied to the wrapper function were all aligned to the same reference genome,
 since the same chromosome needs to be present in the vcf files of all species analyzed.
 """
 
@@ -40,8 +40,8 @@ def main():
 
 	configInfo = shFn.parse_config(configFile)
 	# get directory names of output files
-	outDir_mkTable, outDir_alleleTable = get_outdirs(configInfo["speciesList"], configInfo["outDir"])	
-	
+	outDir_mkTable, outDir_alleleTable = get_outdirs(configInfo["speciesList"], configInfo["outDir"])
+
 	# get list of chromosomes, as these are in the names of files
 	bedList = shFn.getBedFiles(configInfo["bedVcfDir"], configInfo["speciesList"])
 	ChromList = shFn.getChromList(bedList) # list of chromosome names
@@ -49,12 +49,12 @@ def main():
 	covStatsDict = {}
 	mkTableDict = {}
 	for chrom in sorted(ChromList):
-		covStats_fileName = outDir_alleleTable + "/coverageStats_" + chrom + ".txt" 
-		alleleTable_fileName = outDir_alleleTable + "/InfoForMKtable_" + chrom + ".txt" 
+		covStats_fileName = outDir_alleleTable + "/coverageStats_" + chrom + ".txt"
+		alleleTable_fileName = outDir_alleleTable + "/InfoForMKtable_" + chrom + ".txt"
 		mkTable_fileName = outDir_mkTable + "/MKtable_" + chrom + ".txt"
 		existsCovStats = os.path.isfile(covStats_fileName)
 		existsMK = os.path.isfile(mkTable_fileName)
-		if existsCovStats and existsMK: 
+		if existsCovStats and existsMK:
 			f = open(covStats_fileName, 'r')
 			for line in f:
 				line = line.split()
@@ -71,12 +71,14 @@ def main():
 				else:
 					mkTableDict[line[0]] = line[1:len(line)]
 			f.close()
-			
+
 		else:
 			print("Coverage stats and/or MK table didn't exist for " + chrom)
 			continue
 
-	outFile = open("PolymorphismDivergenceStats_combined.txt", 'w')
+    sp_abbr = configInfo["speciesList"][0]
+
+	outFile = open("%s_PolymorphismDivergenceStats_combined.txt"%(sp_abbr), 'w')
 	print("Gene", end="\t", file=outFile)
 	for i in covStatsDict["header"]:
 		print(i, end="\t", file=outFile)

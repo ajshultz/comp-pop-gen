@@ -1,10 +1,10 @@
 #!/usr/bin/python -tt
 
-""" 
+"""
 This wrapper takes in a parent directory and comma-separated list of species, and invokes VcfBed_2_AlleleTable_ByChrom.py script
 by locating the correct vcf files to use for a particular chromosome, and locating the bed files to see which sites had sufficient
-coverage 
-IMPORTANT: This code assumes that the set of species supplied to the wrapper function were all aligned to the same reference genome, 
+coverage
+IMPORTANT: This code assumes that the set of species supplied to the wrapper function were all aligned to the same reference genome,
 since the same chromosome needs to be present in the vcf files of all species analyzed.
 """
 
@@ -48,7 +48,7 @@ def make_outdir(speciesList, outDir):
 			sys.exit()
 	return(outdirNameMK, outdirNameAT, outdirNameSBATCH)
 
-def GetChrom2IntervalNum(speciesList, vcfBedDir):	
+def GetChrom2IntervalNum(speciesList, vcfBedDir):
 	Chrom2IntervalMap = {}
 	for species in speciesList:
 		Chrom2IntervalMap[species] = {}
@@ -102,22 +102,22 @@ def main():
 	start_date = now.strftime("%Y-%m-%d")
 	# resources to request for jobs, SLURM directives
 	#queue = "serial_requeue,shared"
-	queue = "bos-info"
+	queue = "serial_requeue"
 	nCores = 1
 	time = 4800
 	mem = 15000
 	chromPerJob = configInfo["scaffPerJob"]
 
 	# Make directory for output files
-	outDir_mkTable, outDir_alleleTable, outDir_sbatchScript = make_outdir(configInfo["speciesList"], configInfo["outDir"])	
+	outDir_mkTable, outDir_alleleTable, outDir_sbatchScript = make_outdir(configInfo["speciesList"], configInfo["outDir"])
 	# get bed files
 	bedList = shFn.getBedFiles(configInfo["bedVcfDir"], configInfo["speciesList"])
-	
+
 	# For each chromosome, find out which VCF it's in, put it in Chrom2IntervalMap
 	# get interval files for each vcf (i.e. which chromosomes a particular vcf contains)
 	Chrom2IntervalMap = GetChrom2IntervalNum(configInfo["speciesList"], configInfo["bedVcfDir"])
 	# get list of chromosome names
-	ChromList = shFn.getChromList(bedList) 
+	ChromList = shFn.getChromList(bedList)
 
 
 	#Submit one job per chrom
@@ -127,7 +127,7 @@ def main():
 	command = ""
 	tmpCount = 0
 	jobNum = 0
-	jobIdCommandDict = {} 
+	jobIdCommandDict = {}
 	currentCoreMemAllocDict = {}
 	currentMemAllocDict = {}
 	for chrom in sorted(ChromList):
@@ -143,7 +143,7 @@ def main():
 			vcf = configInfo["bedVcfDir"] + "/" + species + "/vcf/" + species + "_hardfilters." + Chrom2IntervalMap[species][chrom] + ".vcf.gz"
 			vcfList.append(vcf)
 			existsVcf = os.path.isfile(vcf)
-			if not existsVcf: 
+			if not existsVcf:
 				print("one of your vcf or bed files doesn't exist")
 				sys.exit()
 		vcfCommaSep = ','.join(vcfList)
@@ -152,7 +152,7 @@ def main():
 			# First calculate allele table, then MK table
 			command += "cd " + outDir_alleleTable + "\n"
 			command += "python3 " + script1 + " " + vcfCommaSep + " " + bedCommaSep + " " + gffDB + " " + configInfo["refFile"] + " " + chrom + "\n"
-			command += "cd " + outDir_mkTable + "\n" 
+			command += "cd " + outDir_mkTable + "\n"
 			command += "python3 " + script2 + " " + gffDB + " " + configInfo["refFile"] + " " + alleleTableFile + " " + chrom + "\n"
 		if chromCount > chromPerJob or chromTotal == len(ChromList):
 			# create SBATCH script and submit
@@ -166,20 +166,20 @@ def main():
 			# reset command to submit, chromCount
 			command = "cd " + outDir_alleleTable + "\n"
 			command += "python3 " + script1 + " " + vcfCommaSep + " " + bedCommaSep + " " + gffDB + " " + configInfo["refFile"] + " " + chrom + "\n"
-			command += "cd " + outDir_mkTable + "\n" 
+			command += "cd " + outDir_mkTable + "\n"
 			command += "python3 " + script2 + " " + gffDB + " " + configInfo["refFile"] + " " + alleleTableFile + " " + chrom + "\n"
 			chromCount = 1
 	ongoingJobs = ['RUNNING', 'PENDING']
-	failedJobs = ['CANCELLED','FAILED','TIMEOUT','PREEMPTED','NODE_FAIL','OUT_OF_ME+']	
+	failedJobs = ['CANCELLED','FAILED','TIMEOUT','PREEMPTED','NODE_FAIL','OUT_OF_ME+']
 	sleep(300)	# allow time for jobs to submit, otherwise they have no status and program exits
 
-	numSuccessJobsDict = {} 
+	numSuccessJobsDict = {}
 	while len(numSuccessJobsDict.keys()) < len(jobIdCommandDict.keys()):
 		for jobId in jobIdCommandDict:
 			status = shFn.jobid_status(jobId, start_date)
 			print(status)
 			if status and status not in ongoingJobs:
-				if status == 'COMPLETED': 
+				if status == 'COMPLETED':
 					numSuccessJobsDict[jobId] = 1
 				elif status in failedJobs:
 					if status == 'OUT_OF_ME+':
@@ -206,7 +206,7 @@ def main():
 						del jobIdCommandDict[jobId]
 				else:
 					print("UNIDENTIFIED JOB STATUS: ", status)
-					
+
 		sleep(120)
 	print("FINISHED")
 	sys.exit()

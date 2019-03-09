@@ -22,4 +22,4 @@
 
 # These analyses are done by scaffold/chromosome, but one may analyze several scaffolds (in serial) per job
 # See numScaffsInRef.txt to see how many jobs will get submitted
---SCAFF_PER_JOB 10
+--SCAFF_PER_JOB 5

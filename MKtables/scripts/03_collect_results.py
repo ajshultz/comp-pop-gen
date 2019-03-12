@@ -76,7 +76,7 @@ def main():
 			print("Coverage stats and/or MK table didn't exist for " + chrom)
 			continue
 
-    sp_abbr = configInfo["speciesList"][0]
+	sp_abbr = configInfo["speciesList"][0]
 
 	outFile = open("%s_PolymorphismDivergenceStats_combined.txt"%(sp_abbr), 'w')
 	print("Gene", end="\t", file=outFile)

@@ -1,30 +1,28 @@
 require(tidyverse)
 
-setwd("~/Dropbox/Informatics/CompPopGen/variant_calling_testing_stats/")
+setwd("/Users/tim/Documents/Science/presentations/meetings/Cod Kickoff 2018")
 
 species <- "Mmulatta"
 species <- "Tguttata"
 species <- "Herato"
 species <- "Pacticauda"
 
-interval <- 1
-
-LC_2X <- read_delim(paste0(species,"_2X_LC/stats/",species,"_2X_",interval,"_unfilteredVCFstats.txt"),delim="\t") %>%
+LC_2X <- read_delim(paste0(species,"_2X_LC.txt.gz"),delim="\t") %>%
   rename(HOM_REF=`HOM-REF`,HOM_VAR=`HOM-VAR`,NO_CALL=`NO-CALL`) %>%
   mutate(EXP="LC_2X")
-LC_4X <- read_delim(paste0(species,"_4X_LC/stats/",species,"_4X_",interval,"_unfilteredVCFstats.txt"),delim="\t") %>%
+LC_4X <- read_delim(paste0(species,"_4X_LC.txt.gz"),delim="\t") %>%
   rename(HOM_REF=`HOM-REF`,HOM_VAR=`HOM-VAR`,NO_CALL=`NO-CALL`) %>%
   mutate(EXP="LC_4X")
-LC_15X <- read_delim(paste0(species,"_15X_LC/stats/",species,"_15X_",interval,"_unfilteredVCFstats.txt"),delim="\t") %>%
+LC_15X <- read_delim(paste0(species,"_15X_LC.txt.gz"),delim="\t") %>%
   rename(HOM_REF=`HOM-REF`,HOM_VAR=`HOM-VAR`,NO_CALL=`NO-CALL`) %>%
   mutate(EXP="LC_15X")
-HC_15X <- read_delim(paste0(species,"_15X_HC/stats/",species,"_15X_",interval,"_unfilteredVCFstats.txt"),delim="\t") %>%
+HC_15X <- read_delim(paste0(species,"_15X_HC.txt.gz"),delim="\t") %>%
   rename(HOM_REF=`HOM-REF`,HOM_VAR=`HOM-VAR`,NO_CALL=`NO-CALL`) %>%
   mutate(EXP="HC_15X")
-LC_30X <- read_delim(paste0(species,"_30X_LC/stats/",species,"_30X_",interval,"_unfilteredVCFstats.txt"),delim="\t") %>%
+LC_30X <- read_delim(paste0(species,"_30X_LC.txt.gz"),delim="\t") %>%
   rename(HOM_REF=`HOM-REF`,HOM_VAR=`HOM-VAR`,NO_CALL=`NO-CALL`) %>%
   mutate(EXP="LC_30X")
-HC_30X <- read_delim(paste0(species,"_30X_HC/stats/",species,"_30X_",interval,"_unfilteredVCFstats.txt"),delim="\t") %>%
+HC_30X <- read_delim(paste0(species,"_30X_HC.txt.gz"),delim="\t") %>%
   rename(HOM_REF=`HOM-REF`,HOM_VAR=`HOM-VAR`,NO_CALL=`NO-CALL`) %>%
   mutate(EXP="HC_30X")
 

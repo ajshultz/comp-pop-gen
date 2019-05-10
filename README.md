@@ -1,3 +1,12 @@
+FASTQ to VCF pipeline for reanalysis of SRA datasets
+============
+
+Authors:
+Allison Shultz (Assistant Curator of Ornithology, Natural History Museum of Los Angeles County; ashultz@nhm.org)
+Brian Arnold (Senior Bioinformatics Scientist, Informatics Group, Harvard University; barnold@g.harvard.edu)
+Tim Sackton (Director of Bioinformatics, Informatics Group, Harvard University; tsackton@g.harvard.edu)
+
+
 Our objective is to create a semi-automated, reproducible, robust pipeline to take raw sequencing data (user supplied or from NCBI) and generate VCF files for downstream analyses with some quality filtering. 
 
 The pipeline will have four steps:

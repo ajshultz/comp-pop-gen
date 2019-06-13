@@ -11,14 +11,14 @@ SAMPLE_FILE_DIR=/n/holylfs/LABS/informatics/ashultz/CompPopGen/comp-pop-gen/vcf_
 
 #Submit sample removal jobs 
 
-sbatch /n/holylfs/LABS/informatics/ashultz/CompPopGen/comp-pop-gen/vcf_qc/vcf_sample_filter.sbatch Acunicularia ${SPECIES_DIR} ${SAMPLE_FILE_DIR} --array=1-10
+sbatch --array=1-10 /n/holylfs/LABS/informatics/ashultz/CompPopGen/comp-pop-gen/vcf_qc/vcf_sample_filter.sbatch Acunicularia ${SPECIES_DIR} ${SAMPLE_FILE_DIR} 
 
-sbatch /n/holylfs/LABS/informatics/ashultz/CompPopGen/comp-pop-gen/vcf_qc/vcf_sample_filter.sbatch Ccornix ${SPECIES_DIR} ${SAMPLE_FILE_DIR} --array=1-10
+sbatch --array=1-10 /n/holylfs/LABS/informatics/ashultz/CompPopGen/comp-pop-gen/vcf_qc/vcf_sample_filter.sbatch Ccornix ${SPECIES_DIR} ${SAMPLE_FILE_DIR}
 
-sbatch /n/holylfs/LABS/informatics/ashultz/CompPopGen/comp-pop-gen/vcf_qc/vcf_sample_filter.sbatch Falbicollis ${SPECIES_DIR} ${SAMPLE_FILE_DIR} --array=1-35
+sbatch --array=1-35 /n/holylfs/LABS/informatics/ashultz/CompPopGen/comp-pop-gen/vcf_qc/vcf_sample_filter.sbatch Falbicollis ${SPECIES_DIR} ${SAMPLE_FILE_DIR}
 
-sbatch /n/holylfs/LABS/informatics/ashultz/CompPopGen/comp-pop-gen/vcf_qc/vcf_sample_filter.sbatch Pdomesticus ${SPECIES_DIR} ${SAMPLE_FILE_DIR} --array=1-32
+sbatch --array=1-32 /n/holylfs/LABS/informatics/ashultz/CompPopGen/comp-pop-gen/vcf_qc/vcf_sample_filter.sbatch Pdomesticus ${SPECIES_DIR} ${SAMPLE_FILE_DIR}
 
-sbatch /n/holylfs/LABS/informatics/ashultz/CompPopGen/comp-pop-gen/vcf_qc/vcf_sample_filter.sbatch Pmajor ${SPECIES_DIR} ${SAMPLE_FILE_DIR} --array=1-34
+sbatch --array=1-34 /n/holylfs/LABS/informatics/ashultz/CompPopGen/comp-pop-gen/vcf_qc/vcf_sample_filter.sbatch Pmajor ${SPECIES_DIR} ${SAMPLE_FILE_DIR}
 
-sbatch /n/holylfs/LABS/informatics/ashultz/CompPopGen/comp-pop-gen/vcf_qc/vcf_sample_filter.sbatch Ptrochilus ${SPECIES_DIR} ${SAMPLE_FILE_DIR} --array=1-10
+sbatch --array=1-10 /n/holylfs/LABS/informatics/ashultz/CompPopGen/comp-pop-gen/vcf_qc/vcf_sample_filter.sbatch Ptrochilus ${SPECIES_DIR} ${SAMPLE_FILE_DIR}

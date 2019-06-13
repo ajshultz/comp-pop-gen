@@ -4,7 +4,7 @@
 #SBATCH -n 1
 #SBATCH -N 1
 #SBATCH --mem 8000
-#SBATCH -t 0-04:00:00
+#SBATCH -t 0-08:00:00
 #SBATCH -J IndFilt
 #SBATCH -o logs/IndFilt_%A_%a.out
 #SBATCH -e logs/IndFilt_%A_%a.err

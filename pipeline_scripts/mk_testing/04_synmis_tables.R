@@ -1,3 +1,5 @@
+## Using annotation output from SnpEff to calculate the number of missense & synonymous variants
+
 library(tidyverse)
 library(tictoc)
 library(beepr)

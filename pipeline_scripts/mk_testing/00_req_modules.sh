@@ -1,3 +1,5 @@
+## Modules required for pipeline scripts on cluster
+
 module load bcftools/1.5-fasrc02
 module load samtools/1.5-fasrc02
 module load vcftools/0.1.14-fasrc01

@@ -7,4 +7,4 @@ Sara Wuitchik (Postdoctoal associate, Boston University & Harvard University; sj
 
 Tim Sackton (Director of Bioinformatics, Informatics Group, Harvard University; tsackton@g.harvard.edu)
 
-Update, June 27: 08_cleaning.R is a work-in-progress.
+Update, July 1: scripts 08 & 09 are in progress; pipeline is not complete.

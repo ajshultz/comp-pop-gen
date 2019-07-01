@@ -1,3 +1,5 @@
+## Use of missingness data to determine if there are individuals with high relative missingness that need to be removed
+
 install.packages("tidyverse")
 libary(tidyverse)
 corCor <- read.delim("~/Desktop/PDF/CompPopGen/_Ccornix_all_all_missingness_info.txt")

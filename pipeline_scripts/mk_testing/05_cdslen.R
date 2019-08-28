@@ -9,12 +9,4 @@ cds.len <- cds.temp %>%
   summarise(cds.len = sum(cds.temp))
 write.table(cds.len, "cdslen.txt", sep = "\t", row.names = F, quote = F)
 
-## as of 16:30 Aug 28, below is untested
-
-corCor <- read.delim("corCor.effects.txt", sep = "\t", header = F, stringsAsFactors = F, quote = "") %>%
-  as_tibble()
-colnames(corCor) <- c("chr", "end.pos", "effect")
-corCor <- corCor %>%
-  mutate(start.pos = end.pos - 1) %>%
-  select(chr, start.pos, end.pos, effect) 
-write.table(corCor, "corCor.vcfann.bed", sep = "\t", row.names = F, quote = F)
+## cyvcf2.py output manipulations will take place here before 06_ 

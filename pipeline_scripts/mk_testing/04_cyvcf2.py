@@ -1,3 +1,11 @@
+# to set up conda env for cyvcf2 on cluster
+
+module load Anaconda/5.0.1-fasrc01
+conda create -n cyvcf2_env python=3.6 anaconda
+# activate before running cyvcf2
+source activate cyvcf2_env
+conda install -n cyvcf2_env cyvcf2
+
 #!/usr/bin/python -tt
 
 import re

@@ -1,4 +1,6 @@
-First pass at a pipeline to concatenate and filter VCFs, run through snpEff, then combine into a consensus BED file from which MK tables can be constructed.
+## Scripts for avian comparative genomics 
+
+First pass at a pipeline to concatenate and filter VCFs, run through snpEff, then combine into a consensus BED file from which MK tables can be constructed. Using Corvus cornix as example species.
 
 Authors: 
 

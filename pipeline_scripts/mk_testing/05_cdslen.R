@@ -9,4 +9,4 @@ cds.len <- cds.temp %>%
   summarise(cds.len = sum(cds.temp))
 write.table(cds.len, "cdslen.txt", sep = "\t", row.names = F, quote = F)
 
-## cyvcf2.py output manipulations will take place here before 06_ 
+## cyvcf2.py output manipulations will take place here before 06_consensusbed.sh

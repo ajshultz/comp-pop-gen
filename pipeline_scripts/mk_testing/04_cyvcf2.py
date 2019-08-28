@@ -40,5 +40,5 @@ if __name__ == '__main__':
 
 
 
-## Written by Brian J Arnold (barnold@harvard.edu)
+## Written with Brian J Arnold (barnold@harvard.edu)
 

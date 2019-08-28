@@ -16,5 +16,3 @@ corCor.2.ncbi.genome : Corvus_cornix_cornix
 
 java -jar snpEff.jar build -gff3 -v corCor.2.ncbi #builds database
 java -jar snpEff.jar corCor.2.ncbi data/corCor.clean.vcf.gz > corCor.ann.vcf #annotates VCF
-cat annotated/corCor.clean.ann.vcf | scripts/vcfEffOnePerLine.pl | java  -jar SnpSift.jar extractFields - CHROM POS "ANN[*].EFFECT" "ANN[*].GENEID" > corCor.oneper.txt #separates effects out to one per line and extracts specific annotation fields, written out to a text file for easy loading into R
-

@@ -10,3 +10,7 @@ module load bedops/2.4.25-fasrc01
 module load bedtools2/2.26.0-fasrc01
 module load python/3.6.3-fasrc01
 module load R/3.5.1-fasrc01
+
+## if using an updated version of R, will need to reload dependencies
+module load gcc/8.2.0-fasrc01 openmpi/3.1.1-fasrc01 R/3.6.1-fasrc01
+

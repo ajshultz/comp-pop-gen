@@ -1,4 +1,4 @@
-First pass at a pipeline to concatenate and filter VCFs, run through snpEff and SnpSift, then combine into a consensus BED file from which MK tables can be constructed.
+First pass at a pipeline to concatenate and filter VCFs, run through snpEff, then combine into a consensus BED file from which MK tables can be constructed.
 
 Authors: 
 
@@ -7,4 +7,6 @@ Sara Wuitchik (Postdoctoal associate, Boston University & Harvard University; sj
 
 Tim Sackton (Director of Bioinformatics, Informatics Group, Harvard University; tsackton@g.harvard.edu)
 
-Update, July 1: scripts 08 & 09 are in progress; pipeline is not complete.
+Allison Shultz (Assistant Curator of Ornithology, LA Natural History Museum; ashultz@nhm.org)
+
+Update, Aug 28: scripts are being streamlined, should be complete by Aug 30 

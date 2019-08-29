@@ -2,7 +2,6 @@
 
 module load Anaconda3/5.0.1-fasrc02
 conda create -n cyvcf2_env python=3.6 anaconda
-# activate before running cyvcf2
 source activate cyvcf2_env
 conda install -n cyvcf2_env cyvcf2
 

@@ -7,7 +7,6 @@ conda install -c bioconda -n cyvcf2 cyvcf2
 
 
 
-
 #!/usr/bin/python -tt
 
 import re
@@ -18,24 +17,22 @@ from cyvcf2 import VCF
 
 def main():
 
-	vcf = VCF('/scratch/swuitchik/CompPopGen/consensus_ingroups/corCor/corCor.ann.vcf', gts012=True) # gts012=True makes value of 3 UNKNOWN, with 0,1,2 corresponding to numb ALT alleles
+        vcf = VCF('/scratch/swuitchik/CompPopGen/consensus_ingroups/corCor/corCor.ann.vcf', gts012=True) # gts012=True makes value of 3 UNKNOWN, with 0,1,2 corresponding to numb ALT alleles
 
-	outFile = open("corCor.effects.txt", 'w')
-  
-	for variant in vcf:
-		# check if this site passed GATK VCF filtering, and only look at bi-allelic sites
-		if len(variant.ALT) == 1:
-			print(variant.CHROM, variant.end, sep="\t", end="\t", file=outFile)
-			for field in variant.INFO:
-				if field[0] == 'ANN':
-					annotations = field[1].split(",")
-					effects = []
-					for i in annotations:
-						i = i.split('|')
-						effects.append(i[1])
-					print(",".join(effects), file=outFile)
+        outFile = open("corCor.effects.txt", 'w')
 
-	outFile.close()
+        for variant in vcf:
+                
+                if len(variant.ALT) == 1:
+                        print(variant.CHROM, variant.end, sep="\t", end="\t", file=outFile)
+                        for field in variant.INFO:
+                                if field[0] == 'ANN':
+                                        annotations = field[1]
+                                        annList = annotations.split('|')
+                                        effect = annList[1]
+                                        print(effect, file=outFile)
+
+        outFile.close()
 if __name__ == '__main__':
   main()
 

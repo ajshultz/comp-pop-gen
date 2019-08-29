@@ -12,5 +12,5 @@ corCor.remove <- corCor.clean %>%
   filter(missing >= corCor.threshold)
 write.csv(corCor.remove %>% select(INDV), "corCor.remove.indv")
 
-## if there are individuals to remove, use: vcftools --gzvcf corCor.clean.vcf.gz --remove-indv corCor.remove.indv --recode --recode-INFO-all --out corCor.clean2 to remove individuals with high relative missingness
+## if there are individuals to remove, use: vcftools --gzvcf corCor.clean.vcf.gz --remove-indv corCor.remove.indv --recode --recode-INFO-all --out corCor.clean2 
 ## use the VCF with high missingness individuals removed as input for subsequent step

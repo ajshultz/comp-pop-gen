@@ -1,9 +1,12 @@
 # to set up conda env for cyvcf2 on cluster
 
 module load Anaconda3/5.0.1-fasrc02
-conda create -n cyvcf2_env python=3.6 anaconda
-source activate cyvcf2_env
-conda install -n cyvcf2_env cyvcf2
+conda create -n cyvcf2 python=3.6 anaconda
+source activate cyvcf2
+conda install -c bioconda -n cyvcf2 cyvcf2
+
+
+
 
 #!/usr/bin/python -tt
 
@@ -37,7 +40,7 @@ if __name__ == '__main__':
   main()
 
 
-
+# to deactivate cyvcf2 environment, use: source deactivate
 
 ## Written with Brian J Arnold (barnold@harvard.edu)
 

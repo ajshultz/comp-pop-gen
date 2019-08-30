@@ -14,7 +14,7 @@ call <- read.delim("corCor.callable.bed", sep = "\t", header = F, stringsAsFacto
 colnames(call) <- c("chr", "start", "end", "gene")
 call.temp <- call %>% mutate(call.temp = end - start)
 call.length <- call.temp %>% group_by(gene) %>% summarise(call.len = sum(call.temp))
-write.table(call.len, "call.txt", sep = "\t", row.names = F, quote = F)
+write.table(call.length, "call.txt", sep = "\t", row.names = F, quote = F)
 
 data <- read.delim("corCor.final.clean.bed", sep = "\t", header = F, stringsAsFactors = F, quote = "") %>% as_tibble()
 colnames(data) <- c("chr", "start", "end", "gene", "effect")

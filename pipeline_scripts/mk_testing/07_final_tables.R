@@ -10,13 +10,18 @@ cds.len <- cds.temp %>%
   summarise(cds.len = sum(cds.temp))
 write.table(cds.len, "cdslen.txt", sep = "\t", row.names = F, quote = F)
 
-call <- read.delim("corCor.callable.bed", sep = "\t", header = F, stringsAsFactors = F, quote = "") %>% as_tibble()
+call <- read.delim("corCor.callable.bed", sep = "\t", header = F, stringsAsFactors = F, quote = "") %>% 
+  as_tibble()
 colnames(call) <- c("chr", "start", "end", "gene")
-call.temp <- call %>% mutate(call.temp = end - start)
-call.length <- call.temp %>% group_by(gene) %>% summarise(call.len = sum(call.temp))
-write.table(call.length, "call.txt", sep = "\t", row.names = F, quote = F)
+call.temp <- call %>% 
+  mutate(call.temp = end - start)
+call.l <- call.temp %>% 
+  group_by(gene) %>% 
+  summarise(call.len = sum(call.temp))
+write.table(call.l, "call.txt", sep = "\t", row.names = F, quote = F)
 
-data <- read.delim("corCor.final.clean.bed", sep = "\t", header = F, stringsAsFactors = F, quote = "") %>% as_tibble()
+data <- read.delim("corCor.final.clean.bed", sep = "\t", header = F, stringsAsFactors = F, quote = "") %>% 
+  as_tibble()
 colnames(data) <- c("chr", "start", "end", "gene", "effect")
 mis <- data %>% 
   group_by(gene) %>% 
@@ -29,8 +34,8 @@ colnames(syn) <- c("gene", "syn")
 
 table <- left_join(mis, syn, by = "gene")
 tab2 <- left_join(table, cds.len, by = "gene")
-final <- left_join(tab2, call, by = "gene") %>% 
-  select(gene, cds.len, call.length, syn, mis)
+final <- left_join(tab2, call.l, by = "gene") %>% 
+  select(gene, cds.len, call.len, syn, mis)
 
 # qc: make sure no ratios > 1
 check <- final %>% 

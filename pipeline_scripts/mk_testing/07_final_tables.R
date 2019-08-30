@@ -40,7 +40,7 @@ final <- left_join(tab2, call.l, by = "gene") %>%
 # qc: make sure no ratios > 1
 check <- final %>% 
   mutate(check = call.len/cds.len)
-check[!complete.cases(check),]
-max(check$check)
+check[!complete.cases(check),] # should return an empty tibble
+max(check$check) # shouldn't be larger than 1
 write.table(final, "corCor.table.txt", sep = "\t", row.names = F, quote = F)
 # write.table(check, "corCor.table_check.txt", sep = "\t", row.names = F, quote = F)

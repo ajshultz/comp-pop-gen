@@ -11,4 +11,3 @@ Tim Sackton (Director of Bioinformatics, Informatics Group, Harvard University; 
 
 Allison Shultz (Assistant Curator of Ornithology, LA Natural History Museum; ashultz@nhm.org)
 
-Update, Aug 28: scripts are being streamlined, should be complete by Aug 30 

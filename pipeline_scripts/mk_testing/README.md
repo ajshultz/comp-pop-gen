@@ -1,6 +1,6 @@
 ## Scripts for avian comparative genomics 
 
-First pass at a set of scripts to concatenate and filter VCFs, run through snpEff, then combine into a consensus BED file from which MK tables can be constructed. Using Corvus cornix as example species.
+First pass at a set of scripts to concatenate and filter VCFs, run through snpEff, then combine into a consensus BED file from which MK tables can be constructed. Using Corvus cornix as example species; will be generalized shortly.
 
 Authors: 
 

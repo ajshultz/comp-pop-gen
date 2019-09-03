@@ -24,3 +24,7 @@ with fileinput.input() as intake:
         loc = location(line)
         result = '\t'.join((loc, abrvset))
         print(result, end='\n', file=sys.stdout)
+
+        
+        
+## used in 06 script

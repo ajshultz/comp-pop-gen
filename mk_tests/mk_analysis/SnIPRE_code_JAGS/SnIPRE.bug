@@ -1,0 +1,20 @@
+model{
+  for(i in 1:N)
+    {
+      count[i] ~ dpois(mu[i]);
+      log(mu[i]) <- log(TS[i])*(1-R[i])+log(TR[i])*R[i]+inprod(BG[G[i],],x[i,]);
+      res[i]<-count[i]-mu[i];
+    }
+    for(i in 1:n){
+   BG[i,1:4] ~ dmnorm(m[1:4], T[1:4,1:4]);
+  }
+  
+   v <-10;
+  T[1:4,1:4] ~ dwish(S[1:4,1:4], v);
+    
+ m[1]~dnorm(0, .001);
+ m[2]~ dnorm(0, .001);
+ m[3] ~ dnorm(0, .001);
+ m[4]~dnorm(0, .001);
+
+}

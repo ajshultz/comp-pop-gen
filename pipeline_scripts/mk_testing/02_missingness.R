@@ -2,14 +2,15 @@
 
 install.packages("tidyverse")
 libary(tidyverse)
-corCor <- read.delim("~/Desktop/PDF/CompPopGen/_Ccornix_all_all_missingness_info.txt")
+corCor <- read.delim("/scratch/swuitchik/CompPopGen/missingness_ingroups/_Ccornix_all_all_missingness_info.txt")
 corCor.clean <- select(corCor, -c(INTERVAL, N_GENOTYPES_FILTERED, F_MISS)) %>% 
   group_by(INDV) %>%
   summarise_each(funs(sum)) %>%
-  mutate(Missing = N_MISS/N_DATA)
-corCor.threshold <- 3*median(corCor.clean$Missing)
+  mutate(missing = N_MISS/N_DATA)
+corCor.threshold <- 3*median(corCor.clean$missing)
 corCor.remove <- corCor.clean %>% 
-  filter(Missing >= corCor.threshold)
-write.csv(corCor.remove %>% select(INDV), "corCor_remove.csv")
+  filter(missing >= corCor.threshold)
+write.csv(corCor.remove %>% select(INDV), "corCor.remove.indv")
 
-## if there are individuals to remove, rename corCor_remove.csv to *.indv, use vcftools --vcf _____ --remove-indv _____.indv --recode --recode-INFO-all --out ______ to remove individuals with high relative missingness
+## if there are individuals to remove, use: vcftools --gzvcf corCor.clean.vcf.gz --remove-indv corCor.remove.indv --recode --recode-INFO-all --out corCor.clean2 
+## use the VCF with high missingness individuals removed as input for subsequent step

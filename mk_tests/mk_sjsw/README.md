@@ -5,7 +5,7 @@ First pass at a set of scripts to concatenate and filter VCFs, run through snpEf
 Authors: 
 
 
-Sara Wuitchik (Postdoctoal associate, Boston University & Harvard University; sjswui@g.harvard.edu
+Sara Wuitchik (Postdoctoal associate, Boston University & Harvard University; sjswuit@g.harvard.edu
 
 Tim Sackton (Director of Bioinformatics, Informatics Group, Harvard University; tsackton@g.harvard.edu)
 

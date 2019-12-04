@@ -1,6 +1,4 @@
-########################
-# Generalized Pipeline #
-########################
+#!/usr/bin/bash
 
 # VCF concatenation
 

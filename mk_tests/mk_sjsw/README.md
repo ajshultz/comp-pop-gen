@@ -1,6 +1,6 @@
-## Scripts for avian comparative genomics 
+## Pipeline for comparative genomics 
 
-First pass at a set of scripts to concatenate and filter VCFs, run through snpEff, then combine into a consensus BED file from which MK tables can be constructed. Using Corvus cornix as example species; will be generalized shortly.
+Automatic pipeline to concatenate and filter VCFs, run through snpEff, and create input for SnIPRE, MK tests, and direction of selection calculations. Minor configuration and preprocessing required before running pipeline.sh, outlined below.
 
 Authors: 
 
@@ -11,3 +11,118 @@ Tim Sackton (Director of Bioinformatics, Informatics Group, Harvard University; 
 
 Allison Shultz (Assistant Curator of Ornithology, LA Natural History Museum; ashultz@nhm.org)
 
+
+### Configuration and pre-preprocessing
+
+We suggest that the project directory is set up as outlined in directory_tree.pdf so that the main pipeline can automatically switch between directories and call software as necessary. 
+
+
+#### Modules/programs required - pipeline was written under versions in parentheses: 
+
+BCFtools (1.5)
+
+VCFtools (0.1.14)
+
+HTSlib (1.5)
+
+Java (10.0.1)
+
+BEDtools (2.26.0)
+
+Python (3.6.3)
+
+Anaconda (5.0.1; if running in conda environment as suggested) 
+
+
+After loading appropriate modules, we suggest setting up a conda environment that will allow access to python and R packages:
+
+```conda create -n mk python=3.6 anaconda cyvcf2 tqdm r-base r-tidyverse r-rjags r-r2jags r-lme4 r-arm```
+
+```source activate mk```
+
+A few variables need to be set before running:
+
+```export R_LIBS_USER=$HOME/path/to/R/packages```
+
+```export PATHW=$HOME/path/to/working/directory```
+
+```export INSHORT=ingroup_spp_name (six letter code)```
+
+```export OUTSHORT=outgroup_spp_name (six letter code)```
+
+```export INLONG=ingroup_spp_name (longform spp name, with leading underscore)```
+
+```export OUTLONG=outgroup_spp_name (longform spp name, with leading underscore)```
+
+
+Example species names variables: 
+
+```export INSHORT=corCor```
+
+```export OUTSHORT=corMon```
+
+```export INLONG=_Ccornix```
+
+```export OUTLONG=_Cmonedula```
+
+We use SnpEff (http://snpeff.sourceforge.net/download.html) to build databases and annotate the variants in the VCFs. It should be downloaded in your project directory and set up prior to running the pipeline.
+
+```wget http://sourceforge.net/projects/snpeff/files/snpEff_latest_core.zip```
+
+```unzip snpEff_latest_core.zip```
+
+```rm snpEff_latest_core.zip``` 
+
+```rm -r clinEff/```
+
+```cd snpEff/```
+
+```mkdir -p data/$INSHORT.ncbi/```
+
+Ensure reference sequence (FASTA) and genome annotation (GFF3) are in the appropriate .ncbi data directory, rename files to sequences.fa and genes.gff, then gzip.
+
+Add the following to the snpEff.config file, under the Databases & Genomes - Non-standard Genomes section:
+
+\# Common name genome, NCBI version __
+
+$INSHORT.ncbi.genome : ncbi_genome_name
+
+For example: 
+
+\# Hooded crow genome, NCBI version 2
+
+corCor.ncbi.genome : Corvus_cornix_cornix
+
+Once snpEff is ready, export the path to a variable:
+
+```export PATHS=$HOME/path/to/snpEff```
+
+#### Build a snpEff database
+
+From your working directory, run: 
+
+```java -jar snpEff/snpEff.jar build -gff3 -v $INSHORT.ncbi```
+
+#### In your working directory, you'll need: 
+
+- Missingness data (all_all_missingness_info.txt) for both ingroup and outgroup
+
+- Coverage site data (clean_coverage_sites_merged.bed) for both ingroup and outgroup
+
+- genes.sff (same file that's in the snpEff data directory, gunzipped)
+
+- genenames.py
+
+- gff2bed.awk
+
+- parser_nov.py
+
+- pi2bed.awk
+
+- my.jags2.R 
+
+- SnIPRE_source.R
+
+- ingroup.vcfs and outgroup.vcfs directories (containing hardfiltered VCFs) 
+
+#### All of the above information can be found in config.sh as well

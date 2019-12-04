@@ -109,7 +109,7 @@ From your working directory, run:
 
 - Coverage site data (clean_coverage_sites_merged.bed) for both ingroup and outgroup
 
-- genes.sff (same file that's in the snpEff data directory, gunzipped)
+- genes.gff (same file that's in the snpEff data directory, gunzipped)
 
 - genenames.py
 

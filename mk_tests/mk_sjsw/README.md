@@ -125,4 +125,4 @@ From your working directory, run:
 
 - ingroup.vcfs and outgroup.vcfs directories (containing hardfiltered VCFs) 
 
-#### All of the above information can be found in config.sh as well
+#### All of the above information can be found in config.sh; once working directory is ready, pipeline.sh can be run from within the directory to output results from SnIPRE, MK tests, and direction of selection calculations

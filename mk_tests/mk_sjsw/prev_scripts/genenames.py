@@ -11,7 +11,7 @@ def gene_abrvs(line):
 
 def location(line):
     """Extracts chrom, chromStart, chromStop (columns 1-3 in a .bed file)
-		returns as a tab seperated string"""
+                returns as a tab seperated string"""
     poss = line.split()[0:3]
     poss = "\t".join(poss)
     return poss
@@ -20,7 +20,11 @@ def location(line):
 with fileinput.input() as intake:
     for line in intake:
         abrvset = gene_abrvs(line)
-        abrvset = ",".join(list(set(abrvset)))
+        abrvset = ",".join(abrvset)
         loc = location(line)
         result = '\t'.join((loc, abrvset))
         print(result, end='\n', file=sys.stdout)
+
+        
+        
+## used in 06 script

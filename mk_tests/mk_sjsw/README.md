@@ -101,7 +101,7 @@ Once snpEff is ready, export the path to a variable:
 
 From your working directory, run: 
 
-```java -jar snpEff/snpEff.jar build -gff3 -v $INSHORT.ncbi```
+```java -jar $PATHS/snpEff.jar build -gff3 -v $INSHORT.ncbi```
 
 #### In your working directory, you'll need: 
 

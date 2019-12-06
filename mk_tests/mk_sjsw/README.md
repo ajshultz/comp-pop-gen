@@ -12,33 +12,15 @@ Tim Sackton (Director of Bioinformatics, Informatics Group, Harvard University; 
 Allison Shultz (Assistant Curator of Ornithology, LA Natural History Museum; ashultz@nhm.org)
 
 
-### Configuration and pre-preprocessing
+### Configuration and set up
 
-We suggest that the project directory is set up as outlined in directory_tree.pdf so that the main pipeline can automatically switch between directories and call software as necessary. 
+Project directory should be set up as outlined in directory_tree.pdf so the main pipeline can automatically switch between directories and call files as necessary. 
 
+First, set up a conda environment that will allow access to python and R packages:
 
-#### Modules/programs required - pipeline was written under versions in parentheses: 
+```conda create -n mk_v2 python=3.6 anaconda cyvcf2 tqdm bcftools vcftools htslib java-jdk bedtools r-base r-tidyverse r-rjags r-r2jags r-lme4 r-arm```
 
-BCFtools (1.5)
-
-VCFtools (0.1.14)
-
-HTSlib (1.5)
-
-Java (10.0.1)
-
-BEDtools (2.26.0)
-
-Python (3.6.3)
-
-Anaconda (5.0.1; if running in conda environment as suggested) 
-
-
-After loading appropriate modules, we suggest setting up a conda environment that will allow access to python and R packages:
-
-```conda create -n mk python=3.6 anaconda cyvcf2 tqdm r-base r-tidyverse r-rjags r-r2jags r-lme4 r-arm```
-
-```source activate mk```
+```source activate mk_v2```
 
 A few variables need to be set before running:
 
@@ -83,9 +65,9 @@ Ensure reference sequence (FASTA) and genome annotation (GFF3) are in the approp
 
 Add the following to the snpEff.config file, under the Databases & Genomes - Non-standard Genomes section:
 
-\# Common name genome, NCBI version __
+\# Common name genome, Source and Version
 
-$INSHORT.ncbi.genome : ncbi_genome_name
+$INSHORT.genome : genome_name
 
 For example: 
 

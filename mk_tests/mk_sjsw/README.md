@@ -1,4 +1,4 @@
-## Pipeline for comparative genomics 
+# Pipeline for comparative genomics 
 
 Automatic pipeline to concatenate and filter VCFs, annotate variants with snpEff, and run SnIPRE, MK tests, and direction of selection calculations. Minor configuration and preprocessing required before running pipeline.sh, outlined below.
 
@@ -12,7 +12,7 @@ Tim Sackton (Director of Bioinformatics, Informatics Group, Harvard University; 
 Allison Shultz (Assistant Curator of Ornithology, LA Natural History Museum; ashultz@nhm.org)
 
 
-### Configuration and set up
+## Configuration and set up
 
 Project directory should be set up as outlined in directory_tree.pdf so the main pipeline can automatically switch between directories and call files as necessary. 
 
@@ -47,6 +47,8 @@ Example species names variables:
 
 ```export OUTLONG=_Cmonedula```
 
+### SnpEff
+
 We use SnpEff (http://snpeff.sourceforge.net/download.html) to build databases and annotate the variants in the VCFs. It should be downloaded in your project directory and set up prior to running the pipeline.
 
 ```wget http://sourceforge.net/projects/snpeff/files/snpEff_latest_core.zip```
@@ -62,6 +64,8 @@ We use SnpEff (http://snpeff.sourceforge.net/download.html) to build databases a
 ```mkdir -p data/$INSHORT.ncbi/```
 
 Ensure reference sequence (FASTA) and genome annotation (GFF3) are in the appropriate .ncbi data directory, rename files to sequences.fa and genes.gff, then gzip.
+
+#### Add genome information to config file
 
 Add the following to the snpEff.config file, under the Databases & Genomes - Non-standard Genomes section:
 
@@ -85,7 +89,7 @@ From your working directory, run:
 
 ```java -jar $PATHS/snpEff.jar build -gff3 -v $INSHORT.ncbi```
 
-#### In your working directory, you'll need: 
+### In your working directory, you'll need: 
 
 - Missingness data (all_all_missingness_info.txt) for both ingroup and outgroup
 

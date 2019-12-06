@@ -1,4 +1,4 @@
-## Pipeline for comparative genomics 
+# Pipeline for comparative genomics 
 
 Automatic pipeline to concatenate and filter VCFs, annotate variants with snpEff, and run SnIPRE, MK tests, and direction of selection calculations. Minor configuration and preprocessing required before running pipeline.sh, outlined below.
 
@@ -12,33 +12,15 @@ Tim Sackton (Director of Bioinformatics, Informatics Group, Harvard University; 
 Allison Shultz (Assistant Curator of Ornithology, LA Natural History Museum; ashultz@nhm.org)
 
 
-### Configuration and pre-preprocessing
+## Configuration and set up
 
-We suggest that the project directory is set up as outlined in directory_tree.pdf so that the main pipeline can automatically switch between directories and call software as necessary. 
+Project directory should be set up as outlined in directory_tree.pdf so the main pipeline can automatically switch between directories and call files as necessary. 
 
+First, set up a conda environment that will allow access to python and R packages:
 
-#### Modules/programs required - pipeline was written under versions in parentheses: 
+```conda create -n mk_v2 python=3.6 anaconda cyvcf2 tqdm bcftools vcftools htslib java-jdk bedtools r-base r-tidyverse r-rjags r-r2jags r-lme4 r-arm```
 
-BCFtools (1.5)
-
-VCFtools (0.1.14)
-
-HTSlib (1.5)
-
-Java (10.0.1)
-
-BEDtools (2.26.0)
-
-Python (3.6.3)
-
-Anaconda (5.0.1; if running in conda environment as suggested) 
-
-
-After loading appropriate modules, we suggest setting up a conda environment that will allow access to python and R packages:
-
-```conda create -n mk python=3.6 anaconda cyvcf2 tqdm r-base r-tidyverse r-rjags r-r2jags r-lme4 r-arm```
-
-```source activate mk```
+```source activate mk_v2```
 
 A few variables need to be set before running:
 
@@ -65,6 +47,8 @@ Example species names variables:
 
 ```export OUTLONG=_Cmonedula```
 
+### SnpEff
+
 We use SnpEff (http://snpeff.sourceforge.net/download.html) to build databases and annotate the variants in the VCFs. It should be downloaded in your project directory and set up prior to running the pipeline.
 
 ```wget http://sourceforge.net/projects/snpeff/files/snpEff_latest_core.zip```
@@ -77,15 +61,17 @@ We use SnpEff (http://snpeff.sourceforge.net/download.html) to build databases a
 
 ```cd snpEff/```
 
-```mkdir -p data/$INSHORT.ncbi/```
+```mkdir -p data/$INSHORT/```
 
 Ensure reference sequence (FASTA) and genome annotation (GFF3) are in the appropriate .ncbi data directory, rename files to sequences.fa and genes.gff, then gzip.
 
+#### Add genome information to config file
+
 Add the following to the snpEff.config file, under the Databases & Genomes - Non-standard Genomes section:
 
-\# Common name genome, NCBI version __
+\# Common name genome, Source and Version
 
-$INSHORT.ncbi.genome : ncbi_genome_name
+$INSHORT.genome : genome_name
 
 For example: 
 
@@ -101,9 +87,9 @@ Once snpEff is ready, export the path to a variable:
 
 From your working directory, run: 
 
-```java -jar $PATHS/snpEff.jar build -gff3 -v $INSHORT.ncbi```
+```java -jar $PATHS/snpEff.jar build -gff3 -v $INSHORT```
 
-#### In your working directory, you'll need: 
+### In your working directory, you'll need: 
 
 - Missingness data (all_all_missingness_info.txt) for both ingroup and outgroup
 

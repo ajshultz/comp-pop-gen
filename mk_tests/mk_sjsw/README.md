@@ -61,7 +61,7 @@ We use SnpEff (http://snpeff.sourceforge.net/download.html) to build databases a
 
 ```cd snpEff/```
 
-```mkdir -p data/$INSHORT.ncbi/```
+```mkdir -p data/$INSHORT/```
 
 Ensure reference sequence (FASTA) and genome annotation (GFF3) are in the appropriate .ncbi data directory, rename files to sequences.fa and genes.gff, then gzip.
 
@@ -87,7 +87,7 @@ Once snpEff is ready, export the path to a variable:
 
 From your working directory, run: 
 
-```java -jar $PATHS/snpEff.jar build -gff3 -v $INSHORT.ncbi```
+```java -jar $PATHS/snpEff.jar build -gff3 -v $INSHORT```
 
 ### In your working directory, you'll need: 
 

@@ -52,7 +52,6 @@ bedtools intersect -a $OUTSHORT.ann.bed -b onlyCDS.genes.bed -wb | cut -f1,2,3,4
 
 # associate callable sites with genes
 bedtools intersect -a callable.bed -b onlyCDS.genes.bed -wb | cut -f1,2,3,7 | bedtools sort -i - | bedtools merge -i - -c 4 -o distinct > callable.cds.bed 
-
 # output site missingness information for use in SnIPRE
 vcftools --vcf $INSHORT.ann.vcf --missing-site --out $INSHORT.missingness
 vcftools --vcf $OUTSHORT.ann.vcf --missing-site --out $OUTSHORT.missingness

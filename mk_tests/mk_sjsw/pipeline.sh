@@ -30,9 +30,9 @@ bedtools intersect -a $INSHORT.clean.vcf -b callable.bed -header > $INSHORT.call
 bedtools intersect -a $OUTSHORT.clean.vcf -b callable.bed -header > $OUTSHORT.call.vcf
 
 # annotates ingroup VCF
-java -jar $PATHS/snpEff.jar $INSHORT.ncbi $PATHW/$INSHORT.call.vcf > $PATHW/$INSHORT.ann.vcf
+java -jar $PATHS/snpEff.jar $INSHORT $PATHW/$INSHORT.call.vcf > $PATHW/$INSHORT.ann.vcf
 # annotate outgroup VCF
-java -jar $PATHS/snpEff.jar $INSHORT.ncbi $PATHW/$OUTSHORT.call.vcf > $PATHW/$OUTSHORT.ann.vcf
+java -jar $PATHS/snpEff.jar $INSHORT $PATHW/$OUTSHORT.call.vcf > $PATHW/$OUTSHORT.ann.vcf
 
 #parse out variants from annotated VCF and output an annotated BED file 
 python parser_nov.py $INSHORT.ann.vcf $INSHORT.ann.bed -key missense_variant -key synonymous_variant

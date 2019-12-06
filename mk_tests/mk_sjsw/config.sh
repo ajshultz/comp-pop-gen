@@ -27,26 +27,26 @@ unzip snpEff_latest_core.zip
 rm snpEff_latest_core.zip 
 rm -r clinEff/
 cd snpEff/
-mkdir -p data/$INSHORT.ncbi/
+mkdir -p data/$INSHORT/
 # ensure reference sequence (FASTA) and genome annotation (GFF3) are in the appropriate data directory
 # rename reference sequence to sequences.fa and gzip
 # rename genome annotation to genes.gff and gzip
 
 # add the following into the snpEff.config file under the Databases & Genomes section: 
 
-# Common name genome, NCBI version __
-$INSHORT.ncbi.genome : ncbi_genome_name
+# Common name genome, Source and Version
+$INSHORT.genome : genome_name
 
 # for example: 
 
 # # Hooded crow genome, NCBI version 2
-# corCor.ncbi.genome : Corvus_cornix_cornix
+# corCor.genome : Corvus_cornix_cornix
 
 
 export PATHS=$HOME/path/to/snpEff
 
 # build database
-java -jar snpEff/snpEff.jar build -gff3 -v $INSHORT.ncbi 
+java -jar $PATHS/snpEff.jar build -gff3 -v $INSHORT
 
 # in working directory, will need: 
 # ingroup missingness

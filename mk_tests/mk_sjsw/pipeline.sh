@@ -19,9 +19,24 @@ mv $OUTSHORT.clean.recode.vcf $OUTSHORT.clean.vcf
 
 Rscript --vanilla missingness.R $INLONG'_all_all_missingness_info.txt' $OUTLONG'_all_all_missingness_info.txt'
 
-# NB if individuals to remove, use:
-# vcftools --vcf *.clean.vcf --remove-indv *.remove.indv --recode --recode-INFO-all --out *.clean2
-# mv *.clean2.recode.vcf *.clean.vcf
+# remove individuals with high relative missingness, if any
+export ININDV=`cat ingroup.remove.indv | wc -l`
+if [ $ININDV -gt 2 ]
+then
+	vcftools --vcf $INSHORT.clean.vcf --remove-indv ingroup.remove.indv --recode --recode-INFO-all --out $INSHORT.clean2
+	mv $INSHORT.clean2.recode.vcf $INSHORT.clean.vcf
+else 
+	echo "No indv to remove from ingroup"
+fi
+
+export OUTINDV=`cat outgroup.remove.indv | wc -l`
+if [ $OUTINDV -gt 2 ]
+then
+	vcftools --vcf $OUTSHORT.clean.vcf --remove-indv outgroup.remove.indv --recode --recode-INFO-all --out $OUTSHORT.clean2
+	mv $OUTSHORT.clean2.recode.vcf $OUTSHORT.clean.vcf
+else 
+	echo "No indv to remove from outgroup"
+fi
 
 # create callable sites for in and outgroup
 bedtools intersect -a $INLONG'_clean_coverage_sites_merged.bed' -b $OUTLONG'_clean_coverage_sites_merged.bed' > callable.bed

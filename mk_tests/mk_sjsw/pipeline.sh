@@ -21,7 +21,7 @@ Rscript --vanilla missingness.R $INLONG'_all_all_missingness_info.txt' $OUTLONG'
 
 # remove individuals with high relative missingness, if any
 export ININDV=`cat ingroup.remove.indv | wc -l`
-if [ $ININDV -gt 2 ]
+if [ $ININDV -gt 1 ]
 then
 	vcftools --vcf $INSHORT.clean.vcf --remove-indv ingroup.remove.indv --recode --recode-INFO-all --out $INSHORT.clean2
 	mv $INSHORT.clean2.recode.vcf $INSHORT.clean.vcf

@@ -76,7 +76,7 @@ For example:
 
 \# Hooded crow genome, NCBI version 2
 
-corCor.ncbi.genome : Corvus_cornix_cornix
+corCor.genome : Corvus_cornix_cornix
 
 Once snpEff is ready, export the path to a variable:
 

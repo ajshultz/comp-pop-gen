@@ -15,3 +15,5 @@ mk_python is highly experimental and not-guaranteed-to-work Python code for this
 mk_pipeline uses existing tools for most of the work but makes some simplifying assumptions as outlined in the directory.
 
 mk_analysis contains the code to run SnIPRE once the MK table has been generated, and summarize results across spcies
+
+mk_sjsw contains final draft of vcf2mk pipeline

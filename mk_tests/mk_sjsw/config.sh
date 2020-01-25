@@ -60,6 +60,8 @@ java -jar $PATHS/snpEff.jar build -gff3 -v $INSHORT
 # pi2bed.awk
 # my.jag2.R
 # SnIPRE_source.R
-# ingroup.vcfs
-# outgroup.vcfs
+# missingness.R
+# mktest.R
+# ingroup.vcfs dir (w/ hardfiltered vcfs)
+# outgroup.vcfs dir (w/ hardfiltered vcfs)
 

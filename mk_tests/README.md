@@ -4,7 +4,7 @@ Generating MK tables from VCF files
 Authors:
 * Allison Shultz (Assistant Curator of Ornithology, Natural History Museum of Los Angeles County; ashultz@nhm.org)
 * Brian Arnold (Senior Bioinformatics Scientist, Informatics Group, Harvard University; barnold@g.harvard.edu)
-* Sara Wuitchik (Postdoc, Harvard University & Boston University; sjswuit@bu.edu)
+* Sara Wuitchik (Postdoc, Harvard University & Boston University; sjswuit@g.harvard.edu)
 * Tim Sackton (Director of Bioinformatics, Informatics Group, Harvard University; tsackton@g.harvard.edu)
 
 

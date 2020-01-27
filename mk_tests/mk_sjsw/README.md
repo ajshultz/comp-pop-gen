@@ -102,8 +102,6 @@ From your working directory, run:
 
 - parser_nov.py
 
-- pi2bed.awk
-
 - my.jags2.R 
 
 - SnIPRE_source.R

@@ -57,7 +57,6 @@ java -jar $PATHS/snpEff.jar build -gff3 -v $INSHORT
 # genenames.py
 # gff2bed.awk
 # parser_nov.py
-# pi2bed.awk
 # my.jag2.R
 # SnIPRE_source.R
 # missingness.R

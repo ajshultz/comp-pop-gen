@@ -17,9 +17,9 @@ cds <- read_tsv("onlyCDS.genes.bed", col_names = c("chr", "start", "end", "gene"
   summarise(cds.len = sum(cds.temp))
 
 callable <- read_tsv("callable.cds.bed", col_names = c("chr", "start", "end", "gene")) %>%
-	mutate(call.temp = end - start) %>%
-	group_by(gene) %>% 
-	summarise(call.len = sum(call.temp))
+  mutate(call.temp = end - start) %>%
+  group_by(gene) %>% 
+  summarise(call.len = sum(call.temp))
 
 ingroup <- read_tsv(args[1], col_names = c("chr", "start", "end", "effect", "gene"))
 mis.in <- ingroup %>% 
@@ -80,18 +80,7 @@ snipre_data <- full_join(MKtable, callable, by = "gene") %>%
   filter((Trepl/Tsil)<5) %>%
   filter((PR+FR+PS+FS)>1) 
 
-# Run SnIPRE 
-source("SnIPRE_source.R")
-source("my.jags2.R")
-
-snipre.res <- SnIPRE(snipre_data)
-snipre.qres <- snipre.res$new.dataset
-snipre.model <- snipre.res$model
-snipre.table <- table(snipre.qres$SnIPRE.class)
-
-write.table(snipre.qres, "snipre_output.txt", sep = "\t", quote = F, row.names = F)
-
-# add in MK calculations and DOS 
+# functions for MK calculations and DOS 
 mk_test <- function(dn=dn,ds=ds,pn=pn,ps=ps){
   dnds_mat <- matrix(data=c(ds,dn,ps,pn),nrow=2,byrow = F)
   pval = fisher.test(dnds_mat)$p.value
@@ -109,10 +98,20 @@ mk_tibble_calc <- function(snipre_res_obj){
   return(snipre_res_obj_new)
 }
 
-MKtest <- mk_tibble_calc(snipre.qres) %>%
+MKtest <- mk_tibble_calc(snipre_data) %>%
   mutate(dos = FR/(FR + FS) - PR/(PR + PS),
          total_poly = PR + PS,
          total_div = FR + FS) 
 
 write.table(MKtest, "MK_output.txt", sep = "\t", quote = F, row.names = F)
 
+# Run SnIPRE 
+source("SnIPRE_source.R")
+source("my.jags2.R")
+
+snipre.res <- SnIPRE(MKtest)
+snipre.qres <- snipre.res$new.dataset
+snipre.model <- snipre.res$model
+snipre.table <- table(snipre.qres$SnIPRE.class)
+
+write.table(snipre.qres, "snipre_output.txt", sep = "\t", quote = F, row.names = F)

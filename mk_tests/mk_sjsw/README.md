@@ -5,7 +5,7 @@ Automatic pipeline to concatenate and filter VCFs, annotate variants with snpEff
 Authors: 
 
 
-Sara Wuitchik (Postdoctoal associate, Boston University & Harvard University; sjswuit@g.harvard.edu
+Sara Wuitchik (Postdoctoal associate, Boston University & Harvard University; sjswuit@g.harvard.edu)
 
 Allison Shultz (Assistant Curator of Ornithology, LA Natural History Museum; ashultz@nhm.org)
 

@@ -82,6 +82,8 @@ Once snpEff is ready, export the path to a variable:
 
 ```export PATHS=$HOME/path/to/snpEff```
 
+NB: Gasterosteus aculeatus database needs to be built with a GTF, rather than GFF
+
 #### Build a snpEff database
 
 From your working directory, run: 
